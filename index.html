@@ -389,6 +389,7 @@
 
     let sesionActual = null;
     let archivoSeleccionado = null;
+    const STORAGE_KEY = "sesion_capacitacion_pdf";
 
     const vistaLogin = document.getElementById("vistaLogin");
     const vistaApp = document.getElementById("vistaApp");
@@ -442,7 +443,10 @@
       }
     });
 
-    function iniciarInterfazUsuario() {
+function iniciarInterfazUsuario() {
+      // Guardar sesión para que persista al actualizar (F5)
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(sesionActual));
+
       vistaLogin.classList.add("hidden");
       vistaApp.classList.remove("hidden");
       userBadge.classList.remove("hidden");
@@ -464,6 +468,7 @@
     }
 
     document.getElementById("btnCerrarSesion").addEventListener("click", () => {
+      sessionStorage.removeItem(STORAGE_KEY);
       sesionActual = null;
       archivoSeleccionado = null;
       loginForm.reset();
@@ -624,7 +629,16 @@
       el.textContent = texto;
       el.className = `alert ${tipo}`;
     }
+
+    // Restaurar sesión si el usuario recargó la página
+    const sesionGuardada = sessionStorage.getItem(STORAGE_KEY);
+    if (sesionGuardada) {
+      sesionActual = JSON.parse(sesionGuardada);
+      iniciarInterfazUsuario();
+    }
+    
   </script>
 </body>
 </html>
+
 
