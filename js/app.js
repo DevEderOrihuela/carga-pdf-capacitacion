@@ -1,5 +1,6 @@
 const CONFIG = {
-  WEB_APP_URL: "https://script.google.com/macros/s/AKfycbx5JBrhxPJG2oCHmLZ6XkdeaIyzS61bu-x-c5kNGzu8T9bH2wLXSWqQar-halbhmJbX/exec",
+  WEB_APP_URL: "https://script.google.com/macros/s/AKfycbzsilGgES327ZtyN3Fjs0AzjAr5iqn9-FPEmUp-sByKnu_r4lqJqOz5PvxesGU0DYBX/exec",
+  
   MAX_SIZE_MB: 15
 };
 
@@ -273,3 +274,4 @@ function mostrarAlerta(el, texto, tipo) {
   el.textContent = texto;
   el.className = `alert ${tipo}`;
 }
+
