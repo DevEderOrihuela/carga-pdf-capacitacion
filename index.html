@@ -709,7 +709,7 @@
     }
 
     const CONFIG = {
-      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyWAR6hmlhu_McHfVJKC_pZKuOQep4DEJwkiBSwz8VEVJP-M8fvKveMoUxkzGvgXop3/exec",
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbza4lZu5n1A9kjrhYrVyeje6Zd_WdCf7tB3-LMYV5XxDoUdFegUY2KuJDJRkeCUJ56I/exec",
       MAX_SIZE_MB: 15
     };
 
@@ -968,12 +968,10 @@
       inputFechaAsistencia.required = tieneNiveles;
       filaTipoNivel.className = tieneNiveles ? "form-row-3" : "form-group";
 
-      let ruta = `CAPACITACIÓN / ${selectTipo.value}`;
+      let ruta = `CAPACITACIÓN / ${selectTipo.value} / ${selectSede.value}`;
       if (tieneNiveles) {
         const fechaFmt = formatearFechaCarpeta(inputFechaAsistencia.value) || "[FECHA]";
-        ruta += ` / ${selectSede.value} / ${selectNivel.value} / ${fechaFmt}`;
-      } else if (!TIPOS_INICIALES_ACTAS.includes(selectTipo.value) && selectTipo.value) {
-        ruta += ` / ${selectSede.value}`;
+        ruta += ` / ${selectNivel.value} / ${fechaFmt}`;
       }
       rutaPreview.textContent = ruta;
     }
