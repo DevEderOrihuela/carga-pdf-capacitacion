@@ -1227,6 +1227,11 @@
         pdfBlobUrlActual = null;
       }
 
+      if (!doc.fileId) {
+        visorPlaceholder.innerHTML = `<p style="color:#fca5a5;">Este registro no tiene un ID de Google Drive válido en la bitácora.</p>`;
+        return;
+      }
+
       try {
         const res = await fetch(CONFIG.WEB_APP_URL, {
           method: "POST",
@@ -1239,22 +1244,29 @@
         });
         const data = await res.json();
 
-        if (!data.ok) {
-          visorPlaceholder.innerHTML = `<p style="color:#fca5a5;">Error al cargar PDF: ${data.error}</p>`;
+        if (!data.ok || !data.base64) {
+          visorPlaceholder.innerHTML = `<p style="color:#fca5a5;">Error del servidor: ${data.error || "No se recibió el contenido del PDF."}</p>`;
           return;
         }
 
+        // Decodificar Base64 a Uint8Array
         const binaryString = atob(data.base64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
           bytes[i] = binaryString.charCodeAt(i);
         }
 
+        // Crear Blob para descarga directa e impresión
         const blob = new Blob([bytes], { type: "application/pdf" });
         pdfBlobUrlActual = URL.createObjectURL(blob);
         pdfNombreActual = data.nombre || doc.archivo;
 
-        const loadingTask = pdfjsLib.getDocument({ data: bytes });
+        // Cargar documento en PDF.js con disableWorker: true para evitar bloqueos CORS
+        const loadingTask = pdfjsLib.getDocument({
+          data: bytes.slice(0),
+          disableWorker: true
+        });
         pdfDocActual = await loadingTask.promise;
 
         visorPlaceholder.classList.add("hidden");
@@ -1273,7 +1285,11 @@
         await renderizarTodasLasPaginas();
 
       } catch (err) {
-        visorPlaceholder.innerHTML = `<p style="color:#fca5a5;">No se pudo renderizar el documento PDF.</p>`;
+        console.error("Error visor PDF:", err);
+        visorPlaceholder.innerHTML = `
+          <p style="color:#fca5a5;margin-bottom:8px;">No se pudo renderizar el documento PDF (${err.message || "Error de lectura"}).</p>
+          ${doc.url ? `<a href="${doc.url}" target="_blank" rel="noopener" class="btn-secondary">Abrir directamente en Google Drive ↗</a>` : ""}
+        `;
       }
     }
 
