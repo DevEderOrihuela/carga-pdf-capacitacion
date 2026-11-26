@@ -428,6 +428,8 @@
     .tool-btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .tool-btn.primary { background: var(--accent); border-color: #1d4ed8; }
     .tool-btn.primary:hover:not(:disabled) { background: #1d4ed8; }
+    .tool-btn.danger { background: #b91c1c; border-color: #991b1b; }
+    .tool-btn.danger:hover:not(:disabled) { background: #991b1b; }
 
     .tool-sep {
       width: 1px;
@@ -669,6 +671,7 @@
               <span id="visorTituloDoc" class="visor-doc-name">Ningún documento seleccionado</span>
 
               <div class="toolbar-actions" id="visorControles">
+                <div class="toolbar-actions" id="visorControles">
                 <button type="button" class="tool-btn" id="btnRotarIzq" title="Rotar 90° a la izquierda" disabled>↺ Rotar Izq</button>
                 <button type="button" class="tool-btn" id="btnRotarDer" title="Rotar 90° a la derecha" disabled>↻ Rotar Der</button>
                 <div class="tool-sep"></div>
@@ -678,6 +681,8 @@
                 <div class="tool-sep"></div>
                 <button type="button" class="tool-btn" id="btnImprimirPdf" title="Imprimir documento" disabled>🖨 Imprimir</button>
                 <button type="button" class="tool-btn primary" id="btnDescargarPdf" title="Descargar archivo PDF" disabled>⬇ Descargar</button>
+                <div class="tool-sep"></div>
+                <button type="button" class="tool-btn danger" id="btnEliminarPdf" title="Eliminar documento" disabled>🗑 Eliminar</button>
               </div>
             </div>
 
@@ -741,6 +746,7 @@
     let pdfDocActual = null;
     let pdfBlobUrlActual = null;
     let pdfNombreActual = "";
+    let docSeleccionadoActual = null;
     let rotacionActual = 0; // 0, 90, 180, 270
     let escalaActual = 1.15;
 
@@ -1100,6 +1106,7 @@
     const lblZoom = document.getElementById("lblZoom");
     const btnImprimirPdf = document.getElementById("btnImprimirPdf");
     const btnDescargarPdf = document.getElementById("btnDescargarPdf");
+    const btnEliminarPdf = document.getElementById("btnEliminarPdf");
 
     function inicializarFiltrosVisor() {
       filtroVisorSede.innerHTML = '<option value="">Todas las sedes</option>';
@@ -1200,13 +1207,14 @@
       });
     }
 
-    function habilitarControlesVisor(habilitar) {
-      [btnRotarIzq, btnRotarDer, btnZoomMenos, btnZoomMas, btnImprimirPdf, btnDescargarPdf].forEach(b => {
-        b.disabled = !habilitar;
-      });
-    }
+      function habilitarControlesVisor(habilitar) {
+         [btnRotarIzq, btnRotarDer, btnZoomMenos, btnZoomMas, btnImprimirPdf, btnDescargarPdf, btnEliminarPdf].forEach(b => {
+           b.disabled = !habilitar;
+         });
+       }
 
     async function cargarDocumentoEnVisorInteractivo(doc) {
+      docSeleccionadoActual = doc;
       habilitarControlesVisor(false);
       visorTituloDoc.textContent = doc.archivo;
       pdfCanvasContainer.classList.add("hidden");
@@ -1321,6 +1329,58 @@
       a.click();
       document.body.removeChild(a);
     });
+
+    // ELIMINAR PDF SELECCIONADO
+ btnEliminarPdf.addEventListener("click", async () => {
+   if (!docSeleccionadoActual || !docSeleccionadoActual.fileId) return;
+
+   const confirmar = confirm(
+     `¿Estás seguro de eliminar el archivo?\n\n"${docSeleccionadoActual.archivo}"\n\nSe enviará a la papelera de Google Drive y se quitará del listado.`
+   );
+   if (!confirmar) return;
+
+   habilitarControlesVisor(false);
+   visorTituloDoc.textContent = "Eliminando archivo...";
+
+   try {
+     const res = await fetch(CONFIG.WEB_APP_URL, {
+       method: "POST",
+       body: JSON.stringify({
+         accion: "eliminar_documento",
+         usuario: sesionActual.usuario,
+         clave: sesionActual.clave,
+         fileId: docSeleccionadoActual.fileId
+       })
+     });
+     const data = await res.json();
+
+     if (!data.ok) {
+       alert(`Error al eliminar: ${data.error}`);
+       habilitarControlesVisor(true);
+       visorTituloDoc.textContent = docSeleccionadoActual.archivo;
+       return;
+     }
+
+     // Limpiar vista previa y actualizar listado
+     if (pdfBlobUrlActual) {
+       URL.revokeObjectURL(pdfBlobUrlActual);
+       pdfBlobUrlActual = null;
+     }
+     pdfDocActual = null;
+     docSeleccionadoActual = null;
+
+     pdfCanvasContainer.innerHTML = "";
+     pdfCanvasContainer.classList.add("hidden");
+     visorPlaceholder.classList.remove("hidden");
+     visorPlaceholder.innerHTML = `<p style="color:#86efac;">${data.mensaje}</p>`;
+     visorTituloDoc.textContent = "Ningún documento seleccionado";
+
+     await cargarDocumentosVisor();
+   } catch (err) {
+     alert("Error de red al intentar eliminar el documento.");
+     habilitarControlesVisor(true);
+   }
+ });
 
     // IMPRIMIR PDF
     btnImprimirPdf.addEventListener("click", () => {
