@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Gestión Documental PDF — Capacitación</title>
-  <!-- PDF.js para visor interactivo -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <!-- SheetJS para exportación nativa a Excel (.xlsx) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
@@ -33,7 +31,6 @@
       flex-direction: column;
     }
 
-    /* BARRA SUPERIOR */
     .navbar {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: #fff;
@@ -75,7 +72,6 @@
     }
     .btn-outline:hover { background: rgba(255, 255, 255, 0.22); }
 
-    /* LOGIN */
     .auth-wrapper {
       flex: 1;
       display: flex;
@@ -86,7 +82,6 @@
 
     .auth-card { width: 100%; max-width: 420px; }
 
-    /* CONTENEDOR PRINCIPAL A PANTALLA COMPLETA */
     .main-wrapper {
       width: 100%;
       max-width: 1850px;
@@ -179,7 +174,6 @@
     }
     .btn-excel:hover { background: #14532d; }
 
-    /* LAYOUT DIVIDIDO PARA CARGA */
     .carga-grid {
       display: grid;
       grid-template-columns: 1.55fr 1fr;
@@ -198,7 +192,6 @@
     .admin-box h3 { margin: 0 0 4px; font-size: 1rem; color: var(--primary-dark); }
     .admin-box p { margin: 0 0 14px; font-size: 0.82rem; color: var(--muted); }
 
-    /* FORMULARIOS */
     .form-group {
       display: flex;
       flex-direction: column;
@@ -242,7 +235,6 @@
     .ruta-label { display: block; font-weight: 600; color: #0369a1; margin-bottom: 3px; }
     .ruta-box code { color: #0c4a6e; font-family: ui-monospace, Consolas, monospace; word-break: break-all; }
 
-    /* DRAG & DROP */
     .drop-zone {
       border: 2px dashed #94a3b8;
       border-radius: 10px;
@@ -299,7 +291,6 @@
     .alert.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
     .alert.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 
-    /* HISTORIAL LATERAL */
     .historial-card { min-height: 480px; display: flex; flex-direction: column; }
     .historial-card h3 { margin: 0 0 6px; font-size: 1.08rem; color: var(--primary-dark); }
     .historial-sub { margin: 0 0 16px; font-size: 0.82rem; color: var(--muted); }
@@ -330,7 +321,6 @@
     }
     .historial-list a { color: var(--accent); font-weight: 600; text-decoration: none; white-space: nowrap; }
 
-    /* VISOR DE DOCUMENTOS AVANZADO */
     .visor-card { padding: 18px 22px; }
 
     .visor-filtros {
@@ -498,7 +488,6 @@
       font-size: 0.94rem;
     }
 
-    /* MÓDULO DE REPORTES JERÁRQUICOS */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -554,7 +543,6 @@
       text-align: center;
     }
 
-    /* Cabeceras multinivel fijas */
     .report-table thead tr:nth-child(1) th {
       position: sticky;
       top: 0;
@@ -866,7 +854,7 @@
       </div>
     </section>
 
-    <!-- MÓDULO 3: REPORTES DE AVANCE (JERÁRQUICO: TIPO -> NIVEL -> FECHA) -->
+    <!-- MÓDULO 3: REPORTES DE AVANCE -->
     <section id="moduloReportes" class="hidden">
       <div class="card">
         <div class="card-header-flex">
@@ -930,7 +918,7 @@
     }
 
     const CONFIG = {
-      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbztxXSaIB_5yVYAD6J9iKJuvMh6KpircUfaplzG5SQ4mXSzYKEZ6sK0aixEJwkzCVPS/exec",
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyAnrjhNNBBoX3Vx9N6eUcUeqjwvbRrbcWdzN6DytewStQbsnVowVYuBNkowaTyFCnb/exec",
       MAX_SIZE_MB: 15
     };
 
@@ -1038,6 +1026,25 @@
     tabVisor.addEventListener("click", () => cambiarPestana("visor"));
     tabReportes.addEventListener("click", () => cambiarPestana("reportes"));
 
+    async function llamarBackend(payload) {
+      if (!CONFIG.WEB_APP_URL || !CONFIG.WEB_APP_URL.startsWith("http")) {
+        throw new Error("Falta configurar CONFIG.WEB_APP_URL en index.html con el enlace /exec de Apps Script.");
+      }
+
+      const res = await fetch(CONFIG.WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+
+      const texto = await res.text();
+      try {
+        return JSON.parse(texto);
+      } catch (e) {
+        throw new Error("El servidor devolvió una respuesta inesperada. Verifica que la Web App esté publicada para 'Cualquier persona'.");
+      }
+    }
+
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const usuario = document.getElementById("loginUsuario").value.trim();
@@ -1047,22 +1054,23 @@
       mostrarAlerta(loginMensaje, "Verificando credenciales...", "info");
 
       try {
-        const res = await fetch(CONFIG.WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({ accion: "login", usuario, clave })
-        });
-        const data = await res.json();
+        const data = await llamarBackend({ accion: "login", usuario, clave });
 
         if (!data.ok) {
-          mostrarAlerta(loginMensaje, data.error, "error");
+          mostrarAlerta(loginMensaje, data.error || "No se pudo iniciar sesión.", "error");
           return;
         }
 
-        sesionActual = { usuario: data.usuario, clave, nombre: data.nombre, sedeAsignada: data.sedeAsignada };
+        sesionActual = {
+          usuario: data.usuario,
+          clave: clave,
+          nombre: data.nombre,
+          sedeAsignada: String(data.sedeAsignada || "").trim().toUpperCase()
+        };
         tiposDocumento = data.tiposDocumento || [];
         iniciarInterfazUsuario();
       } catch (err) {
-        mostrarAlerta(loginMensaje, "Error de conexión con el servidor.", "error");
+        mostrarAlerta(loginMensaje, err.message || "Error de conexión con el servidor.", "error");
       } finally {
         btnLogin.disabled = false;
       }
@@ -1126,17 +1134,13 @@
       mostrarAlerta(mensajeNuevoTipo, "Creando carpeta principal y las 50 subcarpetas de sedes en Google Drive...", "info");
 
       try {
-        const response = await fetch(CONFIG.WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            accion: "crear_tipo",
-            usuario: sesionActual.usuario,
-            clave: sesionActual.clave,
-            nombreTipo,
-            codigoCorto
-          })
+        const res = await llamarBackend({
+          accion: "crear_tipo",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          nombreTipo: nombreTipo,
+          codigoCorto: codigoCorto
         });
-        const res = await response.json();
 
         if (res.ok) {
           mostrarAlerta(mensajeNuevoTipo, res.mensaje, "success");
@@ -1148,7 +1152,7 @@
           mostrarAlerta(mensajeNuevoTipo, `Error: ${res.error}`, "error");
         }
       } catch (err) {
-        mostrarAlerta(mensajeNuevoTipo, "Error de red al crear el tipo documental.", "error");
+        mostrarAlerta(mensajeNuevoTipo, err.message || "Error de red al crear el tipo documental.", "error");
       } finally {
         btnCrearTipo.disabled = false;
       }
@@ -1251,23 +1255,18 @@
       reader.onload = async () => {
         const base64 = reader.result.split(",")[1];
         try {
-          const response = await fetch(CONFIG.WEB_APP_URL, {
-            method: "POST",
-            body: JSON.stringify({
-              accion: "upload",
-              usuario: sesionActual.usuario,
-              clave: sesionActual.clave,
-              sede: selectSede.value,
-              tipoDocumento: selectTipo.value,
-              nivel: selectNivel.value,
-              fechaAsistencia: formatearFechaCarpeta(inputFechaAsistencia.value),
-              nombreArchivo: archivoSeleccionado.name,
-              forzarReemplazo,
-              base64
-            })
+          const res = await llamarBackend({
+            accion: "upload",
+            usuario: sesionActual.usuario,
+            clave: sesionActual.clave,
+            sede: selectSede.value,
+            tipoDocumento: selectTipo.value,
+            nivel: selectNivel.value,
+            fechaAsistencia: formatearFechaCarpeta(inputFechaAsistencia.value),
+            nombreArchivo: archivoSeleccionado.name,
+            forzarReemplazo: forzarReemplazo,
+            base64: base64
           });
-
-          const res = await response.json();
 
           if (res.duplicado) {
             const confirmar = confirm(
@@ -1283,7 +1282,7 @@
           }
 
           if (res.ok) {
-            mostrarAlerta(`[${res.accionRealizada}] Guardado como "${res.nombreGuardado}" en ${res.ruta}.`, "success");
+            mostrarAlerta(mensaje, `[${res.accionRealizada}] Guardado como "${res.nombreGuardado}" en ${res.ruta}.`, "success");
             agregarAlHistorial(res);
             archivoSeleccionado = null;
             inputArchivo.value = "";
@@ -1293,7 +1292,7 @@
             mostrarAlerta(mensaje, `Error: ${res.error}`, "error");
           }
         } catch (err) {
-          mostrarAlerta(mensaje, "Error de red al conectar con Google Drive.", "error");
+          mostrarAlerta(mensaje, err.message || "Error de red al conectar con Google Drive.", "error");
         } finally {
           btnSubir.disabled = false;
         }
@@ -1363,15 +1362,11 @@
       listaDocumentosVisor.innerHTML = "";
 
       try {
-        const res = await fetch(CONFIG.WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            accion: "listar_documentos",
-            usuario: sesionActual.usuario,
-            clave: sesionActual.clave
-          })
+        const data = await llamarBackend({
+          accion: "listar_documentos",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave
         });
-        const data = await res.json();
         if (!data.ok) {
           mostrarAlerta(visorEstado, data.error, "error");
           return;
@@ -1380,7 +1375,7 @@
         visorEstado.classList.add("hidden");
         renderizarListaVisor();
       } catch (err) {
-        mostrarAlerta(visorEstado, "Error al cargar el listado de documentos.", "error");
+        mostrarAlerta(visorEstado, err.message || "Error al cargar el listado de documentos.", "error");
       }
     }
 
@@ -1458,16 +1453,12 @@
       }
 
       try {
-        const res = await fetch(CONFIG.WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            accion: "obtener_pdf_base64",
-            usuario: sesionActual.usuario,
-            clave: sesionActual.clave,
-            fileId: doc.fileId
-          })
+        const data = await llamarBackend({
+          accion: "obtener_pdf_base64",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          fileId: doc.fileId
         });
-        const data = await res.json();
 
         if (!data.ok || !data.base64) {
           visorPlaceholder.innerHTML = `<p style="color:#fca5a5;">Error del servidor: ${data.error || "No se recibió el contenido del PDF."}</p>`;
@@ -1481,16 +1472,15 @@
           bytes[i] = binaryString.charCodeAt(i);
         }
 
-        // Buscar la firma "%PDF-" dentro de los primeros 1024 bytes (tolera espacios o BOM al inicio)
         const limiteBusqueda = Math.min(bytes.length, 1024);
         let inicioPdf = -1;
         for (let i = 0; i <= limiteBusqueda - 5; i++) {
           if (
-            bytes[i] === 0x25 &&     // %
-            bytes[i + 1] === 0x50 && // P
-            bytes[i + 2] === 0x44 && // D
-            bytes[i + 3] === 0x46 && // F
-            bytes[i + 4] === 0x2D    // -
+            bytes[i] === 0x25 &&
+            bytes[i + 1] === 0x50 &&
+            bytes[i + 2] === 0x44 &&
+            bytes[i + 3] === 0x46 &&
+            bytes[i + 4] === 0x2D
           ) {
             inicioPdf = i;
             break;
@@ -1508,7 +1498,6 @@
           return;
         }
 
-        // Si había espacios o bytes basura antes de "%PDF-", recortar el arreglo desde inicioPdf
         const bytesLimpios = inicioPdf > 0 ? bytes.subarray(inicioPdf) : bytes;
 
         const blob = new Blob([bytesLimpios], { type: "application/pdf" });
@@ -1519,8 +1508,6 @@
           data: bytesLimpios.slice(0),
           disableWorker: true
         });
-
-        
         pdfDocActual = await loadingTask.promise;
 
         visorPlaceholder.classList.add("hidden");
@@ -1624,16 +1611,12 @@
       visorTituloDoc.textContent = "Eliminando archivo...";
 
       try {
-        const res = await fetch(CONFIG.WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            accion: "eliminar_documento",
-            usuario: sesionActual.usuario,
-            clave: sesionActual.clave,
-            fileId: docSeleccionadoActual.fileId
-          })
+        const data = await llamarBackend({
+          accion: "eliminar_documento",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          fileId: docSeleccionadoActual.fileId
         });
-        const data = await res.json();
 
         if (!data.ok) {
           alert(`Error al eliminar: ${data.error}`);
@@ -1657,7 +1640,7 @@
 
         await cargarDocumentosVisor();
       } catch (err) {
-        alert("Error de red al intentar eliminar el documento.");
+        alert(err.message || "Error de red al intentar eliminar el documento.");
         habilitarControlesVisor(true);
       }
     });
@@ -1678,15 +1661,11 @@
     async function cargarReporteAvance() {
       mostrarAlerta(reporteEstado, "Calculando avance por sede, tipo documental, nivel y fechas...", "info");
       try {
-        const res = await fetch(CONFIG.WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            accion: "reporte_avance",
-            usuario: sesionActual.usuario,
-            clave: sesionActual.clave
-          })
+        const data = await llamarBackend({
+          accion: "reporte_avance",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave
         });
-        const data = await res.json();
         if (!data.ok) {
           mostrarAlerta(reporteEstado, data.error, "error");
           return;
@@ -1697,7 +1676,7 @@
         subtituloReporte.textContent = `Matriz consolidada con desglose por Nivel y Fechas • Generado: ${data.generadoEn}`;
         renderizarTablaReporte();
       } catch (err) {
-        mostrarAlerta(reporteEstado, "Error al generar el reporte de avance.", "error");
+        mostrarAlerta(reporteEstado, err.message || "Error al generar el reporte de avance.", "error");
       }
     }
 
@@ -1720,14 +1699,12 @@
       const { estructuraTipos, filas } = reporteDataCache;
       const filasFiltradas = obtenerFilasReporteFiltradas();
 
-      // KPIs globales
       const totalGeneralDocs = filas.reduce((acc, f) => acc + f.total, 0);
       const sedesConCarga = filas.filter(f => f.total > 0).length;
       document.getElementById("kpiTotalDocs").textContent = totalGeneralDocs;
       document.getElementById("kpiSedesActivas").textContent = `${sedesConCarga} / ${filas.length}`;
       document.getElementById("kpiTiposActivos").textContent = estructuraTipos.length;
 
-      // Construir cabecera HTML multinivel (3 filas)
       let tr1 = `<tr><th rowspan="3">SEDE OPERATIVA</th>`;
       let tr2 = `<tr>`;
       let tr3 = `<tr>`;
@@ -1755,7 +1732,6 @@
       tr3 += `</tr>`;
       theadReporte.innerHTML = tr1 + tr2 + tr3;
 
-      // Acumuladores por columna hoja
       const totalesCol = {};
       columnasHojaOrdenadas.forEach(c => { totalesCol[c.key] = 0; });
       let granTotalFiltrado = 0;
@@ -1787,7 +1763,6 @@
       tfootReporte.innerHTML = footHtml;
     }
 
-    // EXPORTAR A EXCEL (.XLSX) CON IDENTIFICADORES DE REPORTE, FECHA Y HORA
     document.getElementById("btnExportarExcel").addEventListener("click", () => {
       if (!reporteDataCache) return;
       if (!window.XLSX) {
@@ -1803,22 +1778,20 @@
       const estadoTexto = document.getElementById("filtroReporteEstado").selectedOptions[0].text;
       const filtroSedeTexto = filtroReporteSede.value.trim().toUpperCase() || "NINGUNO";
 
-      // Bloque de identificadores del reporte (Filas 1 a 6)
       const aoa = [
         ["REPORTE DE AVANCE DE CARGA DOCUMENTAL — CAPACITACIÓN (ED2026)"],
         ["CÓDIGO DE REPORTE:", "RPT-AVANCE-CAP-ED2026", "", "FECHA Y HORA DE DESCARGA:", fechaHoraExport],
         ["ÁMBITO DE CONSULTA:", ambito, "", "DATOS CONSULTADOS AL:", generadoEn],
         ["GENERADO POR:", usuarioGenerador, "", "FILTRO APLICADO:", `${estadoTexto} (Sede: ${filtroSedeTexto})`],
-        [] // Fila 5 en blanco separadora
+        []
       ];
 
-      // Construir filas de cabecera multinivel (Filas índice 5, 6 y 7 en Excel -> filas 6, 7 y 8 visuales)
       const rowTipo = ["SEDE OPERATIVA"];
       const rowNivel = [""];
       const rowFecha = [""];
       const merges = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }, // Título principal
-        { s: { r: 5, c: 0 }, e: { r: 7, c: 0 } }  // SEDE OPERATIVA (rowspan 3)
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
+        { s: { r: 5, c: 0 }, e: { r: 7, c: 0 } }
       ];
 
       const columnasHoja = [];
@@ -1853,7 +1826,6 @@
         }
       });
 
-      // Columna TOTAL SEDE
       rowTipo.push("TOTAL SEDE");
       rowNivel.push("");
       rowFecha.push("");
@@ -1861,7 +1833,6 @@
 
       aoa.push(rowTipo, rowNivel, rowFecha);
 
-      // Filas de datos por sede
       const totalesCol = {};
       columnasHoja.forEach(c => { totalesCol[c.key] = 0; });
       let granTotal = 0;
@@ -1878,18 +1849,15 @@
         aoa.push(filaExcel);
       });
 
-      // Fila final de totales
       const filaTotalesExcel = [`TOTAL GENERAL (${filasExportar.length} sedes)`];
       columnasHoja.forEach(c => filaTotalesExcel.push(totalesCol[c.key]));
       filaTotalesExcel.push(granTotal);
       aoa.push(filaTotalesExcel);
 
-      // Crear libro y hoja Excel
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       ws["!merges"] = merges;
 
-      // Ajustar anchos de columnas
       const wscols = [{ wch: 32 }];
       columnasHoja.forEach(() => wscols.push({ wch: 16 }));
       wscols.push({ wch: 14 });
@@ -1907,23 +1875,31 @@
       el.className = `alert ${tipo}`;
     }
 
-    // --- RESTAURAR SESIÓN ---
-    const sesionGuardada = sessionStorage.getItem(STORAGE_KEY);
-    if (sesionGuardada) {
-      sesionActual = JSON.parse(sesionGuardada);
-      iniciarInterfazUsuario();
-      fetch(CONFIG.WEB_APP_URL, {
-        method: "POST",
-        body: JSON.stringify({ accion: "get_tipos", usuario: sesionActual.usuario, clave: sesionActual.clave })
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.ok) {
-            tiposDocumento = data.tiposDocumento;
-            renderizarTiposDocumento();
-            inicializarFiltrosVisor();
-          }
-        });
+    // --- RESTAURAR SESIÓN SEGURA ---
+    try {
+      const sesionGuardada = sessionStorage.getItem(STORAGE_KEY);
+      if (sesionGuardada) {
+        const parsed = JSON.parse(sesionGuardada);
+        if (parsed && parsed.usuario && parsed.clave) {
+          sesionActual = parsed;
+          iniciarInterfazUsuario();
+          llamarBackend({
+            accion: "get_tipos",
+            usuario: sesionActual.usuario,
+            clave: sesionActual.clave
+          }).then(data => {
+            if (data.ok) {
+              tiposDocumento = data.tiposDocumento;
+              renderizarTiposDocumento();
+              inicializarFiltrosVisor();
+            }
+          }).catch(() => {});
+        } else {
+          sessionStorage.removeItem(STORAGE_KEY);
+        }
+      }
+    } catch (e) {
+      sessionStorage.removeItem(STORAGE_KEY);
     }
   </script>
 </body>
