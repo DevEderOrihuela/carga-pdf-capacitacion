@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión Documental PDF — Capacitación</title>
-  <!-- Librerías externas: Chart.js, PDF.js y SheetJS (Excel) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
@@ -24,11 +23,11 @@
     * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: var(--bg); color: var(--text); }
 
-    /* NAVBAR */
     .navbar {
       background: var(--primary); color: #fff; padding: 10px 22px;
       display: flex; align-items: center; justify-content: space-between;
       box-shadow: 0 2px 6px rgba(0,0,0,0.12); position: sticky; top: 0; z-index: 50;
+      flex-wrap: wrap; gap: 10px;
     }
     .brand { display: flex; align-items: center; gap: 12px; }
     .brand-badge {
@@ -38,7 +37,7 @@
     .brand-title { font-size: 16px; font-weight: 700; }
     .brand-sub { font-size: 11.5px; color: #DBEAFE; }
 
-    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .user-info { text-align: right; font-size: 12.5px; }
     .user-info strong { display: block; font-size: 13px; }
     .role-pill {
@@ -46,7 +45,6 @@
       font-size: 10.5px; font-weight: 700; margin-left: 4px;
     }
 
-    /* BOTÓN CARPETA DRIVE SOLO VISTA */
     .btn-drive-view {
       display: inline-flex; align-items: center; gap: 6px;
       background: #EFF6FF; color: #0F4C81; border: 1px solid #BFDBFE;
@@ -61,7 +59,6 @@
     }
     .btn-logout:hover { background: rgba(255,255,255,0.25); }
 
-    /* TABS */
     .tabs-wrapper { padding: 14px 22px 0; max-width: 1440px; margin: 0 auto; }
     .tabs {
       display: inline-flex; gap: 6px; background: #DFE6EE; padding: 5px;
@@ -76,7 +73,6 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
-    /* CONTENEDOR PRINCIPAL */
     .container { max-width: 1440px; margin: 14px auto 30px; padding: 0 22px; }
     .card {
       background: var(--card); border: 1px solid var(--border);
@@ -89,7 +85,6 @@
     .section-header h2 { margin: 0; font-size: 18px; color: var(--primary-dark); }
     .section-header p { margin: 3px 0 0; font-size: 12.5px; color: var(--muted); }
 
-    /* FORMULARIOS Y BOTONES */
     label { display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px; }
     input, select {
       width: 100%; padding: 9px 11px; border: 1px solid #94A3B8; border-radius: 6px;
@@ -108,7 +103,6 @@
     .btn-danger { background: var(--danger); color: #fff; }
     .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-    /* LOGIN */
     .login-box {
       max-width: 410px; margin: 70px auto; background: #fff; padding: 30px;
       border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(15,23,42,0.08);
@@ -117,7 +111,6 @@
     .login-box p { margin: 0 0 20px; font-size: 13px; color: var(--muted); }
     .form-group { margin-bottom: 14px; }
 
-    /* DASHBOARD KPIS */
     .kpi-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 14px; margin-bottom: 18px;
@@ -142,7 +135,6 @@
     }
     .chart-box h3 { margin: 0 0 10px; font-size: 14.5px; color: var(--primary-dark); }
 
-    /* CARGA DE DOCUMENTOS */
     .upload-layout { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; }
     @media (max-width: 960px) { .upload-layout { grid-template-columns: 1fr; } }
     .form-row-4 { display: grid; grid-template-columns: 1.4fr 1fr 1.2fr 1fr; gap: 10px; margin-bottom: 12px; }
@@ -160,13 +152,14 @@
       text-align: center; background: #F8FAFC; cursor: pointer; margin-bottom: 14px;
       transition: all 0.2s;
     }
+    .dropzone.drag-over { border-color: var(--accent); background: #EFF6FF; }
     .dropzone.has-file { border-color: #10B981; background: #ECFDF5; }
+
     .session-item {
       border: 1px solid #E2E8F0; border-radius: 7px; padding: 10px 12px;
       margin-bottom: 8px; background: #F8FAFC; display: flex; justify-content: space-between; align-items: center; gap: 8px;
     }
 
-    /* VISOR PDF */
     .viewer-filters {
       display: grid; grid-template-columns: 1fr 1fr 1.4fr auto; gap: 10px;
       background: #F8FAFC; padding: 12px; border-radius: 8px; border: 1px solid #E2E8F0; margin-bottom: 14px;
@@ -192,7 +185,6 @@
     }
     .pdf-canvas-container canvas { box-shadow: 0 4px 16px rgba(0,0,0,0.4); background: #fff; }
 
-    /* TABLAS REPORTES Y USUARIOS */
     .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     th { background: var(--primary); color: #fff; padding: 9px 10px; text-align: left; white-space: nowrap; }
@@ -203,7 +195,9 @@
       background: #DCFCE7; color: #166534; font-weight: 700;
     }
 
-    /* MODAL */
+    .users-admin-grid { display: grid; grid-template-columns: 380px 1fr; gap: 16px; }
+    @media (max-width: 920px) { .users-admin-grid { grid-template-columns: 1fr; } }
+
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(15,23,42,0.55);
       display: none; align-items: center; justify-content: center; z-index: 100;
@@ -213,7 +207,6 @@
       box-shadow: 0 12px 30px rgba(0,0,0,0.25);
     }
 
-    /* TOAST */
     .toast {
       position: fixed; bottom: 20px; right: 20px; background: #0F172A; color: #fff;
       padding: 12px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
@@ -224,7 +217,6 @@
 </head>
 <body>
 
-  <!-- BARRA SUPERIOR -->
   <header class="navbar">
     <div class="brand">
       <div class="brand-badge">PDF</div>
@@ -235,7 +227,6 @@
     </div>
 
     <div class="nav-right hidden" id="navUserSection">
-      <!-- BOTÓN DIRECTO A CARPETA GOOGLE DRIVE (SOLO VISTA) -->
       <a id="btnVerCarpetaDrive"
          href="https://drive.google.com/drive/folders/1R4OrJ3nSTjeiHnt7yHwJrOnBhY8Ct2Vp"
          target="_blank"
@@ -256,7 +247,6 @@
     </div>
   </header>
 
-  <!-- PANTALLA DE LOGIN -->
   <section id="loginView" class="login-box">
     <h1>Iniciar Sesión</h1>
     <p>Ingrese sus credenciales asignadas para acceder al sistema.</p>
@@ -274,7 +264,6 @@
     </button>
   </section>
 
-  <!-- APLICACIÓN PRINCIPAL -->
   <main id="appView" class="hidden">
     <div class="tabs-wrapper">
       <nav class="tabs" id="tabsNav">
@@ -287,7 +276,12 @@
     </div>
 
     <div class="container">
-      <!-- MÓDULO 1: DASHBOARD -->
+      <div id="noPermissionsBanner" class="card hidden" style="text-align:center; padding:40px;">
+        <h3 style="color:var(--primary-dark);">Sin módulos asignados</h3>
+        <p style="color:var(--muted);">Su rol no tiene permisos habilitados actualmente. Comuníquese con el Administrador.</p>
+      </div>
+
+      <!-- DASHBOARD -->
       <section id="tab-dashboard" class="card hidden">
         <div class="section-header">
           <div>
@@ -337,7 +331,7 @@
         </div>
       </section>
 
-      <!-- MÓDULO 2: CARGAR DOCUMENTOS -->
+      <!-- CARGAR DOCUMENTOS -->
       <section id="tab-cargar" class="hidden">
         <div class="upload-layout">
           <div class="card">
@@ -360,7 +354,7 @@
             <div class="form-row-4">
               <div>
                 <label for="upTipo">Tipo de Documento *</label>
-                <select id="upTipo" onchange="onTipoChange(); updateDrivePreview();"></select>
+                <select id="upTipo" onchange="onTipoChange(); updateDrivePreview(); syncDriveFolderButton();"></select>
               </div>
               <div id="wrapNivel">
                 <label for="upNivel">Nivel *</label>
@@ -416,7 +410,7 @@
         </div>
       </section>
 
-      <!-- MÓDULO 3: VISOR DE DOCUMENTOS -->
+      <!-- VISOR DE DOCUMENTOS -->
       <section id="tab-visor" class="card hidden">
         <div class="section-header">
           <div>
@@ -468,12 +462,12 @@
         </div>
       </section>
 
-      <!-- MÓDULO 4: REPORTES DE AVANCE -->
+      <!-- REPORTES DE AVANCE -->
       <section id="tab-reportes" class="card hidden">
         <div class="section-header">
           <div>
             <h2>Reporte de Avance de Carga por Sede Operativa</h2>
-            <p>Matriz consolidada por sede, tipo documental, nivel y perfil</p>
+            <p>Matriz consolidada por sede, tipo documental y nivel</p>
           </div>
           <button class="btn btn-success" onclick="exportReportExcel()">Exportar a Excel (.XLSX)</button>
         </div>
@@ -510,7 +504,7 @@
         </div>
       </section>
 
-      <!-- MÓDULO 5: GESTIÓN DE USUARIOS -->
+      <!-- GESTIÓN DE USUARIOS -->
       <section id="tab-usuarios" class="hidden">
         <div class="card" style="margin-bottom:16px;">
           <div class="section-header">
@@ -538,7 +532,7 @@
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 380px 1fr; gap:16px;">
+        <div class="users-admin-grid">
           <div class="card">
             <h3 style="margin-top:0; color:var(--primary-dark);">Crear / Editar Usuario</h3>
             <div class="form-group">
@@ -633,10 +627,7 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // =========================================================================
-    // CONFIGURACIÓN PRINCIPAL (REEMPLAZAR CON TUS URLs REALES)
-    // =========================================================================
-    const API_URL = "AKfycbwUCLaJE489pHISdVtQxfIC6CKF1rlsTK1thWfzrClxijbCgDErCwiItUpN74KzYfTv/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbw0CIB0IHeoGw29totAOZcXrGIRFtqv8PofpvwWGvXdGvxnG-smZQavKOQH1bs-qCGi/exec";
     const DEFAULT_DRIVE_URL = "https://drive.google.com/drive/folders/1R4OrJ3nSTjeiHnt7yHwJrOnBhY8Ct2Vp";
 
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -658,9 +649,6 @@
       charts: {}
     };
 
-    // =========================================================================
-    // UTILIDADES Y COMUNICACIÓN API
-    // =========================================================================
     function showToast(msg, isError = false) {
       const t = document.getElementById("toast");
       t.textContent = msg;
@@ -678,9 +666,6 @@
       return await res.json();
     }
 
-    // =========================================================================
-    // SESIÓN PERSISTENTE (LOGIN / LOGOUT)
-    // =========================================================================
     window.addEventListener("DOMContentLoaded", () => {
       const saved = localStorage.getItem("ed2026_pdf_user");
       if (saved) {
@@ -691,9 +676,25 @@
           localStorage.removeItem("ed2026_pdf_user");
         }
       }
-      // Fecha por defecto hoy
       document.getElementById("upFecha").value = new Date().toISOString().split("T")[0];
+      setupDropzoneEvents();
     });
+
+    function setupDropzoneEvents() {
+      const dz = document.getElementById("dropzone");
+      dz.addEventListener("dragover", e => {
+        e.preventDefault();
+        dz.classList.add("drag-over");
+      });
+      dz.addEventListener("dragleave", () => dz.classList.remove("drag-over"));
+      dz.addEventListener("drop", e => {
+        e.preventDefault();
+        dz.classList.remove("drag-over");
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          processSelectedFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
 
     async function login() {
       const usuario = document.getElementById("loginUser").value.trim();
@@ -737,12 +738,8 @@
       const u = STATE.user;
       document.getElementById("lblUserName").innerHTML = `${u.nombres} <span class="role-pill">${u.rol}</span>`;
       document.getElementById("lblUserScope").textContent = `Ámbito: ${u.ambito === "TODAS" ? "Nacional (50 Sedes)" : u.ambito}`;
+      document.getElementById("btnVerCarpetaDrive").href = u.driveViewUrl || DEFAULT_DRIVE_URL;
 
-      // Configurar URL inicial del botón Carpeta Drive (Solo Vista)
-      const btnDrive = document.getElementById("btnVerCarpetaDrive");
-      btnDrive.href = u.driveViewUrl || DEFAULT_DRIVE_URL;
-
-      // Aplicar visibilidad de pestañas según permisos
       const p = u.permisos || {};
       const tabMap = {
         dashboard: p.dashboard,
@@ -766,7 +763,13 @@
       document.getElementById("btnDeletePdf").classList.toggle("hidden", !p.eliminar);
       document.getElementById("btnNewDocType").classList.toggle("hidden", u.rol !== "ADMINISTRADOR");
 
-      if (firstAllowed) switchTab(firstAllowed);
+      if (firstAllowed) {
+        document.getElementById("noPermissionsBanner").classList.add("hidden");
+        switchTab(firstAllowed);
+      } else {
+        document.getElementById("noPermissionsBanner").classList.remove("hidden");
+      }
+
       await refreshAllData();
     }
 
@@ -777,9 +780,6 @@
       });
     }
 
-    // =========================================================================
-    // CARGA DE DATOS Y SINCRONIZACIÓN DE ENLACE DRIVE SOLO VISTA
-    // =========================================================================
     async function refreshAllData() {
       if (!STATE.user) return;
       try {
@@ -814,10 +814,6 @@
       }
     }
 
-    /**
-     * Actualiza dinámicamente el destino del botón "Carpeta Drive (Solo Vista)"
-     * según la sede/tipo seleccionado o vuelve a la carpeta raíz del ámbito del usuario.
-     */
     async function syncDriveFolderButton() {
       const btn = document.getElementById("btnVerCarpetaDrive");
       const sedeCarga = document.getElementById("upSede").value;
@@ -839,14 +835,11 @@
           sede: sedeTarget,
           tipo: tipoTarget
         });
-        if (resp.ok && resp.url) {
-          btn.href = resp.url;
-        }
+        if (resp.ok && resp.url) btn.href = resp.url;
       } catch (e) {}
     }
 
     function populateSelectors() {
-      // Sedes en Cargar
       const upSede = document.getElementById("upSede");
       const upSedeSearch = document.getElementById("upSedeSearch");
       upSede.innerHTML = "";
@@ -867,7 +860,6 @@
         });
       }
 
-      // Sedes en Visor
       const visSede = document.getElementById("visFilterSede");
       visSede.innerHTML = STATE.user.ambito === "TODAS"
         ? `<option value="">Todas las sedes (50)</option>`
@@ -878,14 +870,12 @@
         });
       }
 
-      // Sedes en Gestión de Usuarios
       const usrAmbito = document.getElementById("usrAmbito");
       usrAmbito.innerHTML = `<option value="TODAS">TODAS (Ámbito Nacional)</option>`;
       STATE.sedes.forEach(s => {
         usrAmbito.innerHTML += `<option value="${s.nombre}">${s.nombre}</option>`;
       });
 
-      // Tipos de documento
       const upTipo = document.getElementById("upTipo");
       const visTipo = document.getElementById("visFilterTipo");
       upTipo.innerHTML = `<option value="">-- Seleccione Tipo --</option>`;
@@ -908,9 +898,6 @@
       });
     }
 
-    // =========================================================================
-    // DASHBOARD EJECUTIVO + RANKING POR USUARIO
-    // =========================================================================
     function renderDashboard() {
       const regs = STATE.registros;
       const totalSedesScope = STATE.user.ambito === "TODAS" ? (STATE.sedes.length || 50) : 1;
@@ -926,32 +913,21 @@
       document.getElementById("kpiSedesPendientes").textContent = pendientes;
       document.getElementById("kpiPromedioSede").textContent = promedio;
 
-      // 1. Por Tipo Documental
       const byTipo = {};
       regs.forEach(r => { byTipo[r.tipo] = (byTipo[r.tipo] || 0) + 1; });
       drawChart("chartTipo", "doughnut", Object.keys(byTipo), Object.values(byTipo), "Documentos", ["#0F4C81", "#2563EB", "#16A34A", "#D97706", "#7C3AED"]);
 
-      // 2. Por Nivel
       const byNivel = { "NIVEL I": 0, "NIVEL II": 0, "NIVEL III": 0 };
       regs.forEach(r => { if (byNivel.hasOwnProperty(r.nivel)) byNivel[r.nivel]++; });
       drawChart("chartNivel", "bar", Object.keys(byNivel), Object.values(byNivel), "Archivos", ["#1D4ED8", "#0F4C81", "#16A34A"]);
 
-      // 3. Ranking por Usuario (Top 20)
       const byUser = {};
       regs.forEach(r => {
         const label = `${r.nombreUsuario || r.usuario} (${r.usuario})`;
         byUser[label] = (byUser[label] || 0) + 1;
       });
       const sortedUsers = Object.entries(byUser).sort((a, b) => b[1] - a[1]).slice(0, 20);
-      drawChart(
-        "chartUsuarios",
-        "bar",
-        sortedUsers.map(x => x[0]),
-        sortedUsers.map(x => x[1]),
-        "PDFs Cargados",
-        "#0F4C81",
-        { indexAxis: "y" }
-      );
+      drawChart("chartUsuarios", "bar", sortedUsers.map(x => x[0]), sortedUsers.map(x => x[1]), "PDFs Cargados", "#0F4C81", { indexAxis: "y" });
     }
 
     function drawChart(canvasId, type, labels, data, label, colors, extraOpts = {}) {
@@ -959,10 +935,7 @@
       const ctx = document.getElementById(canvasId).getContext("2d");
       STATE.charts[canvasId] = new Chart(ctx, {
         type: type,
-        data: {
-          labels: labels,
-          datasets: [{ label: label, data: data, backgroundColor: colors, borderRadius: 4 }]
-        },
+        data: { labels: labels, datasets: [{ label: label, data: data, backgroundColor: colors, borderRadius: 4 }] },
         options: {
           responsive: true,
           plugins: { legend: { display: type === "doughnut", position: "right" } },
@@ -971,9 +944,6 @@
       });
     }
 
-    // =========================================================================
-    // LÓGICA DE CARGA DE DOCUMENTOS
-    // =========================================================================
     function onTipoChange() {
       const sel = document.getElementById("upTipo");
       const opt = sel.options[sel.selectedIndex];
@@ -1011,16 +981,20 @@
     }
 
     function handleFileSelect(ev) {
-      const file = ev.target.files[0];
-      if (!file) return;
+      if (ev.target.files && ev.target.files[0]) {
+        processSelectedFile(ev.target.files[0]);
+      }
+    }
+
+    function processSelectedFile(file) {
       if (file.type !== "application/pdf") {
         showToast("Solo se permiten archivos en formato PDF.", true);
-        ev.target.value = "";
+        document.getElementById("fileInput").value = "";
         return;
       }
       if (file.size > 15 * 1024 * 1024) {
         showToast("El archivo supera el límite máximo permitido de 15 MB.", true);
-        ev.target.value = "";
+        document.getElementById("fileInput").value = "";
         return;
       }
       STATE.selectedFile = file;
@@ -1073,12 +1047,10 @@
         STATE.sessionUploads.unshift(resp.registro);
         renderSessionUploads();
 
-        // Actualizar enlace de carpeta Drive solo vista hacia la carpeta recién usada
         if (resp.registro.folderUrl) {
           document.getElementById("btnVerCarpetaDrive").href = resp.registro.folderUrl;
         }
 
-        // Limpiar archivo
         STATE.selectedFile = null;
         document.getElementById("fileInput").value = "";
         document.getElementById("dropzone").classList.remove("has-file");
@@ -1118,7 +1090,6 @@
       `).join("");
     }
 
-    // Nuevo Tipo Documental (Admin)
     function openNewTypeModal() { document.getElementById("modalNewType").style.display = "flex"; }
     function closeNewTypeModal() { document.getElementById("modalNewType").style.display = "none"; }
 
@@ -1132,9 +1103,15 @@
       btn.disabled = true;
       btn.textContent = "Creando 50 subcarpetas...";
       try {
-        const resp = await apiCall({ action: "createDocType", nombreTipo, prefijo, requiereNivel });
+        const resp = await apiCall({
+          action: "createDocType",
+          actorUsuario: STATE.user.usuario,
+          nombreTipo, prefijo, requiereNivel
+        });
         if (!resp.ok) return showToast(resp.error, true);
         showToast("Tipo documental y 50 subcarpetas creadas en Drive.");
+        document.getElementById("newTypeName").value = "";
+        document.getElementById("newTypePrefix").value = "";
         closeNewTypeModal();
         await refreshAllData();
       } finally {
@@ -1143,9 +1120,6 @@
       }
     }
 
-    // =========================================================================
-    // VISOR INTERACTIVO DE PDF
-    // =========================================================================
     function renderViewerList() {
       const fSede = document.getElementById("visFilterSede").value;
       const fTipo = document.getElementById("visFilterTipo").value;
@@ -1269,9 +1243,6 @@
       }
     }
 
-    // =========================================================================
-    // REPORTES DE AVANCE Y EXPORTACIÓN EXCEL (.XLSX)
-    // =========================================================================
     function buildReportRows() {
       const q = document.getElementById("repSearchSede").value.toLowerCase();
       const status = document.getElementById("repFilterStatus").value;
@@ -1337,9 +1308,6 @@
       XLSX.writeFile(wb, `Reporte_Avance_Sedes_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    // =========================================================================
-    // GESTIÓN DE USUARIOS Y PERMISOS (ADMINISTRADOR)
-    // =========================================================================
     function renderRoleMatrix() {
       const roles = ["ADMINISTRADOR", "ASISTENTE", "COORDINADOR(A)", "JEFATURA"];
       const keys = ["dashboard", "cargar", "visor", "eliminar", "reportes", "gestorUsuarios"];
@@ -1368,16 +1336,19 @@
         if (!matriz[rol]) matriz[rol] = {};
         matriz[rol][perm] = chk.checked;
       });
-      const resp = await apiCall({ action: "saveRoleMatrix", matriz });
-      if (resp.ok) {
-        showToast("Matriz de permisos actualizada.");
-        await refreshAllData();
-      }
+      const resp = await apiCall({
+        action: "saveRoleMatrix",
+        actorUsuario: STATE.user.usuario,
+        matriz
+      });
+      if (!resp.ok) return showToast(resp.error, true);
+      showToast("Matriz de permisos actualizada.");
+      await refreshAllData();
     }
 
     function renderUsersTable() {
       const tbody = document.getElementById("usersTableBody");
-      tbody.innerHTML = STATE.usuarios.map(u => `
+      tbody.innerHTML = STATE.usuarios.map((u, idx) => `
         <tr>
           <td><strong>${u.usuario}</strong></td>
           <td>${u.nombres}</td>
@@ -1386,13 +1357,15 @@
           <td>${u.activo === "SI" ? "ACTIVO" : "INACTIVO"}</td>
           <td>
             <button class="btn btn-secondary" style="padding:4px 10px; font-size:12px;"
-                    onclick='editUser(${JSON.stringify(u)})'>Editar</button>
+                    onclick="editUserByIndex(${idx})">Editar</button>
           </td>
         </tr>
       `).join("");
     }
 
-    function editUser(u) {
+    function editUserByIndex(idx) {
+      const u = STATE.usuarios[idx];
+      if (!u) return;
       document.getElementById("usrLogin").value = u.usuario;
       document.getElementById("usrPass").value = u.password;
       document.getElementById("usrNombres").value = u.nombres;
@@ -1419,7 +1392,11 @@
         ambito: document.getElementById("usrAmbito").value,
         activo: document.getElementById("usrActivo").value
       };
-      const resp = await apiCall({ action: "saveUser", userData });
+      const resp = await apiCall({
+        action: "saveUser",
+        actorUsuario: STATE.user.usuario,
+        userData
+      });
       if (!resp.ok) return showToast(resp.error, true);
       showToast("Cuenta de usuario guardada correctamente.");
       clearUserForm();
