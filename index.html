@@ -6,6 +6,7 @@
   <title>Sistema de Gestión Documental PDF — Capacitación</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --primary: #0f4c81;
@@ -56,9 +57,20 @@
     .brand-sub { display: block; font-size: 0.78rem; opacity: 0.85; }
 
     .user-badge { display: flex; align-items: center; gap: 14px; }
-    .user-info { text-align: right; line-height: 1.3; }
+    .user-info { text-align: right; line-height: 1.35; }
     .user-info strong { display: block; font-size: 0.9rem; }
-    .user-info small { font-size: 0.76rem; opacity: 0.85; }
+    .user-info small { font-size: 0.76rem; opacity: 0.9; }
+    .role-pill {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin-left: 6px;
+    }
 
     .btn-outline {
       background: rgba(255, 255, 255, 0.1);
@@ -113,9 +125,9 @@
     .tab-btn {
       background: transparent;
       border: none;
-      padding: 10px 22px;
+      padding: 10px 20px;
       border-radius: 7px;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: #475569;
       cursor: pointer;
@@ -174,6 +186,56 @@
     }
     .btn-excel:hover { background: #14532d; }
 
+    /* DASHBOARD */
+    .dash-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .dash-kpi {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .dash-kpi.green { border-left-color: #16a34a; }
+    .dash-kpi.amber { border-left-color: #d97706; }
+    .dash-kpi.blue { border-left-color: #2563eb; }
+
+    .dash-kpi span { font-size: 0.78rem; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+    .dash-kpi strong { font-size: 1.75rem; color: var(--text); }
+    .dash-kpi small { font-size: 0.78rem; color: var(--muted); }
+
+    .dash-charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .chart-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-card.full { grid-column: 1 / -1; }
+    .chart-card h3 { margin: 0 0 4px; font-size: 1rem; color: var(--primary-dark); }
+    .chart-card p { margin: 0 0 14px; font-size: 0.8rem; color: var(--muted); }
+    .chart-box { position: relative; height: 280px; width: 100%; }
+    .chart-box.tall { height: 340px; }
+
+    /* CARGA */
     .carga-grid {
       display: grid;
       grid-template-columns: 1.55fr 1fr;
@@ -269,12 +331,12 @@
 
     .btn-primary {
       width: 100%;
-      padding: 13px;
+      padding: 12px;
       background: var(--primary);
       color: #fff;
       border: none;
       border-radius: 8px;
-      font-size: 0.98rem;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -322,6 +384,7 @@
     }
     .historial-list a { color: var(--accent); font-weight: 600; text-decoration: none; white-space: nowrap; }
 
+    /* VISOR */
     .visor-card { padding: 18px 22px; }
 
     .visor-filtros {
@@ -375,6 +438,8 @@
       font-size: 0.72rem;
     }
     .badge.blue { background: #dbeafe; color: #1e40af; }
+    .badge.green { background: #dcfce7; color: #166534; }
+    .badge.red { background: #fee2e2; color: #991b1b; }
 
     .visor-preview-panel {
       border: 1px solid #cbd5e1;
@@ -489,7 +554,7 @@
       font-size: 0.94rem;
     }
 
-    /* MÓDULO DE REPORTES JERÁRQUICOS DE 4 NIVELES */
+    /* REPORTES */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -644,16 +709,54 @@
     .count-positive { background: #dcfce7; color: #166534; }
     .count-total { background: #dbeafe; color: #1e40af; }
 
+    /* GESTIÓN DE USUARIOS Y ROLES */
+    .users-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 24px;
+    }
+
+    .simple-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    .simple-table th {
+      background: #0f4c81;
+      color: #fff;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .simple-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .simple-table tr:hover td { background: #f8fafc; }
+
+    .perm-table th, .perm-table td {
+      text-align: center;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+    }
+    .perm-table th:first-child, .perm-table td:first-child { text-align: left; font-weight: 700; }
+    .perm-table input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
+
     .hidden { display: none !important; }
 
     @media (max-width: 1120px) {
-      .carga-grid { grid-template-columns: 1fr; }
-      .visor-layout { grid-template-columns: 1fr; }
+      .carga-grid, .visor-layout, .users-grid, .dash-charts-grid { grid-template-columns: 1fr; }
+      .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); }
       .doc-lista, .visor-preview-panel { height: 520px; }
     }
 
     @media (max-width: 780px) {
-      .form-row, .form-row-3, .form-row-4, .visor-filtros, .reporte-filtros, .kpi-grid, .card-header-flex {
+      .form-row, .form-row-3, .form-row-4, .visor-filtros, .reporte-filtros, .kpi-grid, .dash-kpi-grid, .card-header-flex {
         grid-template-columns: 1fr;
         flex-direction: column;
       }
@@ -686,7 +789,7 @@
     <div class="card auth-card">
       <div class="card-header">
         <h2>Iniciar Sesión</h2>
-        <p style="margin-bottom:20px">Ingrese sus credenciales asignadas para cargar y consultar documentos.</p>
+        <p style="margin-bottom:20px">Ingrese sus credenciales asignadas para acceder al sistema.</p>
       </div>
       <form id="loginForm">
         <div class="form-group">
@@ -707,15 +810,81 @@
   <main id="vistaApp" class="main-wrapper hidden">
 
     <div class="top-controls">
-      <div class="tabs-bar">
-        <button type="button" class="tab-btn active" id="tabCarga">Cargar Documentos</button>
-        <button type="button" class="tab-btn" id="tabVisor">Visor de Documentos</button>
-        <button type="button" class="tab-btn" id="tabReportes">Reportes de Avance</button>
+      <div class="tabs-bar" id="tabsBar">
+        <button type="button" class="tab-btn hidden" id="tabDashboard">Dashboard</button>
+        <button type="button" class="tab-btn hidden" id="tabCarga">Cargar Documentos</button>
+        <button type="button" class="tab-btn hidden" id="tabVisor">Visor de Documentos</button>
+        <button type="button" class="tab-btn hidden" id="tabReportes">Reportes de Avance</button>
+        <button type="button" class="tab-btn hidden" id="tabUsuarios">Gestión de Usuarios</button>
       </div>
     </div>
 
-    <!-- MÓDULO 1: CARGA DE DOCUMENTOS -->
-    <section id="moduloCarga" class="carga-grid">
+    <!-- MÓDULO: DASHBOARD -->
+    <section id="moduloDashboard" class="hidden">
+      <div class="card">
+        <div class="card-header-flex">
+          <div>
+            <h2>Dashboard Ejecutivo de Avance</h2>
+            <p id="dashSubtitulo">Resumen gráfico consolidado de carga documental en tiempo real.</p>
+          </div>
+          <button type="button" id="btnRefrescarDash" class="btn-secondary">Actualizar Indicadores</button>
+        </div>
+
+        <div id="dashEstado" class="alert info hidden">Cargando indicadores gráficos...</div>
+
+        <div class="dash-kpi-grid">
+          <div class="dash-kpi blue">
+            <span>Total Documentos PDF</span>
+            <strong id="dashKpiTotal">0</strong>
+            <small>Archivos válidos en repositorio</small>
+          </div>
+          <div class="dash-kpi green">
+            <span>Sedes con Avance</span>
+            <strong id="dashKpiSedes">0 / 0</strong>
+            <small id="dashKpiPctSedes">0% de cobertura operativa</small>
+          </div>
+          <div class="dash-kpi amber">
+            <span>Sedes Pendientes</span>
+            <strong id="dashKpiPendientes">0</strong>
+            <small>Sin envíos registrados aún</small>
+          </div>
+          <div class="dash-kpi">
+            <span>Promedio por Sede Activa</span>
+            <strong id="dashKpiPromedio">0</strong>
+            <small>Documentos por sede con envío</small>
+          </div>
+        </div>
+
+        <div class="dash-charts-grid">
+          <div class="chart-card">
+            <h3>Documentos por Tipo Documental</h3>
+            <p>Distribución total según categoría de archivo.</p>
+            <div class="chart-box">
+              <canvas id="chartTipos"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Avance en Listas de Asistencia por Nivel</h3>
+            <p>Comparativo entre Nivel I, Nivel II y Nivel III.</p>
+            <div class="chart-box">
+              <canvas id="chartNiveles"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card full">
+            <h3>Ranking de Carga por Sede Operativa (Top 20)</h3>
+            <p>Sedes con mayor volumen de documentos cargados al repositorio.</p>
+            <div class="chart-box tall">
+              <canvas id="chartSedes"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MÓDULO: CARGA DE DOCUMENTOS -->
+    <section id="moduloCarga" class="carga-grid hidden">
       <div class="card">
         <div class="card-header-flex">
           <div>
@@ -808,13 +977,13 @@
       </div>
     </section>
 
-    <!-- MÓDULO 2: VISOR DE DOCUMENTOS -->
+    <!-- MÓDULO: VISOR DE DOCUMENTOS -->
     <section id="moduloVisor" class="hidden">
       <div class="card visor-card">
         <div class="card-header-flex">
           <div>
             <h2>Visor de Documentos Almacenados</h2>
-            <p>Seleccione un archivo para visualizarlo, rotar páginas, imprimir, descargar o eliminar.</p>
+            <p>Seleccione un archivo para visualizarlo, rotar páginas, imprimir o descargar.</p>
           </div>
           <button type="button" id="btnRefrescarVisor" class="btn-secondary">Actualizar Lista</button>
         </div>
@@ -853,7 +1022,7 @@
                 <div class="tool-sep"></div>
                 <button type="button" class="tool-btn" id="btnImprimirPdf" title="Imprimir documento" disabled>🖨 Imprimir</button>
                 <button type="button" class="tool-btn primary" id="btnDescargarPdf" title="Descargar archivo PDF" disabled>⬇ Descargar</button>
-                <div class="tool-sep"></div>
+                <div class="tool-sep" id="sepEliminar"></div>
                 <button type="button" class="tool-btn danger" id="btnEliminarPdf" title="Eliminar documento" disabled>🗑 Eliminar</button>
               </div>
             </div>
@@ -868,7 +1037,7 @@
       </div>
     </section>
 
-    <!-- MÓDULO 3: REPORTES DE AVANCE -->
+    <!-- MÓDULO: REPORTES DE AVANCE -->
     <section id="moduloReportes" class="hidden">
       <div class="card">
         <div class="card-header-flex">
@@ -924,6 +1093,105 @@
       </div>
     </section>
 
+    <!-- MÓDULO: GESTIÓN DE USUARIOS Y PERMISOS -->
+    <section id="moduloUsuarios" class="hidden">
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header-flex">
+          <div>
+            <h2>Matriz de Permisos por Rol</h2>
+            <p>Configure qué módulos y acciones tiene habilitado cada perfil de usuario en el sistema.</p>
+          </div>
+          <button type="button" id="btnGuardarPermisosRoles" class="btn-secondary">Guardar Matriz de Permisos</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="simple-table perm-table" id="tablaPermisosRoles">
+            <thead>
+              <tr>
+                <th>ROL DEL SISTEMA</th>
+                <th>Dashboard</th>
+                <th>Cargar Archivos</th>
+                <th>Visor de Archivos</th>
+                <th>Eliminar en Visor</th>
+                <th>Reportes</th>
+                <th>Gestor de Permisos</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPermisosRoles"></tbody>
+          </table>
+        </div>
+        <div id="mensajePermisosRoles" class="alert hidden"></div>
+      </div>
+
+      <div class="users-grid">
+        <div class="card">
+          <h3 style="margin:0 0 6px;color:var(--primary-dark);">Crear / Editar Usuario</h3>
+          <p style="margin:0 0 16px;font-size:0.84rem;color:var(--muted);">Si ingresa un usuario existente, se actualizarán sus datos y rol.</p>
+          <form id="formUsuario">
+            <div class="form-group">
+              <label for="uUsuario">Usuario (Login) *</label>
+              <input type="text" id="uUsuario" placeholder="Ej. jperez" required>
+            </div>
+            <div class="form-group">
+              <label for="uClave">Contraseña *</label>
+              <input type="text" id="uClave" placeholder="Contraseña de acceso" required>
+            </div>
+            <div class="form-group">
+              <label for="uNombre">Nombres y Apellidos *</label>
+              <input type="text" id="uNombre" placeholder="Ej. Juan Pérez" required>
+            </div>
+            <div class="form-group">
+              <label for="uRol">Rol Asignado *</label>
+              <select id="uRol" required>
+                <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+                <option value="ASISTENTE">ASISTENTE</option>
+                <option value="COORDINADOR(A)">COORDINADOR(A)</option>
+                <option value="JEFATURA">JEFATURA</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="uSede">Ámbito / Sede Operativa *</label>
+              <select id="uSede" required></select>
+            </div>
+            <div class="form-group">
+              <label for="uActivo">Estado de Cuenta *</label>
+              <select id="uActivo" required>
+                <option value="SI">ACTIVO (SI)</option>
+                <option value="NO">INACTIVO (NO)</option>
+              </select>
+            </div>
+            <button type="submit" id="btnGuardarUsuario" class="btn-primary">Guardar Usuario</button>
+          </form>
+          <div id="mensajeUsuario" class="alert hidden"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header-flex">
+            <div>
+              <h3 style="margin:0 0 4px;color:var(--primary-dark);">Usuarios Registrados</h3>
+              <p style="margin:0;font-size:0.84rem;color:var(--muted);">Haz clic en "Editar" para cargar los datos en el formulario.</p>
+            </div>
+            <button type="button" id="btnRefrescarUsuarios" class="btn-secondary">Actualizar Lista</button>
+          </div>
+          <div style="overflow-x:auto;max-height:520px;overflow-y:auto;">
+            <table class="simple-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Nombre Completo</th>
+                  <th>Rol</th>
+                  <th>Sede</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyUsuarios"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <script>
@@ -932,7 +1200,7 @@
     }
 
     const CONFIG = {
-      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbxfqMzGAxMDifR0g7hVZtM7qD8JhT3ltouCCx47Klt7IcSEYHSmtQMsKiAJsWVUvFbG/exec",
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyFmtigdda_42ClnfIm-EYbsnSTS-Gq92B4T0auf-iSkJYgUey3IjUGbVjY2j9bPgug/exec",
       MAX_SIZE_MB: 15
     };
 
@@ -974,6 +1242,7 @@
     let archivoSeleccionado = null;
     let documentosVisorCache = [];
     let reporteDataCache = null;
+    let rolesMatrizCache = [];
 
     let pdfDocActual = null;
     let pdfBlobUrlActual = null;
@@ -982,6 +1251,10 @@
     let rotacionActual = 0;
     let escalaActual = 1.15;
 
+    let chartTiposInstance = null;
+    let chartNivelesInstance = null;
+    let chartSedesInstance = null;
+
     const vistaLogin = document.getElementById("vistaLogin");
     const vistaApp = document.getElementById("vistaApp");
     const userBadge = document.getElementById("userBadge");
@@ -989,12 +1262,17 @@
     const loginMensaje = document.getElementById("loginMensaje");
     const btnLogin = document.getElementById("btnLogin");
 
+    const tabDashboard = document.getElementById("tabDashboard");
     const tabCarga = document.getElementById("tabCarga");
     const tabVisor = document.getElementById("tabVisor");
     const tabReportes = document.getElementById("tabReportes");
+    const tabUsuarios = document.getElementById("tabUsuarios");
+
+    const moduloDashboard = document.getElementById("moduloDashboard");
     const moduloCarga = document.getElementById("moduloCarga");
     const moduloVisor = document.getElementById("moduloVisor");
     const moduloReportes = document.getElementById("moduloReportes");
+    const moduloUsuarios = document.getElementById("moduloUsuarios");
 
     const btnToggleNuevoTipo = document.getElementById("btnToggleNuevoTipo");
     const panelNuevoTipo = document.getElementById("panelNuevoTipo");
@@ -1033,10 +1311,14 @@
     }
 
     function cambiarPestana(activa) {
-      [tabCarga, tabVisor, tabReportes].forEach(t => t.classList.remove("active"));
-      [moduloCarga, moduloVisor, moduloReportes].forEach(m => m.classList.add("hidden"));
+      [tabDashboard, tabCarga, tabVisor, tabReportes, tabUsuarios].forEach(t => t.classList.remove("active"));
+      [moduloDashboard, moduloCarga, moduloVisor, moduloReportes, moduloUsuarios].forEach(m => m.classList.add("hidden"));
 
-      if (activa === "carga") {
+      if (activa === "dashboard") {
+        tabDashboard.classList.add("active");
+        moduloDashboard.classList.remove("hidden");
+        cargarDashboard();
+      } else if (activa === "carga") {
         tabCarga.classList.add("active");
         moduloCarga.classList.remove("hidden");
       } else if (activa === "visor") {
@@ -1047,12 +1329,18 @@
         tabReportes.classList.add("active");
         moduloReportes.classList.remove("hidden");
         cargarReporteAvance();
+      } else if (activa === "usuarios") {
+        tabUsuarios.classList.add("active");
+        moduloUsuarios.classList.remove("hidden");
+        cargarGestionUsuarios();
       }
     }
 
+    tabDashboard.addEventListener("click", () => cambiarPestana("dashboard"));
     tabCarga.addEventListener("click", () => cambiarPestana("carga"));
     tabVisor.addEventListener("click", () => cambiarPestana("visor"));
     tabReportes.addEventListener("click", () => cambiarPestana("reportes"));
+    tabUsuarios.addEventListener("click", () => cambiarPestana("usuarios"));
 
     async function llamarBackend(payload) {
       if (!CONFIG.WEB_APP_URL || !CONFIG.WEB_APP_URL.startsWith("http")) {
@@ -1093,7 +1381,9 @@
           usuario: data.usuario,
           clave: clave,
           nombre: data.nombre,
-          sedeAsignada: String(data.sedeAsignada || "").trim().toUpperCase()
+          sedeAsignada: String(data.sedeAsignada || "").trim().toUpperCase(),
+          rol: data.rol || "COORDINADOR(A)",
+          permisos: data.permisos || {}
         };
         tiposDocumento = data.tiposDocumento || [];
         iniciarInterfazUsuario();
@@ -1111,18 +1401,38 @@
       vistaApp.classList.remove("hidden");
       userBadge.classList.remove("hidden");
 
-      document.getElementById("lblNombreUsuario").textContent = sesionActual.nombre;
+      const p = sesionActual.permisos || {};
+
+      document.getElementById("lblNombreUsuario").innerHTML = `${sesionActual.nombre} <span class="role-pill">${sesionActual.rol}</span>`;
       document.getElementById("lblSedeUsuario").textContent =
-        sesionActual.sedeAsignada === "TODAS" ? "Acceso Nacional (50 Sedes)" : `Sede: ${sesionActual.sedeAsignada}`;
+        sesionActual.sedeAsignada === "TODAS" ? "Ámbito: Nacional (50 Sedes)" : `Sede: ${sesionActual.sedeAsignada}`;
+
+      // Mostrar/ocultar pestañas según permisos del Rol
+      tabDashboard.classList.toggle("hidden", !p.dashboard);
+      tabCarga.classList.toggle("hidden", !p.cargar);
+      tabVisor.classList.toggle("hidden", !p.visor);
+      tabReportes.classList.toggle("hidden", !p.reportes);
+      tabUsuarios.classList.toggle("hidden", !p.usuarios);
+
+      // Controlar botón Eliminar en el Visor según permiso del rol
+      const btnEliminar = document.getElementById("btnEliminarPdf");
+      const sepEliminar = document.getElementById("sepEliminar");
+      btnEliminar.classList.toggle("hidden", !p.eliminar);
+      sepEliminar.classList.toggle("hidden", !p.eliminar);
+
+      // Botón + Nuevo Tipo Documental solo si tiene permiso de gestión/admin
+      if (p.usuarios && sesionActual.sedeAsignada === "TODAS") {
+        btnToggleNuevoTipo.classList.remove("hidden");
+      } else {
+        btnToggleNuevoTipo.classList.add("hidden");
+        panelNuevoTipo.classList.add("hidden");
+      }
 
       if (sesionActual.sedeAsignada === "TODAS") {
-        btnToggleNuevoTipo.classList.remove("hidden");
         buscarSede.classList.remove("hidden");
         renderizarSedes(SEDES_OPERATIVAS);
         selectSede.disabled = false;
       } else {
-        btnToggleNuevoTipo.classList.add("hidden");
-        panelNuevoTipo.classList.add("hidden");
         buscarSede.classList.add("hidden");
         renderizarSedes([sesionActual.sedeAsignada]);
         selectSede.disabled = true;
@@ -1130,6 +1440,14 @@
 
       renderizarTiposDocumento();
       inicializarFiltrosVisor();
+      poblarSelectSedesUsuario();
+
+      // Abrir primera pestaña permitida para el rol
+      if (p.dashboard) cambiarPestana("dashboard");
+      else if (p.cargar) cambiarPestana("carga");
+      else if (p.visor) cambiarPestana("visor");
+      else if (p.reportes) cambiarPestana("reportes");
+      else if (p.usuarios) cambiarPestana("usuarios");
     }
 
     document.getElementById("btnCerrarSesion").addEventListener("click", () => {
@@ -1148,6 +1466,133 @@
       vistaLogin.classList.remove("hidden");
     });
 
+    // --- MÓDULO DASHBOARD ---
+    document.getElementById("btnRefrescarDash").addEventListener("click", cargarDashboard);
+
+    async function cargarDashboard() {
+      const dashEstado = document.getElementById("dashEstado");
+      mostrarAlerta(dashEstado, "Actualizando gráficos e indicadores ejecutivos...", "info");
+
+      try {
+        const data = await llamarBackend({
+          accion: "reporte_avance",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave
+        });
+
+        if (!data.ok) {
+          mostrarAlerta(dashEstado, data.error, "error");
+          return;
+        }
+
+        reporteDataCache = data;
+        dashEstado.classList.add("hidden");
+        document.getElementById("dashSubtitulo").textContent =
+          `Resumen gráfico consolidado • Ámbito: ${data.ambito} • Actualizado: ${data.generadoEn}`;
+
+        const filas = data.filas || [];
+        const totalDocs = filas.reduce((acc, f) => acc + f.total, 0);
+        const totalSedes = filas.length;
+        const sedesActivas = filas.filter(f => f.total > 0).length;
+        const sedesPendientes = totalSedes - sedesActivas;
+        const pctCobertura = totalSedes > 0 ? Math.round((sedesActivas / totalSedes) * 100) : 0;
+        const promedioActiva = sedesActivas > 0 ? (totalDocs / sedesActivas).toFixed(1) : "0";
+
+        document.getElementById("dashKpiTotal").textContent = totalDocs;
+        document.getElementById("dashKpiSedes").textContent = `${sedesActivas} / ${totalSedes}`;
+        document.getElementById("dashKpiPctSedes").textContent = `${pctCobertura}% de cobertura operativa`;
+        document.getElementById("dashKpiPendientes").textContent = sedesPendientes;
+        document.getElementById("dashKpiPromedio").textContent = promedioActiva;
+
+        renderizarGraficosDashboard(data);
+      } catch (err) {
+        mostrarAlerta(dashEstado, err.message || "Error al cargar el Dashboard.", "error");
+      }
+    }
+
+    function renderizarGraficosDashboard(data) {
+      if (!window.Chart) return;
+      const stats = data.dashboardStats || { porTipo: {}, porNivel: {} };
+
+      // 1. Gráfico Donut: Documentos por Tipo Documental
+      const labelsTipo = Object.keys(stats.porTipo);
+      const valsTipo = Object.values(stats.porTipo);
+      if (chartTiposInstance) chartTiposInstance.destroy();
+      chartTiposInstance = new Chart(document.getElementById("chartTipos"), {
+        type: "doughnut",
+        data: {
+          labels: labelsTipo,
+          datasets: [{
+            data: valsTipo,
+            backgroundColor: ["#0f4c81", "#2563eb", "#16a34a", "#d97706", "#7c3aed", "#0891b2"],
+            borderWidth: 2,
+            borderColor: "#ffffff"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 14, font: { size: 12 } } }
+          }
+        }
+      });
+
+      // 2. Gráfico Barras: Listas de Asistencia por Nivel
+      const labelsNivel = Object.keys(stats.porNivel);
+      const valsNivel = Object.values(stats.porNivel);
+      if (chartNivelesInstance) chartNivelesInstance.destroy();
+      chartNivelesInstance = new Chart(document.getElementById("chartNiveles"), {
+        type: "bar",
+        data: {
+          labels: labelsNivel,
+          datasets: [{
+            label: "Documentos Cargados",
+            data: valsNivel,
+            backgroundColor: ["#1d4ed8", "#0f4c81", "#16a34a"],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+
+      // 3. Gráfico Barras Horizontales: Top 20 Sedes con más carga
+      const topSedes = [...(data.filas || [])]
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 20);
+
+      if (chartSedesInstance) chartSedesInstance.destroy();
+      chartSedesInstance = new Chart(document.getElementById("chartSedes"), {
+        type: "bar",
+        data: {
+          labels: topSedes.map(s => s.sede),
+          datasets: [{
+            label: "Total Documentos",
+            data: topSedes.map(s => s.total),
+            backgroundColor: "#0f4c81",
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    }
+
+    // --- MÓDULO CARGA ---
     btnToggleNuevoTipo.addEventListener("click", () => {
       panelNuevoTipo.classList.toggle("hidden");
       mensajeNuevoTipo.classList.add("hidden");
@@ -1372,7 +1817,7 @@
       listaHistorial.prepend(li);
     }
 
-    // --- MÓDULO 2: VISOR DE DOCUMENTOS ---
+    // --- MÓDULO VISOR ---
     const filtroVisorSede = document.getElementById("filtroVisorSede");
     const filtroVisorTipo = document.getElementById("filtroVisorTipo");
     const filtroVisorTexto = document.getElementById("filtroVisorTexto");
@@ -1487,9 +1932,11 @@
     }
 
     function habilitarControlesVisor(habilitar) {
-      [btnRotarIzq, btnRotarDer, btnZoomMenos, btnZoomMas, btnImprimirPdf, btnDescargarPdf, btnEliminarPdf].forEach(b => {
+      const puedeEliminar = sesionActual && sesionActual.permisos && sesionActual.permisos.eliminar;
+      [btnRotarIzq, btnRotarDer, btnZoomMenos, btnZoomMas, btnImprimirPdf, btnDescargarPdf].forEach(b => {
         b.disabled = !habilitar;
       });
+      btnEliminarPdf.disabled = !(habilitar && puedeEliminar);
     }
 
     async function cargarDocumentoEnVisorInteractivo(doc) {
@@ -1659,6 +2106,10 @@
 
     btnEliminarPdf.addEventListener("click", async () => {
       if (!docSeleccionadoActual || !docSeleccionadoActual.fileId) return;
+      if (!sesionActual.permisos.eliminar) {
+        alert("Su rol no tiene permisos para eliminar documentos.");
+        return;
+      }
 
       const confirmar = confirm(
         `¿Estás seguro de eliminar el archivo?\n\n"${docSeleccionadoActual.archivo}"\n\nSe enviará a la papelera de Google Drive y se quitará del listado.`
@@ -1703,7 +2154,7 @@
       }
     });
 
-    // --- MÓDULO 3: REPORTES DE AVANCE (4 NIVELES: TIPO -> NIVEL -> PERFIL -> FECHA) ---
+    // --- MÓDULO REPORTES ---
     const reporteEstado = document.getElementById("reporteEstado");
     const filtroReporteSede = document.getElementById("filtroReporteSede");
     const filtroReporteEstado = document.getElementById("filtroReporteEstado");
@@ -1763,11 +2214,6 @@
       document.getElementById("kpiSedesActivas").textContent = `${sedesConCarga} / ${filas.length}`;
       document.getElementById("kpiTiposActivos").textContent = estructuraTipos.length;
 
-      // Cabecera HTML de 4 filas:
-      // Fila 1: Tipo Documental
-      // Fila 2: Nivel (NIVEL I, NIVEL II, NIVEL III)
-      // Fila 3: Perfil (SLE/CAL/CAE, CTL, APLICADOR/ORIENTADOR, OPERADOR TECNOLÓGICO) o rowspan=2 si es NIVEL I
-      // Fila 4: Fechas (DD-MM-YYYY)
       let tr1 = `<tr><th rowspan="4">SEDE OPERATIVA</th>`;
       let tr2 = `<tr>`;
       let tr3 = `<tr>`;
@@ -1784,7 +2230,6 @@
           et.niveles.forEach(nd => {
             tr2 += `<th colspan="${nd.colspan}">${nd.nivel}</th>`;
             if (!nd.tienePerfiles) {
-              // NIVEL I: no tiene perfil intermedio, ocupa fila 3 y 4 para fechas (o 3 con rowspan=2 si es "Sin fechas")
               nd.perfiles[0].fechas.forEach(f => {
                 tr3 += `<th rowspan="2" style="background:#eff6ff;color:#1e3a8a;">${f}</th>`;
               });
@@ -1838,13 +2283,8 @@
       tfootReporte.innerHTML = footHtml;
     }
 
-    // EXPORTAR A EXCEL (.XLSX) CON DISEÑO EJECUTIVO DE 4 NIVELES DE CABECERA
     document.getElementById("btnExportarExcel").addEventListener("click", () => {
-      if (!reporteDataCache) return;
-      if (!window.XLSX) {
-        alert("La librería de Excel aún está cargando. Intente nuevamente en unos segundos.");
-        return;
-      }
+      if (!reporteDataCache || !window.XLSX) return;
 
       const { estructuraTipos, generadoEn, timestampArchivo, usuarioGenerador, ambito } = reporteDataCache;
       const filasExportar = obtenerFilasReporteFiltradas();
@@ -1938,7 +2378,6 @@
         []
       ];
 
-      // Cabeceras de 4 niveles (Filas 5, 6, 7 y 8)
       const rowTipo = ["SEDE OPERATIVA"];
       const rowNivel = [""];
       const rowPerfil = [""];
@@ -2124,17 +2563,7 @@
         }
       }
 
-      const wsrows = [
-        { hpt: 28 },
-        { hpt: 19 },
-        { hpt: 19 },
-        { hpt: 19 },
-        { hpt: 10 },
-        { hpt: 26 },
-        { hpt: 22 },
-        { hpt: 22 },
-        { hpt: 22 }
-      ];
+      const wsrows = [{ hpt: 28 }, { hpt: 19 }, { hpt: 19 }, { hpt: 19 }, { hpt: 10 }, { hpt: 26 }, { hpt: 22 }, { hpt: 22 }, { hpt: 22 }];
       for (let i = 0; i < filasExportar.length; i++) wsrows.push({ hpt: 20 });
       wsrows.push({ hpt: 24 });
       ws["!rows"] = wsrows;
@@ -2149,8 +2578,172 @@
       XLSX.utils.book_append_sheet(wb, ws, "Avance_ED2026");
 
       const tagDescarga = timestampArchivo || ahoraLocal.toISOString().replace(/[-:T]/g, "").slice(0, 15);
-      const nombreArchivoExcel = `RPT_Avance_Documental_ED2026_${tagDescarga}.xlsx`;
-      XLSX.writeFile(wb, nombreArchivoExcel);
+      XLSX.writeFile(wb, `RPT_Avance_Documental_ED2026_${tagDescarga}.xlsx`);
+    });
+
+    // --- MÓDULO GESTIÓN DE USUARIOS Y PERMISOS ---
+    function poblarSelectSedesUsuario() {
+      const sel = document.getElementById("uSede");
+      sel.innerHTML = '<option value="TODAS">TODAS (Ámbito Nacional)</option>';
+      SEDES_OPERATIVAS.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        sel.appendChild(opt);
+      });
+    }
+
+    document.getElementById("btnRefrescarUsuarios").addEventListener("click", cargarGestionUsuarios);
+
+    async function cargarGestionUsuarios() {
+      const msgUsers = document.getElementById("mensajeUsuario");
+      const tbodyUsers = document.getElementById("tbodyUsuarios");
+      tbodyUsers.innerHTML = '<tr><td colspan="6">Cargando usuarios y permisos...</td></tr>';
+
+      try {
+        const data = await llamarBackend({
+          accion: "listar_usuarios_roles",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave
+        });
+
+        if (!data.ok) {
+          mostrarAlerta(msgUsers, data.error, "error");
+          return;
+        }
+
+        rolesMatrizCache = data.rolesMatriz || [];
+        renderizarMatrizPermisos(rolesMatrizCache);
+        renderizarTablaUsuarios(data.usuarios || []);
+      } catch (err) {
+        mostrarAlerta(msgUsers, err.message || "Error al cargar usuarios.", "error");
+      }
+    }
+
+    function renderizarMatrizPermisos(matriz) {
+      const tbody = document.getElementById("tbodyPermisosRoles");
+      tbody.innerHTML = "";
+
+      matriz.forEach((r, idx) => {
+        const esAdmin = r.rol === "ADMINISTRADOR";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.rol}</td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="dashboard" ${r.dashboard ? "checked" : ""}></td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="cargar" ${r.cargar ? "checked" : ""}></td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="visor" ${r.visor ? "checked" : ""}></td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="eliminar" ${r.eliminar ? "checked" : ""}></td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="reportes" ${r.reportes ? "checked" : ""}></td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="usuarios" ${r.usuarios ? "checked" : ""} ${esAdmin ? "disabled" : ""}></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("btnGuardarPermisosRoles").addEventListener("click", async () => {
+      const msgPerm = document.getElementById("mensajePermisosRoles");
+      const checks = document.querySelectorAll("#tbodyPermisosRoles input[type='checkbox']");
+
+      checks.forEach(chk => {
+        const idx = Number(chk.dataset.idx);
+        const perm = chk.dataset.perm;
+        if (rolesMatrizCache[idx]) {
+          rolesMatrizCache[idx][perm] = chk.checked;
+        }
+      });
+
+      mostrarAlerta(msgPerm, "Guardando matriz de permisos...", "info");
+
+      try {
+        const res = await llamarBackend({
+          accion: "guardar_permisos_roles",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          rolesMatriz: rolesMatrizCache
+        });
+
+        if (res.ok) {
+          mostrarAlerta(msgPerm, res.mensaje, "success");
+          rolesMatrizCache = res.rolesMatriz || rolesMatrizCache;
+          const miRol = rolesMatrizCache.find(m => m.rol === sesionActual.rol);
+          if (miRol) {
+            sesionActual.permisos = miRol;
+            iniciarInterfazUsuario();
+            cambiarPestana("usuarios");
+          }
+        } else {
+          mostrarAlerta(msgPerm, res.error, "error");
+        }
+      } catch (err) {
+        mostrarAlerta(msgPerm, err.message || "Error al guardar permisos.", "error");
+      }
+    });
+
+    function renderizarTablaUsuarios(usuarios) {
+      const tbody = document.getElementById("tbodyUsuarios");
+      tbody.innerHTML = "";
+
+      usuarios.forEach(u => {
+        const tr = document.createElement("tr");
+        const estadoBadge = u.activo === "SI"
+          ? '<span class="badge green">ACTIVO</span>'
+          : '<span class="badge red">INACTIVO</span>';
+
+        tr.innerHTML = `
+          <td><strong>${u.usuario}</strong></td>
+          <td>${u.nombre}</td>
+          <td><span class="badge blue">${u.rol}</span></td>
+          <td>${u.sede}</td>
+          <td>${estadoBadge}</td>
+          <td><button type="button" class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;">Editar</button></td>
+        `;
+
+        tr.querySelector("button").addEventListener("click", () => {
+          document.getElementById("uUsuario").value = u.usuario;
+          document.getElementById("uClave").value = u.clave;
+          document.getElementById("uNombre").value = u.nombre;
+          document.getElementById("uRol").value = u.rol;
+          document.getElementById("uSede").value = u.sede;
+          document.getElementById("uActivo").value = u.activo;
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("formUsuario").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msgUser = document.getElementById("mensajeUsuario");
+      const btnSave = document.getElementById("btnGuardarUsuario");
+
+      btnSave.disabled = true;
+      mostrarAlerta(msgUser, "Guardando usuario...", "info");
+
+      try {
+        const res = await llamarBackend({
+          accion: "guardar_usuario",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          uUsuario: document.getElementById("uUsuario").value.trim(),
+          uClave: document.getElementById("uClave").value.trim(),
+          uNombre: document.getElementById("uNombre").value.trim(),
+          uRol: document.getElementById("uRol").value,
+          uSede: document.getElementById("uSede").value,
+          uActivo: document.getElementById("uActivo").value
+        });
+
+        if (res.ok) {
+          mostrarAlerta(msgUser, res.mensaje, "success");
+          document.getElementById("formUsuario").reset();
+          await cargarGestionUsuarios();
+        } else {
+          mostrarAlerta(msgUser, res.error, "error");
+        }
+      } catch (err) {
+        mostrarAlerta(msgUser, err.message || "Error al guardar usuario.", "error");
+      } finally {
+        btnSave.disabled = false;
+      }
     });
 
     function mostrarAlerta(el, texto, tipo) {
@@ -2173,6 +2766,8 @@
           }).then(data => {
             if (data.ok) {
               tiposDocumento = data.tiposDocumento;
+              sesionActual.rol = data.rol || sesionActual.rol;
+              sesionActual.permisos = data.permisos || sesionActual.permisos;
               renderizarTiposDocumento();
               inicializarFiltrosVisor();
             }
