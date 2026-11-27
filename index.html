@@ -1481,16 +1481,44 @@
           bytes[i] = binaryString.charCodeAt(i);
         }
 
-        const cabecera = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
-        if (cabecera !== "%PDF") {
+        // Buscar la firma "%PDF-" dentro de los primeros 1024 bytes (tolera espacios o BOM al inicio)
+        const limiteBusqueda = Math.min(bytes.length, 1024);
+        let inicioPdf = -1;
+        for (let i = 0; i <= limiteBusqueda - 5; i++) {
+          if (
+            bytes[i] === 0x25 &&     // %
+            bytes[i + 1] === 0x50 && // P
+            bytes[i + 2] === 0x44 && // D
+            bytes[i + 3] === 0x46 && // F
+            bytes[i + 4] === 0x2D    // -
+          ) {
+            inicioPdf = i;
+            break;
+          }
+        }
+
+        if (inicioPdf === -1) {
+          const muestra = String.fromCharCode(...bytes.slice(0, 12)).replace(/[^\x20-\x7E]/g, ".");
           visorPlaceholder.innerHTML = `
             <p style="color:#fca5a5;margin-bottom:8px;">
-              El archivo almacenado en Drive no tiene formato PDF válido (cabecera recibida: "${cabecera}").
+              El archivo almacenado en Drive no contiene una estructura PDF válida (inicio: "${muestra}").
             </p>
             ${doc.url ? `<a href="${doc.url}" target="_blank" rel="noopener" class="btn-secondary">Revisar en Google Drive ↗</a>` : ""}
           `;
           return;
         }
+
+        // Si había espacios o bytes basura antes de "%PDF-", recortar el arreglo desde inicioPdf
+        const bytesLimpios = inicioPdf > 0 ? bytes.subarray(inicioPdf) : bytes;
+
+        const blob = new Blob([bytesLimpios], { type: "application/pdf" });
+        pdfBlobUrlActual = URL.createObjectURL(blob);
+        pdfNombreActual = data.nombre || doc.archivo;
+
+        const loadingTask = pdfjsLib.getDocument({
+          data: bytesLimpios.slice(0),
+          disableWorker: true
+        });
 
         const blob = new Blob([bytes], { type: "application/pdf" });
         pdfBlobUrlActual = URL.createObjectURL(blob);
