@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Gestión Documental PDF — Capacitación</title>
-  <!-- PDF.js para visor interactivo -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <!-- SheetJS con soporte de estilos visuales (colores, bordes, fuentes) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <style>
     :root {
@@ -202,7 +200,8 @@
     }
 
     .form-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; }
-    .form-row-3 { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 14px; }
+    .form-row-3 { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 14px; }
+    .form-row-4 { display: grid; grid-template-columns: 1.4fr 0.8fr 1.2fr 1fr; gap: 12px; }
 
     label { font-weight: 600; font-size: 0.85rem; color: #334155; }
 
@@ -490,6 +489,7 @@
       font-size: 0.94rem;
     }
 
+    /* MÓDULO DE REPORTES JERÁRQUICOS DE 4 NIVELES */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -535,11 +535,11 @@
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      font-size: 0.8rem;
+      font-size: 0.79rem;
     }
 
     .report-table th, .report-table td {
-      padding: 8px 10px;
+      padding: 7px 10px;
       border-bottom: 1px solid #cbd5e1;
       border-right: 1px solid #cbd5e1;
       text-align: center;
@@ -552,29 +552,41 @@
       color: #fff;
       font-weight: 700;
       z-index: 3;
-      height: 38px;
+      height: 36px;
     }
 
     .report-table thead tr:nth-child(2) th {
       position: sticky;
-      top: 38px;
+      top: 36px;
       background: #1d4ed8;
       color: #fff;
       font-weight: 600;
       z-index: 3;
-      height: 32px;
-      font-size: 0.76rem;
+      height: 30px;
+      font-size: 0.75rem;
     }
 
     .report-table thead tr:nth-child(3) th {
       position: sticky;
-      top: 70px;
+      top: 66px;
+      background: #3b82f6;
+      color: #fff;
+      font-weight: 600;
+      z-index: 3;
+      height: 28px;
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    .report-table thead tr:nth-child(4) th {
+      position: sticky;
+      top: 94px;
       background: #eff6ff;
       color: #1e3a8a;
       font-weight: 700;
       z-index: 3;
-      height: 30px;
-      font-size: 0.74rem;
+      height: 28px;
+      font-size: 0.72rem;
       white-space: nowrap;
     }
 
@@ -598,13 +610,8 @@
       white-space: nowrap;
     }
 
-    .report-table tbody tr:hover td {
-      background: #f1f5f9;
-    }
-
-    .report-table tbody tr:hover td:first-child {
-      background: #e2e8f0;
-    }
+    .report-table tbody tr:hover td { background: #f1f5f9; }
+    .report-table tbody tr:hover td:first-child { background: #e2e8f0; }
 
     .report-table tfoot td {
       position: sticky;
@@ -630,7 +637,7 @@
       padding: 2px 7px;
       border-radius: 999px;
       font-weight: 700;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
     }
 
     .count-zero { background: #f1f5f9; color: #94a3b8; font-weight: 500; }
@@ -639,14 +646,14 @@
 
     .hidden { display: none !important; }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1120px) {
       .carga-grid { grid-template-columns: 1fr; }
       .visor-layout { grid-template-columns: 1fr; }
       .doc-lista, .visor-preview-panel { height: 520px; }
     }
 
-    @media (max-width: 720px) {
-      .form-row, .form-row-3, .visor-filtros, .reporte-filtros, .kpi-grid, .card-header-flex {
+    @media (max-width: 780px) {
+      .form-row, .form-row-3, .form-row-4, .visor-filtros, .reporte-filtros, .kpi-grid, .card-header-flex {
         grid-template-columns: 1fr;
         flex-direction: column;
       }
@@ -759,6 +766,11 @@
               </select>
             </div>
 
+            <div class="form-group hidden" id="grupoSubnivel">
+              <label for="subnivel">Perfil / Cargo *</label>
+              <select id="subnivel"></select>
+            </div>
+
             <div class="form-group" id="grupoFechaAsistencia">
               <label for="fechaAsistencia">Fecha de Control *</label>
               <input type="date" id="fechaAsistencia" required>
@@ -817,8 +829,8 @@
             <select id="filtroVisorTipo"><option value="">Todos los tipos</option></select>
           </div>
           <div>
-            <label for="filtroVisorTexto">Buscar archivo / fecha / nivel</label>
-            <input type="text" id="filtroVisorTexto" placeholder="Ej. 25-08-2026 o NIVEL III...">
+            <label for="filtroVisorTexto">Buscar archivo / nivel / perfil / fecha</label>
+            <input type="text" id="filtroVisorTexto" placeholder="Ej. SLE, CTL, APLICADOR, 25-08-2026...">
           </div>
         </div>
 
@@ -862,7 +874,7 @@
         <div class="card-header-flex">
           <div>
             <h2>Reporte de Avance de Carga por Sede Operativa</h2>
-            <p id="subtituloReporte">Matriz consolidada con desglose por Nivel y Fechas de Control.</p>
+            <p id="subtituloReporte">Matriz consolidada con desglose por Nivel, Perfil y Fechas de Control.</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button type="button" id="btnExportarExcel" class="btn-excel">📊 Exportar a Excel (.XLSX)</button>
@@ -920,7 +932,7 @@
     }
 
     const CONFIG = {
-      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyAnrjhNNBBoX3Vx9N6eUcUeqjwvbRrbcWdzN6DytewStQbsnVowVYuBNkowaTyFCnb/exec",
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbxfqMzGAxMDifR0g7hVZtM7qD8JhT3ltouCCx47Klt7IcSEYHSmtQMsKiAJsWVUvFbG/exec",
       MAX_SIZE_MB: 15
     };
 
@@ -944,6 +956,18 @@
       "TACNA", "TUMBES", "UCAYALI-PUCALLPA", "ÁNCASH-CHIMBOTE",
       "ÁNCASH-HUARAZ", "ÁNCASH-POMABAMBA"
     ];
+
+    const PERFILES_POR_NIVEL = {
+      "NIVEL I": [],
+      "NIVEL II": [
+        { label: "SLE/CAL/CAE", carpeta: "SLE-CAL-CAE" },
+        { label: "CTL", carpeta: "CTL" }
+      ],
+      "NIVEL III": [
+        { label: "APLICADOR/ORIENTADOR", carpeta: "APLICADOR-ORIENTADOR" },
+        { label: "OPERADOR TECNOLÓGICO", carpeta: "OPERADOR TECNOLÓGICO" }
+      ]
+    };
 
     let sesionActual = null;
     let tiposDocumento = [];
@@ -984,6 +1008,8 @@
     const selectTipo = document.getElementById("tipoDocumento");
     const grupoNivel = document.getElementById("grupoNivel");
     const selectNivel = document.getElementById("nivel");
+    const grupoSubnivel = document.getElementById("grupoSubnivel");
+    const selectSubnivel = document.getElementById("subnivel");
     const grupoFechaAsistencia = document.getElementById("grupoFechaAsistencia");
     const inputFechaAsistencia = document.getElementById("fechaAsistencia");
     const rutaPreview = document.getElementById("rutaPreview");
@@ -1169,7 +1195,7 @@
         selectTipo.appendChild(opt);
       });
       if (seleccionarNombre) selectTipo.value = seleccionarNombre;
-      actualizarVistaRuta();
+      actualizarOpcionesSubnivel();
     }
 
     function renderizarSedes(lista) {
@@ -1189,27 +1215,56 @@
       renderizarSedes(filtradas.length ? filtradas : ["SIN COINCIDENCIAS"]);
     });
 
+    function actualizarOpcionesSubnivel() {
+      const perfiles = PERFILES_POR_NIVEL[selectNivel.value] || [];
+      selectSubnivel.innerHTML = "";
+      perfiles.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.label;
+        opt.dataset.carpeta = p.carpeta;
+        opt.textContent = p.label;
+        selectSubnivel.appendChild(opt);
+      });
+      actualizarVistaRuta();
+    }
+
     function actualizarVistaRuta() {
       const tipoObj = tiposDocumento.find(t => t.nombre === selectTipo.value);
       const tieneNiveles = tipoObj ? tipoObj.tieneNiveles : false;
+      const perfiles = PERFILES_POR_NIVEL[selectNivel.value] || [];
+      const tieneSubnivel = tieneNiveles && perfiles.length > 0;
 
       grupoNivel.style.display = tieneNiveles ? "flex" : "none";
       grupoFechaAsistencia.style.display = tieneNiveles ? "flex" : "none";
       selectNivel.required = tieneNiveles;
       inputFechaAsistencia.required = tieneNiveles;
-      filaTipoNivel.className = tieneNiveles ? "form-row-3" : "form-group";
+
+      if (tieneSubnivel) {
+        grupoSubnivel.classList.remove("hidden");
+        selectSubnivel.required = true;
+        filaTipoNivel.className = "form-row-4";
+      } else {
+        grupoSubnivel.classList.add("hidden");
+        selectSubnivel.required = false;
+        filaTipoNivel.className = tieneNiveles ? "form-row-3" : "form-group";
+      }
 
       let ruta = `CAPACITACIÓN / ${selectTipo.value} / ${selectSede.value}`;
       if (tieneNiveles) {
+        ruta += ` / ${selectNivel.value}`;
+        if (tieneSubnivel && selectSubnivel.selectedOptions[0]) {
+          ruta += ` / ${selectSubnivel.selectedOptions[0].dataset.carpeta}`;
+        }
         const fechaFmt = formatearFechaCarpeta(inputFechaAsistencia.value) || "[FECHA]";
-        ruta += ` / ${selectNivel.value} / ${fechaFmt}`;
+        ruta += ` / ${fechaFmt}`;
       }
       rutaPreview.textContent = ruta;
     }
 
     selectSede.addEventListener("change", actualizarVistaRuta);
-    selectTipo.addEventListener("change", actualizarVistaRuta);
-    selectNivel.addEventListener("change", actualizarVistaRuta);
+    selectTipo.addEventListener("change", actualizarOpcionesSubnivel);
+    selectNivel.addEventListener("change", actualizarOpcionesSubnivel);
+    selectSubnivel.addEventListener("change", actualizarVistaRuta);
     inputFechaAsistencia.addEventListener("change", actualizarVistaRuta);
 
     dropZone.addEventListener("click", () => inputArchivo.click());
@@ -1264,6 +1319,7 @@
             sede: selectSede.value,
             tipoDocumento: selectTipo.value,
             nivel: selectNivel.value,
+            subnivel: selectSubnivel.value || "",
             fechaAsistencia: formatearFechaCarpeta(inputFechaAsistencia.value),
             nombreArchivo: archivoSeleccionado.name,
             forzarReemplazo: forzarReemplazo,
@@ -1647,7 +1703,7 @@
       }
     });
 
-    // --- MÓDULO 3: REPORTES DE AVANCE JERÁRQUICOS + EXPORTACIÓN EXCEL (.XLSX) ---
+    // --- MÓDULO 3: REPORTES DE AVANCE (4 NIVELES: TIPO -> NIVEL -> PERFIL -> FECHA) ---
     const reporteEstado = document.getElementById("reporteEstado");
     const filtroReporteSede = document.getElementById("filtroReporteSede");
     const filtroReporteEstado = document.getElementById("filtroReporteEstado");
@@ -1661,7 +1717,7 @@
     filtroReporteEstado.addEventListener("change", renderizarTablaReporte);
 
     async function cargarReporteAvance() {
-      mostrarAlerta(reporteEstado, "Calculando avance por sede, tipo documental, nivel y fechas...", "info");
+      mostrarAlerta(reporteEstado, "Calculando avance por sede, tipo documental, nivel, perfil y fechas...", "info");
       try {
         const data = await llamarBackend({
           accion: "reporte_avance",
@@ -1675,7 +1731,7 @@
 
         reporteDataCache = data;
         reporteEstado.classList.add("hidden");
-        subtituloReporte.textContent = `Matriz consolidada con desglose por Nivel y Fechas • Generado: ${data.generadoEn}`;
+        subtituloReporte.textContent = `Matriz consolidada con desglose por Nivel, Perfil y Fechas • Generado: ${data.generadoEn}`;
         renderizarTablaReporte();
       } catch (err) {
         mostrarAlerta(reporteEstado, err.message || "Error al generar el reporte de avance.", "error");
@@ -1707,32 +1763,49 @@
       document.getElementById("kpiSedesActivas").textContent = `${sedesConCarga} / ${filas.length}`;
       document.getElementById("kpiTiposActivos").textContent = estructuraTipos.length;
 
-      let tr1 = `<tr><th rowspan="3">SEDE OPERATIVA</th>`;
+      // Cabecera HTML de 4 filas:
+      // Fila 1: Tipo Documental
+      // Fila 2: Nivel (NIVEL I, NIVEL II, NIVEL III)
+      // Fila 3: Perfil (SLE/CAL/CAE, CTL, APLICADOR/ORIENTADOR, OPERADOR TECNOLÓGICO) o rowspan=2 si es NIVEL I
+      // Fila 4: Fechas (DD-MM-YYYY)
+      let tr1 = `<tr><th rowspan="4">SEDE OPERATIVA</th>`;
       let tr2 = `<tr>`;
       let tr3 = `<tr>`;
+      let tr4 = `<tr>`;
 
       const columnasHojaOrdenadas = [];
 
       estructuraTipos.forEach(et => {
         if (!et.tieneNiveles) {
-          tr1 += `<th rowspan="3">${et.nombre}</th>`;
+          tr1 += `<th rowspan="4">${et.nombre}</th>`;
           columnasHojaOrdenadas.push(et.columnas[0]);
         } else {
           tr1 += `<th colspan="${et.colspan}">${et.nombre}</th>`;
           et.niveles.forEach(nd => {
             tr2 += `<th colspan="${nd.colspan}">${nd.nivel}</th>`;
-            nd.fechas.forEach(f => {
-              tr3 += `<th>${f}</th>`;
-            });
+            if (!nd.tienePerfiles) {
+              // NIVEL I: no tiene perfil intermedio, ocupa fila 3 y 4 para fechas (o 3 con rowspan=2 si es "Sin fechas")
+              nd.perfiles[0].fechas.forEach(f => {
+                tr3 += `<th rowspan="2" style="background:#eff6ff;color:#1e3a8a;">${f}</th>`;
+              });
+            } else {
+              nd.perfiles.forEach(pd => {
+                tr3 += `<th colspan="${pd.colspan}">${pd.perfil}</th>`;
+                pd.fechas.forEach(f => {
+                  tr4 += `<th>${f}</th>`;
+                });
+              });
+            }
           });
           et.columnas.forEach(col => columnasHojaOrdenadas.push(col));
         }
       });
 
-      tr1 += `<th rowspan="3">TOTAL SEDE</th></tr>`;
+      tr1 += `<th rowspan="4">TOTAL SEDE</th></tr>`;
       tr2 += `</tr>`;
       tr3 += `</tr>`;
-      theadReporte.innerHTML = tr1 + tr2 + tr3;
+      tr4 += `</tr>`;
+      theadReporte.innerHTML = tr1 + tr2 + tr3 + tr4;
 
       const totalesCol = {};
       columnasHojaOrdenadas.forEach(c => { totalesCol[c.key] = 0; });
@@ -1765,7 +1838,7 @@
       tfootReporte.innerHTML = footHtml;
     }
 
-    // EXPORTAR A EXCEL (.XLSX) CON DISEÑO EJECUTIVO, COLORES Y BORDES
+    // EXPORTAR A EXCEL (.XLSX) CON DISEÑO EJECUTIVO DE 4 NIVELES DE CABECERA
     document.getElementById("btnExportarExcel").addEventListener("click", () => {
       if (!reporteDataCache) return;
       if (!window.XLSX) {
@@ -1781,7 +1854,6 @@
       const estadoTexto = document.getElementById("filtroReporteEstado").selectedOptions[0].text;
       const filtroSedeTexto = filtroReporteSede.value.trim().toUpperCase() || "NINGUNO";
 
-      // Definición de estilos reutilizables
       const bordeFino = {
         top: { style: "thin", color: { rgb: "CBD5E1" } },
         bottom: { style: "thin", color: { rgb: "CBD5E1" } },
@@ -1837,6 +1909,13 @@
         alignment: { horizontal: "center", vertical: "center" }
       };
 
+      const estiloThPerfil = {
+        font: { name: "Calibri", sz: 9, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "3B82F6" } },
+        border: bordeCabecera,
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
       const estiloThFecha = {
         font: { name: "Calibri", sz: 9, bold: true, color: { rgb: "1E3A8A" } },
         fill: { fgColor: { rgb: "DBEAFE" } },
@@ -1844,12 +1923,10 @@
         alignment: { horizontal: "center", vertical: "center" }
       };
 
-      // Calcular total de columnas para extender el banner
-      let totalColsTabla = 2; // SEDE + TOTAL SEDE
+      let totalColsTabla = 2;
       estructuraTipos.forEach(et => { totalColsTabla += et.colspan; });
       const ultimaColIdx = Math.max(totalColsTabla - 1, 6);
 
-      // Bloque superior de identificadores (Filas 0 a 4)
       const filaBanner = Array(ultimaColIdx + 1).fill("");
       filaBanner[0] = "REPORTE DE AVANCE DE CARGA DOCUMENTAL — EVALUACIÓN DOCENTE 2026 (CAPACITACIÓN)";
 
@@ -1861,13 +1938,14 @@
         []
       ];
 
-      // Cabeceras multinivel (Filas 5, 6 y 7)
+      // Cabeceras de 4 niveles (Filas 5, 6, 7 y 8)
       const rowTipo = ["SEDE OPERATIVA"];
       const rowNivel = [""];
+      const rowPerfil = [""];
       const rowFecha = [""];
       const merges = [
         { s: { r: 0, c: 0 }, e: { r: 0, c: ultimaColIdx } },
-        { s: { r: 5, c: 0 }, e: { r: 7, c: 0 } }
+        { s: { r: 5, c: 0 }, e: { r: 8, c: 0 } }
       ];
 
       const columnasHoja = [];
@@ -1877,20 +1955,39 @@
         if (!et.tieneNiveles) {
           rowTipo.push(et.nombre);
           rowNivel.push("");
+          rowPerfil.push("");
           rowFecha.push("");
-          merges.push({ s: { r: 5, c: colIdx }, e: { r: 7, c: colIdx } });
+          merges.push({ s: { r: 5, c: colIdx }, e: { r: 8, c: colIdx } });
           columnasHoja.push(et.columnas[0]);
           colIdx += 1;
         } else {
           const inicioTipo = colIdx;
           et.niveles.forEach(nd => {
             const inicioNivel = colIdx;
-            nd.fechas.forEach((f, idxF) => {
-              rowTipo.push(colIdx === inicioTipo ? et.nombre : "");
-              rowNivel.push(idxF === 0 ? nd.nivel : "");
-              rowFecha.push(f);
-              colIdx += 1;
-            });
+            if (!nd.tienePerfiles) {
+              nd.perfiles[0].fechas.forEach(f => {
+                rowTipo.push(colIdx === inicioTipo ? et.nombre : "");
+                rowNivel.push(colIdx === inicioNivel ? nd.nivel : "");
+                rowPerfil.push(f);
+                rowFecha.push("");
+                merges.push({ s: { r: 7, c: colIdx }, e: { r: 8, c: colIdx } });
+                colIdx += 1;
+              });
+            } else {
+              nd.perfiles.forEach(pd => {
+                const inicioPerfil = colIdx;
+                pd.fechas.forEach((f, idxF) => {
+                  rowTipo.push(colIdx === inicioTipo ? et.nombre : "");
+                  rowNivel.push(colIdx === inicioNivel ? nd.nivel : "");
+                  rowPerfil.push(idxF === 0 ? pd.perfil : "");
+                  rowFecha.push(f);
+                  colIdx += 1;
+                });
+                if (pd.colspan > 1) {
+                  merges.push({ s: { r: 7, c: inicioPerfil }, e: { r: 7, c: colIdx - 1 } });
+                }
+              });
+            }
             if (nd.colspan > 1) {
               merges.push({ s: { r: 6, c: inicioNivel }, e: { r: 6, c: colIdx - 1 } });
             }
@@ -1905,12 +2002,12 @@
       const colTotalIdx = colIdx;
       rowTipo.push("TOTAL SEDE");
       rowNivel.push("");
+      rowPerfil.push("");
       rowFecha.push("");
-      merges.push({ s: { r: 5, c: colTotalIdx }, e: { r: 7, c: colTotalIdx } });
+      merges.push({ s: { r: 5, c: colTotalIdx }, e: { r: 8, c: colTotalIdx } });
 
-      aoa.push(rowTipo, rowNivel, rowFecha);
+      aoa.push(rowTipo, rowNivel, rowPerfil, rowFecha);
 
-      // Filas de datos por sede
       const totalesCol = {};
       columnasHoja.forEach(c => { totalesCol[c.key] = 0; });
       let granTotal = 0;
@@ -1927,7 +2024,6 @@
         aoa.push(filaExcel);
       });
 
-      // Fila final de totales
       const filaTotalesExcel = [`TOTAL GENERAL (${filasExportar.length} sedes)`];
       columnasHoja.forEach(c => filaTotalesExcel.push(totalesCol[c.key]));
       filaTotalesExcel.push(granTotal);
@@ -1937,8 +2033,7 @@
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       ws["!merges"] = merges;
 
-      // Aplicar estilos celda por celda
-      const filaInicioDatos = 8;
+      const filaInicioDatos = 9;
       const filaTotalIdx = filaInicioDatos + filasExportar.length;
 
       for (let r = 0; r <= filaTotalIdx; r++) {
@@ -1946,23 +2041,14 @@
           const ref = XLSX.utils.encode_cell({ r, c });
           if (!ws[ref]) ws[ref] = { t: "s", v: "" };
 
-          // Fila 0: Banner título
-          if (r === 0) {
-            ws[ref].s = estiloBanner;
-            continue;
-          }
-
-          // Filas 1-3: Ficha identificadora
+          if (r === 0) { ws[ref].s = estiloBanner; continue; }
           if (r >= 1 && r <= 3) {
             if (c === 0 || c === 3) ws[ref].s = estiloMetaLabel;
             else if (c === 1 || c === 4) ws[ref].s = estiloMetaVal;
             continue;
           }
-
-          // Fila 4: Separador
           if (r === 4) continue;
 
-          // Filas 5-7: Cabecera jerárquica
           if (r === 5) {
             ws[ref].s = (c === 0 || c === colTotalIdx) ? estiloThSede : estiloThTipo;
             continue;
@@ -1972,11 +2058,20 @@
             continue;
           }
           if (r === 7) {
-            ws[ref].s = (c === 0 || c === colTotalIdx) ? estiloThSede : (rowFecha[c] !== "" ? estiloThFecha : estiloThTipo);
+            if (c === 0 || c === colTotalIdx) { ws[ref].s = estiloThSede; continue; }
+            const colMeta = columnasHoja[c - 1];
+            if (!colMeta || colMeta.nivel === "-") ws[ref].s = estiloThTipo;
+            else if (colMeta.perfil === "-") ws[ref].s = estiloThFecha;
+            else ws[ref].s = estiloThPerfil;
+            continue;
+          }
+          if (r === 8) {
+            if (c === 0 || c === colTotalIdx) { ws[ref].s = estiloThSede; continue; }
+            const colMeta = columnasHoja[c - 1];
+            ws[ref].s = (!colMeta || colMeta.nivel === "-") ? estiloThTipo : estiloThFecha;
             continue;
           }
 
-          // Fila Final: Totales Generales
           if (r === filaTotalIdx && c <= colTotalIdx) {
             ws[ref].s = {
               font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "0A355C" } },
@@ -1992,13 +2087,11 @@
             continue;
           }
 
-          // Filas de datos por sede (r >= 8 && r < filaTotalIdx)
           if (r >= filaInicioDatos && r < filaTotalIdx && c <= colTotalIdx) {
             const esFilaPar = (r % 2 === 0);
             const valorNum = Number(ws[ref].v || 0);
 
             if (c === 0) {
-              // Columna Sede Operativa
               ws[ref].s = {
                 font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "1E293B" } },
                 fill: { fgColor: { rgb: esFilaPar ? "F8FAFC" : "FFFFFF" } },
@@ -2006,7 +2099,6 @@
                 alignment: { horizontal: "left", vertical: "center" }
               };
             } else if (c === colTotalIdx) {
-              // Columna Total Sede
               ws[ref].s = {
                 font: { name: "Calibri", sz: 10, bold: true, color: { rgb: valorNum > 0 ? "1E40AF" : "94A3B8" } },
                 fill: { fgColor: { rgb: valorNum > 0 ? "DBEAFE" : "F1F5F9" } },
@@ -2014,7 +2106,6 @@
                 alignment: { horizontal: "center", vertical: "center" }
               };
             } else {
-              // Celdas de conteo (Semáforo: Verde si > 0, gris tenue si = 0)
               ws[ref].s = {
                 font: {
                   name: "Calibri",
@@ -2033,29 +2124,27 @@
         }
       }
 
-      // Alturas de filas para respiración visual
       const wsrows = [
-        { hpt: 28 }, // Banner
-        { hpt: 19 }, // Meta 1
-        { hpt: 19 }, // Meta 2
-        { hpt: 19 }, // Meta 3
-        { hpt: 10 }, // Separador
-        { hpt: 26 }, // Cabecera Tipo
-        { hpt: 22 }, // Cabecera Nivel
-        { hpt: 22 }  // Cabecera Fecha
+        { hpt: 28 },
+        { hpt: 19 },
+        { hpt: 19 },
+        { hpt: 19 },
+        { hpt: 10 },
+        { hpt: 26 },
+        { hpt: 22 },
+        { hpt: 22 },
+        { hpt: 22 }
       ];
       for (let i = 0; i < filasExportar.length; i++) wsrows.push({ hpt: 20 });
-      wsrows.push({ hpt: 24 }); // Fila Total
+      wsrows.push({ hpt: 24 });
       ws["!rows"] = wsrows;
 
-      // Anchos de columnas optimizados
       const wscols = [{ wch: 32 }];
       columnasHoja.forEach(() => wscols.push({ wch: 15 }));
       wscols.push({ wch: 14 });
       ws["!cols"] = wscols;
 
-      // Inmovilizar panel izquierdo (Sede) y cabecera superior
-      ws["!freeze"] = { xSplit: 1, ySplit: 8 };
+      ws["!freeze"] = { xSplit: 1, ySplit: 9 };
 
       XLSX.utils.book_append_sheet(wb, ws, "Avance_ED2026");
 
