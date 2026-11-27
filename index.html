@@ -1520,14 +1520,7 @@
           disableWorker: true
         });
 
-        const blob = new Blob([bytes], { type: "application/pdf" });
-        pdfBlobUrlActual = URL.createObjectURL(blob);
-        pdfNombreActual = data.nombre || doc.archivo;
-
-        const loadingTask = pdfjsLib.getDocument({
-          data: bytes.slice(0),
-          disableWorker: true
-        });
+        
         pdfDocActual = await loadingTask.promise;
 
         visorPlaceholder.classList.add("hidden");
