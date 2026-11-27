@@ -109,6 +109,7 @@
       background: #dfe6ee;
       padding: 5px;
       border-radius: 10px;
+      flex-wrap: wrap;
     }
 
     .tab-btn {
@@ -161,6 +162,19 @@
       text-decoration: none;
     }
     .btn-secondary:hover { background: #dbeafe; }
+
+    .btn-excel {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-excel:hover { background: #d1fae5; }
 
     /* LAYOUT DIVIDIDO PARA CARGA */
     .carga-grid {
@@ -368,7 +382,6 @@
     }
     .badge.blue { background: #dbeafe; color: #1e40af; }
 
-    /* CONTENEDOR DERECHO DEL VISOR PDF.JS */
     .visor-preview-panel {
       border: 1px solid #cbd5e1;
       border-radius: 10px;
@@ -450,7 +463,6 @@
       font-weight: 600;
     }
 
-    /* ÁREA SCROLLEABLE DONDE SE RENDERIZAN LAS PÁGINAS DEL PDF */
     .pdf-canvas-container {
       flex: 1 1 auto;
       width: 100%;
@@ -483,6 +495,145 @@
       font-size: 0.94rem;
     }
 
+    /* MÓDULO DE REPORTES DE AVANCE */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .kpi-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-box span { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .kpi-box strong { font-size: 1.55rem; color: var(--primary-dark); }
+
+    .reporte-filtros {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+      background: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .table-scroll-wrapper {
+      width: 100%;
+      max-height: calc(100vh - 340px);
+      min-height: 440px;
+      overflow: auto;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.82rem;
+    }
+
+    .report-table th, .report-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      border-right: 1px solid #e2e8f0;
+      text-align: center;
+    }
+
+    .report-table thead th {
+      position: sticky;
+      top: 0;
+      background: #0f4c81;
+      color: #fff;
+      font-weight: 600;
+      z-index: 2;
+      white-space: normal;
+      min-width: 135px;
+      line-height: 1.25;
+    }
+
+    .report-table thead th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 4;
+      background: #0a355c;
+      text-align: left;
+      min-width: 240px;
+    }
+
+    .report-table tbody td:first-child {
+      position: sticky;
+      left: 0;
+      background: #f8fafc;
+      font-weight: 600;
+      color: #1e293b;
+      text-align: left;
+      z-index: 1;
+      white-space: nowrap;
+    }
+
+    .report-table tbody tr:hover td {
+      background: #f1f5f9;
+    }
+
+    .report-table tbody tr:hover td:first-child {
+      background: #e2e8f0;
+    }
+
+    .report-table tfoot td {
+      position: sticky;
+      bottom: 0;
+      background: #e2e8f0;
+      font-weight: 800;
+      color: #0f172a;
+      z-index: 2;
+      border-top: 2px solid #94a3b8;
+    }
+
+    .report-table tfoot td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 4;
+      background: #cbd5e1;
+      text-align: left;
+    }
+
+    .count-pill {
+      display: inline-block;
+      min-width: 28px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .count-zero {
+      background: #f1f5f9;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .count-positive {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .count-total {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
     .hidden { display: none !important; }
 
     @media (max-width: 1024px) {
@@ -492,7 +643,7 @@
     }
 
     @media (max-width: 720px) {
-      .form-row, .form-row-3, .visor-filtros, .card-header-flex {
+      .form-row, .form-row-3, .visor-filtros, .reporte-filtros, .kpi-grid, .card-header-flex {
         grid-template-columns: 1fr;
         flex-direction: column;
       }
@@ -549,6 +700,7 @@
       <div class="tabs-bar">
         <button type="button" class="tab-btn active" id="tabCarga">Cargar Documentos</button>
         <button type="button" class="tab-btn" id="tabVisor">Visor de Documentos</button>
+        <button type="button" class="tab-btn" id="tabReportes">Reportes de Avance</button>
       </div>
     </div>
 
@@ -611,7 +763,7 @@
           </div>
 
           <div class="ruta-box">
-            <span class="ruta-label">Carpeta destino en Drive (se creará la subcarpeta de fecha si no existe):</span>
+            <span class="ruta-label">Carpeta destino en Drive (se guardará con fecha y hora estandarizada):</span>
             <code id="rutaPreview"></code>
           </div>
 
@@ -701,6 +853,62 @@
       </div>
     </section>
 
+    <!-- MÓDULO 3: REPORTES DE AVANCE (MATRIZ SEDES x TIPOS DOCUMENTALES) -->
+    <section id="moduloReportes" class="hidden">
+      <div class="card">
+        <div class="card-header-flex">
+          <div>
+            <h2>Reporte de Avance de Carga por Sede Operativa</h2>
+            <p id="subtituloReporte">Matriz consolidada de archivos cargados por sede y tipo documental.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" id="btnExportarCsv" class="btn-excel">⬇ Exportar Reporte (.CSV)</button>
+            <button type="button" id="btnRefrescarReporte" class="btn-secondary">Actualizar Reporte</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <span>Total Documentos Cargados</span>
+            <strong id="kpiTotalDocs">0</strong>
+          </div>
+          <div class="kpi-box">
+            <span>Sedes con Envío Registrado</span>
+            <strong id="kpiSedesActivas">0 / 0</strong>
+          </div>
+          <div class="kpi-box">
+            <span>Tipos Documentales Activos</span>
+            <strong id="kpiTiposActivos">0</strong>
+          </div>
+        </div>
+
+        <div class="reporte-filtros">
+          <div>
+            <label for="filtroReporteSede">Buscar Sede Operativa</label>
+            <input type="text" id="filtroReporteSede" placeholder="Ej. CUSCO, LIMA, CAJAMARCA...">
+          </div>
+          <div>
+            <label for="filtroReporteEstado">Estado de Avance</label>
+            <select id="filtroReporteEstado">
+              <option value="TODOS">Mostrar todas las sedes</option>
+              <option value="CON_CARGA">Solo sedes con archivos cargados (&gt; 0)</option>
+              <option value="SIN_CARGA">Solo sedes pendientes (0 archivos)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="reporteEstado" class="alert info hidden">Generando matriz de avance...</div>
+
+        <div class="table-scroll-wrapper">
+          <table class="report-table" id="tablaReporteAvance">
+            <thead id="theadReporte"></thead>
+            <tbody id="tbodyReporte"></tbody>
+            <tfoot id="tfootReporte"></tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <script>
@@ -709,7 +917,7 @@
     }
 
     const CONFIG = {
-      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbza4lZu5n1A9kjrhYrVyeje6Zd_WdCf7tB3-LMYV5XxDoUdFegUY2KuJDJRkeCUJ56I/exec",
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwHi8-tVABKr8FWg3N6y3ZQ-KWsFi_HImEaTjXfY3mjln4VgXg4bOCIymw8IuB0KoRK/exec",
       MAX_SIZE_MB: 15
     };
 
@@ -734,17 +942,11 @@
       "ÁNCASH-HUARAZ", "ÁNCASH-POMABAMBA"
     ];
 
-    const TIPOS_INICIALES_ACTAS = [
-      "ACTA DE RECEPCION DE LOCAL",
-      "ACTA DE RECEPCION DE EQUIPOS INFORMATICOS",
-      "ACTA DE DEVOLUCION DE LOCAL",
-      "ACTA DE DEVOLUCION DE EQUIPOS INFORMATICOS"
-    ];
-
     let sesionActual = null;
     let tiposDocumento = [];
     let archivoSeleccionado = null;
     let documentosVisorCache = [];
+    let reporteDataCache = null;
 
     let pdfDocActual = null;
     let pdfBlobUrlActual = null;
@@ -762,8 +964,10 @@
 
     const tabCarga = document.getElementById("tabCarga");
     const tabVisor = document.getElementById("tabVisor");
+    const tabReportes = document.getElementById("tabReportes");
     const moduloCarga = document.getElementById("moduloCarga");
     const moduloVisor = document.getElementById("moduloVisor");
+    const moduloReportes = document.getElementById("moduloReportes");
 
     const btnToggleNuevoTipo = document.getElementById("btnToggleNuevoTipo");
     const panelNuevoTipo = document.getElementById("panelNuevoTipo");
@@ -799,20 +1003,27 @@
       return `${dd}-${mm}-${yyyy}`;
     }
 
-    tabCarga.addEventListener("click", () => {
-      tabCarga.classList.add("active");
-      tabVisor.classList.remove("active");
-      moduloCarga.classList.remove("hidden");
-      moduloVisor.classList.add("hidden");
-    });
+    function cambiarPestana(activa) {
+      [tabCarga, tabVisor, tabReportes].forEach(t => t.classList.remove("active"));
+      [moduloCarga, moduloVisor, moduloReportes].forEach(m => m.classList.add("hidden"));
 
-    tabVisor.addEventListener("click", () => {
-      tabVisor.classList.add("active");
-      tabCarga.classList.remove("active");
-      moduloVisor.classList.remove("hidden");
-      moduloCarga.classList.add("hidden");
-      cargarDocumentosVisor();
-    });
+      if (activa === "carga") {
+        tabCarga.classList.add("active");
+        moduloCarga.classList.remove("hidden");
+      } else if (activa === "visor") {
+        tabVisor.classList.add("active");
+        moduloVisor.classList.remove("hidden");
+        cargarDocumentosVisor();
+      } else if (activa === "reportes") {
+        tabReportes.classList.add("active");
+        moduloReportes.classList.remove("hidden");
+        cargarReporteAvance();
+      }
+    }
+
+    tabCarga.addEventListener("click", () => cambiarPestana("carga"));
+    tabVisor.addEventListener("click", () => cambiarPestana("visor"));
+    tabReportes.addEventListener("click", () => cambiarPestana("reportes"));
 
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -876,6 +1087,7 @@
       sessionStorage.removeItem(STORAGE_KEY);
       sesionActual = null;
       archivoSeleccionado = null;
+      reporteDataCache = null;
       loginForm.reset();
       uploadForm.reset();
       inputFechaAsistencia.value = hoyISO;
@@ -1090,7 +1302,7 @@
       listaHistorial.prepend(li);
     }
 
-    // --- MÓDULO VISOR DE DOCUMENTOS ---
+    // --- MÓDULO 2: VISOR DE DOCUMENTOS ---
     const filtroVisorSede = document.getElementById("filtroVisorSede");
     const filtroVisorTipo = document.getElementById("filtroVisorTipo");
     const filtroVisorTexto = document.getElementById("filtroVisorTexto");
@@ -1249,7 +1461,6 @@
           return;
         }
 
-        // Decodificar Base64 a Uint8Array
         const binaryString = atob(data.base64);
         const len = binaryString.length;
         const bytes = new Uint8Array(len);
@@ -1257,25 +1468,21 @@
           bytes[i] = binaryString.charCodeAt(i);
         }
 
-        // Verificar que los primeros 4 bytes correspondan a "%PDF" (37, 80, 68, 70)
         const cabecera = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
         if (cabecera !== "%PDF") {
           visorPlaceholder.innerHTML = `
             <p style="color:#fca5a5;margin-bottom:8px;">
-              El archivo almacenado en Drive no tiene formato PDF válido (cabecera recibida: "${cabecera}").<br>
-              Es probable que se haya subido dañado o renombrado desde otro formato (Word/imagen). Elimínalo y vuelve a subirlo.
+              El archivo almacenado en Drive no tiene formato PDF válido (cabecera recibida: "${cabecera}").
             </p>
             ${doc.url ? `<a href="${doc.url}" target="_blank" rel="noopener" class="btn-secondary">Revisar en Google Drive ↗</a>` : ""}
           `;
           return;
         }
 
-        // Crear Blob para descarga directa e impresión
         const blob = new Blob([bytes], { type: "application/pdf" });
         pdfBlobUrlActual = URL.createObjectURL(blob);
         pdfNombreActual = data.nombre || doc.archivo;
 
-        // Cargar documento en PDF.js con disableWorker: true para evitar bloqueos CORS
         const loadingTask = pdfjsLib.getDocument({
           data: bytes.slice(0),
           disableWorker: true
@@ -1298,7 +1505,6 @@
         await renderizarTodasLasPaginas();
 
       } catch (err) {
-        console.error("Error visor PDF:", err);
         visorPlaceholder.innerHTML = `
           <p style="color:#fca5a5;margin-bottom:8px;">No se pudo renderizar el documento PDF (${err.message || "Error de lectura"}).</p>
           ${doc.url ? `<a href="${doc.url}" target="_blank" rel="noopener" class="btn-secondary">Abrir directamente en Google Drive ↗</a>` : ""}
@@ -1420,6 +1626,149 @@
         alert("Error de red al intentar eliminar el documento.");
         habilitarControlesVisor(true);
       }
+    });
+
+    // --- MÓDULO 3: REPORTES DE AVANCE ---
+    const reporteEstado = document.getElementById("reporteEstado");
+    const filtroReporteSede = document.getElementById("filtroReporteSede");
+    const filtroReporteEstado = document.getElementById("filtroReporteEstado");
+    const theadReporte = document.getElementById("theadReporte");
+    const tbodyReporte = document.getElementById("tbodyReporte");
+    const tfootReporte = document.getElementById("tfootReporte");
+    const subtituloReporte = document.getElementById("subtituloReporte");
+
+    document.getElementById("btnRefrescarReporte").addEventListener("click", cargarReporteAvance);
+    filtroReporteSede.addEventListener("input", renderizarTablaReporte);
+    filtroReporteEstado.addEventListener("change", renderizarTablaReporte);
+
+    async function cargarReporteAvance() {
+      mostrarAlerta(reporteEstado, "Calculando avance por sede y tipo documental...", "info");
+      try {
+        const res = await fetch(CONFIG.WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            accion: "reporte_avance",
+            usuario: sesionActual.usuario,
+            clave: sesionActual.clave
+          })
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          mostrarAlerta(reporteEstado, data.error, "error");
+          return;
+        }
+
+        reporteDataCache = data;
+        reporteEstado.classList.add("hidden");
+        subtituloReporte.textContent = `Matriz consolidada de archivos cargados por sede y tipo documental • Actualizado: ${data.generadoEn}`;
+        renderizarTablaReporte();
+      } catch (err) {
+        mostrarAlerta(reporteEstado, "Error al generar el reporte de avance.", "error");
+      }
+    }
+
+    function renderizarTablaReporte() {
+      if (!reporteDataCache) return;
+
+      const { tipos, filas } = reporteDataCache;
+      const textoSede = filtroReporteSede.value.trim().toUpperCase();
+      const estadoFiltro = filtroReporteEstado.value;
+
+      // Actualizar KPIs globales (sobre el universo cargado)
+      const totalGeneralDocs = filas.reduce((acc, f) => acc + f.total, 0);
+      const sedesConCarga = filas.filter(f => f.total > 0).length;
+
+      document.getElementById("kpiTotalDocs").textContent = totalGeneralDocs;
+      document.getElementById("kpiSedesActivas").textContent = `${sedesConCarga} / ${filas.length}`;
+      document.getElementById("kpiTiposActivos").textContent = tipos.length;
+
+      // Filtrar filas visibles
+      const filasFiltradas = filas.filter(f => {
+        if (textoSede && !f.sede.includes(textoSede)) return false;
+        if (estadoFiltro === "CON_CARGA" && f.total === 0) return false;
+        if (estadoFiltro === "SIN_CARGA" && f.total > 0) return false;
+        return true;
+      });
+
+      // Cabecera: SEDE OPERATIVA | [Tipos Documentales...] | TOTAL SEDE
+      let headHtml = "<tr><th>SEDE OPERATIVA</th>";
+      tipos.forEach(t => {
+        headHtml += `<th>${t}</th>`;
+      });
+      headHtml += "<th>TOTAL SEDE</th></tr>";
+      theadReporte.innerHTML = headHtml;
+
+      // Cuerpo y acumuladores de totales por columna
+      const totalesColumna = {};
+      tipos.forEach(t => { totalesColumna[t] = 0; });
+      let granTotalFiltrado = 0;
+
+      if (!filasFiltradas.length) {
+        tbodyReporte.innerHTML = `<tr><td colspan="${tipos.length + 2}" style="text-align:center;color:#64748b;padding:24px;">No hay sedes que coincidan con el filtro aplicado.</td></tr>`;
+      } else {
+        let bodyHtml = "";
+        filasFiltradas.forEach(f => {
+          bodyHtml += `<tr><td>${f.sede}</td>`;
+          tipos.forEach(t => {
+            const cant = f.conteos[t] || 0;
+            totalesColumna[t] += cant;
+            const clasePill = cant > 0 ? "count-pill count-positive" : "count-pill count-zero";
+            bodyHtml += `<td><span class="${clasePill}">${cant}</span></td>`;
+          });
+          granTotalFiltrado += f.total;
+          const claseTotal = f.total > 0 ? "count-pill count-total" : "count-pill count-zero";
+          bodyHtml += `<td><span class="${claseTotal}">${f.total}</span></td></tr>`;
+        });
+        tbodyReporte.innerHTML = bodyHtml;
+      }
+
+      // Fila pie de totales por tipo documental
+      let footHtml = `<tr><td>TOTAL GENERAL (${filasFiltradas.length} sedes)</td>`;
+      tipos.forEach(t => {
+        footHtml += `<td>${totalesColumna[t]}</td>`;
+      });
+      footHtml += `<td>${granTotalFiltrado}</td></tr>`;
+      tfootReporte.innerHTML = footHtml;
+    }
+
+    // Exportar reporte matricial a CSV (compatible con Excel)
+    document.getElementById("btnExportarCsv").addEventListener("click", () => {
+      if (!reporteDataCache) return;
+      const { tipos, filas } = reporteDataCache;
+
+      const encabezados = ["SEDE OPERATIVA", ...tipos, "TOTAL SEDE"];
+      const lineas = [encabezados.map(v => `"${v}"`).join(",")];
+
+      const totalesCol = {};
+      tipos.forEach(t => { totalesCol[t] = 0; });
+      let granTotal = 0;
+
+      filas.forEach(f => {
+        const vals = [`"${f.sede}"`];
+        tipos.forEach(t => {
+          const cant = f.conteos[t] || 0;
+          totalesCol[t] += cant;
+          vals.push(cant);
+        });
+        granTotal += f.total;
+        vals.push(f.total);
+        lineas.push(vals.join(","));
+      });
+
+      const filaTotal = ['"TOTAL GENERAL"', ...tipos.map(t => totalesCol[t]), granTotal];
+      lineas.push(filaTotal.join(","));
+
+      const csvContent = "\uFEFF" + lineas.join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const fechaArchivo = new Date().toISOString().slice(0, 10);
+      a.download = `Reporte_Avance_Sedes_${fechaArchivo}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     });
 
     function mostrarAlerta(el, texto, tipo) {
