@@ -1,555 +1,1148 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestión Documental PDF — Capacitación</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestión Documental PDF — Capacitación</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --primary: #0F4C81;
-      --primary-dark: #0A355C;
-      --accent: #2563EB;
-      --bg: #EEF2F6;
-      --card: #FFFFFF;
-      --border: #CBD5E1;
-      --text: #0F172A;
-      --muted: #64748B;
-      --success: #16A34A;
-      --danger: #DC2626;
+      --primary: #0f4c81;
+      --primary-dark: #0a355c;
+      --accent: #2563eb;
+      --bg: #eef2f6;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+      --radius: 12px;
     }
-    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
     .navbar {
-      background: var(--primary); color: #fff; padding: 10px 22px;
-      display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12); position: sticky; top: 0; z-index: 50;
-      flex-wrap: wrap; gap: 10px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      padding: 12px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 12px rgba(15, 76, 129, 0.22);
     }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand-badge {
-      background: #1E6091; border: 1px solid #93C5FD; padding: 6px 10px;
-      border-radius: 6px; font-weight: 800; font-size: 13px; letter-spacing: 0.5px;
-    }
-    .brand-title { font-size: 16px; font-weight: 700; }
-    .brand-sub { font-size: 11.5px; color: #DBEAFE; }
 
-    .nav-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .user-info { text-align: right; font-size: 12.5px; }
-    .user-info strong { display: block; font-size: 13px; }
+    .nav-brand { display: flex; align-items: center; gap: 14px; }
+
+    .brand-icon {
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 8px 11px;
+      border-radius: 8px;
+    }
+
+    .brand-title { display: block; font-weight: 700; font-size: 1.05rem; }
+    .brand-sub { display: block; font-size: 0.78rem; opacity: 0.85; }
+
+    .user-badge { display: flex; align-items: center; gap: 14px; }
+    .user-info { text-align: right; line-height: 1.35; }
+    .user-info strong { display: block; font-size: 0.9rem; }
+    .user-info small { font-size: 0.76rem; opacity: 0.9; }
     .role-pill {
-      background: #1D4ED8; padding: 1px 7px; border-radius: 99px;
-      font-size: 10.5px; font-weight: 700; margin-left: 4px;
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin-left: 6px;
     }
 
-    .btn-drive-view {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #EFF6FF; color: #0F4C81; border: 1px solid #BFDBFE;
-      padding: 7px 13px; border-radius: 6px; font-size: 12.5px; font-weight: 700;
-      text-decoration: none; transition: all 0.15s;
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      padding: 7px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.84rem;
     }
-    .btn-drive-view:hover { background: #DBEAFE; border-color: #93C5FD; }
+    .btn-outline:hover { background: rgba(255, 255, 255, 0.22); }
 
-    .btn-logout {
-      background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.4);
-      padding: 7px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12.5px;
+    .auth-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 16px;
     }
-    .btn-logout:hover { background: rgba(255,255,255,0.25); }
 
-    .tabs-wrapper { padding: 14px 22px 0; max-width: 1440px; margin: 0 auto; }
-    .tabs {
-      display: inline-flex; gap: 6px; background: #DFE6EE; padding: 5px;
-      border-radius: 8px; flex-wrap: wrap;
+    .auth-card { width: 100%; max-width: 420px; }
+
+    .main-wrapper {
+      width: 100%;
+      max-width: 1850px;
+      margin: 0 auto;
+      padding: 16px 24px 28px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
+
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .tabs-bar {
+      display: flex;
+      gap: 6px;
+      background: #dfe6ee;
+      padding: 5px;
+      border-radius: 10px;
+      flex-wrap: wrap;
+    }
+
     .tab-btn {
-      border: none; background: transparent; padding: 8px 16px; border-radius: 6px;
-      font-size: 13.5px; font-weight: 600; color: #475569; cursor: pointer;
-    }
-    .tab-btn.active {
-      background: #fff; color: var(--primary-dark);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .container { max-width: 1440px; margin: 14px auto 30px; padding: 0 22px; }
-    .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    .section-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
-    }
-    .section-header h2 { margin: 0; font-size: 18px; color: var(--primary-dark); }
-    .section-header p { margin: 3px 0 0; font-size: 12.5px; color: var(--muted); }
-
-    label { display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px; }
-    input, select {
-      width: 100%; padding: 9px 11px; border: 1px solid #94A3B8; border-radius: 6px;
-      font-size: 13.5px; background: #fff; color: var(--text);
-    }
-    input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
-    .btn {
-      border: none; border-radius: 6px; padding: 9px 16px; font-size: 13.5px;
-      font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-    }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { background: var(--primary-dark); }
-    .btn-secondary { background: #EFF6FF; color: var(--primary); border: 1px solid #BFDBFE; }
-    .btn-secondary:hover { background: #DBEAFE; }
-    .btn-success { background: #166534; color: #fff; }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-
-    .login-box {
-      max-width: 410px; margin: 70px auto; background: #fff; padding: 30px;
-      border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(15,23,42,0.08);
-    }
-    .login-box h1 { margin: 0 0 6px; font-size: 21px; color: var(--primary-dark); }
-    .login-box p { margin: 0 0 20px; font-size: 13px; color: var(--muted); }
-    .form-group { margin-bottom: 14px; }
-
-    .kpi-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px; margin-bottom: 18px;
-    }
-    .kpi-card {
-      background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px;
-      padding: 14px 16px; border-left: 5px solid var(--primary);
-    }
-    .kpi-card.green { border-left-color: var(--success); }
-    .kpi-card.amber { border-left-color: #D97706; }
-    .kpi-card.blue { border-left-color: var(--accent); }
-    .kpi-title { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
-    .kpi-value { font-size: 26px; font-weight: 800; margin: 4px 0; color: var(--text); }
-    .kpi-sub { font-size: 12px; color: var(--muted); }
-
-    .charts-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
-    }
-    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
-    .chart-box {
-      border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; background: #fff;
-    }
-    .chart-box h3 { margin: 0 0 10px; font-size: 14.5px; color: var(--primary-dark); }
-
-    .upload-layout { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; }
-    @media (max-width: 960px) { .upload-layout { grid-template-columns: 1fr; } }
-    .form-row-4 { display: grid; grid-template-columns: 1.4fr 1fr 1.2fr 1fr; gap: 10px; margin-bottom: 12px; }
-    @media (max-width: 768px) { .form-row-4 { grid-template-columns: 1fr; } }
-
-    .drive-preview {
-      background: #F0F7FF; border: 1px solid #BAE6FD; border-radius: 7px;
-      padding: 10px 12px; margin-bottom: 14px; font-size: 12.5px;
-    }
-    .drive-preview strong { color: #0369A1; display: block; margin-bottom: 3px; }
-    .drive-preview code { color: #0C4A6E; font-weight: 600; word-break: break-all; }
-
-    .dropzone {
-      border: 2px dashed #94A3B8; border-radius: 8px; padding: 28px 16px;
-      text-align: center; background: #F8FAFC; cursor: pointer; margin-bottom: 14px;
+      background: transparent;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 7px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
       transition: all 0.2s;
     }
-    .dropzone.drag-over { border-color: var(--accent); background: #EFF6FF; }
-    .dropzone.has-file { border-color: #10B981; background: #ECFDF5; }
 
-    .session-item {
-      border: 1px solid #E2E8F0; border-radius: 7px; padding: 10px 12px;
-      margin-bottom: 8px; background: #F8FAFC; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    .tab-btn.active {
+      background: #fff;
+      color: var(--primary-dark);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
     }
 
-    .viewer-filters {
-      display: grid; grid-template-columns: 1fr 1fr 1.4fr auto; gap: 10px;
-      background: #F8FAFC; padding: 12px; border-radius: 8px; border: 1px solid #E2E8F0; margin-bottom: 14px;
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e2e8f0;
     }
-    @media (max-width: 850px) { .viewer-filters { grid-template-columns: 1fr; } }
-    .viewer-workspace { display: grid; grid-template-columns: 340px 1fr; gap: 14px; height: 74vh; }
-    @media (max-width: 900px) { .viewer-workspace { grid-template-columns: 1fr; height: auto; } }
-    .doc-list { overflow-y: auto; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px; background: #F8FAFC; }
+
+    .card-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .card-header h2, .card-header-flex h2 { margin: 0 0 4px; font-size: 1.28rem; color: var(--primary-dark); }
+    .card-header p, .card-header-flex p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+    .btn-secondary {
+      background: #eff6ff;
+      color: var(--primary);
+      border: 1px solid #bfdbfe;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .btn-secondary:hover { background: #dbeafe; }
+
+    .btn-excel {
+      background: #166534;
+      color: #fff;
+      border: 1px solid #14532d;
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-excel:hover { background: #14532d; }
+
+    /* DASHBOARD */
+    .dash-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .dash-kpi {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .dash-kpi.green { border-left-color: #16a34a; }
+    .dash-kpi.amber { border-left-color: #d97706; }
+    .dash-kpi.blue { border-left-color: #2563eb; }
+
+    .dash-kpi span { font-size: 0.78rem; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+    .dash-kpi strong { font-size: 1.75rem; color: var(--text); }
+    .dash-kpi small { font-size: 0.78rem; color: var(--muted); }
+
+    .dash-charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .chart-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-card.full { grid-column: 1 / -1; }
+    .chart-card h3 { margin: 0 0 4px; font-size: 1rem; color: var(--primary-dark); }
+    .chart-card p { margin: 0 0 14px; font-size: 0.8rem; color: var(--muted); }
+    .chart-box { position: relative; height: 280px; width: 100%; }
+    .chart-box.tall { height: 340px; }
+
+    /* CARGA */
+    .carga-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .admin-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+
+    .admin-box h3 { margin: 0 0 4px; font-size: 1rem; color: var(--primary-dark); }
+    .admin-box p { margin: 0 0 14px; font-size: 0.82rem; color: var(--muted); }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; }
+    .form-row-3 { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 14px; }
+    .form-row-4 { display: grid; grid-template-columns: 1.4fr 0.8fr 1.2fr 1fr; gap: 12px; }
+
+    label { font-weight: 600; font-size: 0.85rem; color: #334155; }
+
+    input[type="text"], input[type="password"], input[type="date"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.93rem;
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    .search-input { background: #f8fafc !important; font-size: 0.88rem !important; margin-bottom: 4px; }
+
+    .ruta-box {
+      background: #f0f7ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 11px 14px;
+      margin-bottom: 18px;
+      font-size: 0.84rem;
+    }
+
+    .ruta-label { display: block; font-weight: 600; color: #0369a1; margin-bottom: 3px; }
+    .ruta-box code { color: #0c4a6e; font-family: ui-monospace, Consolas, monospace; word-break: break-all; }
+
+    .drop-zone {
+      border: 2px dashed #94a3b8;
+      border-radius: 10px;
+      padding: 34px 20px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: #eff6ff; }
+    .drop-zone.has-file { border-color: #10b981; background: #ecfdf5; }
+
+    .drop-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 10px;
+      background: #dbeafe;
+      color: var(--primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .drop-title { margin: 0 0 4px; font-size: 0.96rem; font-weight: 500; }
+    .link-text { color: var(--accent); text-decoration: underline; font-weight: 600; }
+    .drop-sub { color: var(--muted); font-size: 0.82rem; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .alert {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.87rem;
+      line-height: 1.45;
+    }
+    .alert.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+    .alert.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .alert.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+    .historial-card { min-height: 480px; display: flex; flex-direction: column; }
+    .historial-card h3 { margin: 0 0 6px; font-size: 1.08rem; color: var(--primary-dark); }
+    .historial-sub { margin: 0 0 16px; font-size: 0.82rem; color: var(--muted); }
+    .historial-empty {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      background: #f8fafc;
+    }
+    .historial-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; }
+    .historial-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      gap: 10px;
+    }
+    .historial-list a { color: var(--accent); font-weight: 600; text-decoration: none; white-space: nowrap; }
+
+    /* VISOR */
+    .visor-card { padding: 18px 22px; }
+
+    .visor-filtros {
+      display: grid;
+      grid-template-columns: 1.2fr 1.2fr 1.5fr;
+      gap: 14px;
+      margin-bottom: 14px;
+      background: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .visor-layout {
+      display: grid;
+      grid-template-columns: 370px 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .doc-lista {
+      height: calc(100vh - 250px);
+      min-height: 600px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 6px;
+    }
+
     .doc-item {
-      background: #fff; border: 1px solid var(--border); border-radius: 7px;
-      padding: 10px; margin-bottom: 8px; cursor: pointer;
+      padding: 12px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    .doc-item.active { border: 2px solid var(--primary); background: #EFF6FF; }
-    .pdf-stage {
-      background: #475569; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden;
+
+    .doc-item:hover { border-color: var(--accent); background: #f8fafc; }
+    .doc-item.selected { border-color: var(--primary); background: #eff6ff; box-shadow: 0 0 0 2px rgba(15, 76, 129, 0.15); }
+
+    .doc-title { font-weight: 600; font-size: 0.85rem; color: var(--text); word-break: break-word; margin-bottom: 5px; }
+    .doc-meta { font-size: 0.76rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; }
+    .badge {
+      background: #e2e8f0;
+      color: #334155;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.72rem;
     }
-    .pdf-toolbar {
-      background: #1E293B; color: #fff; padding: 8px 12px;
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    .badge.blue { background: #dbeafe; color: #1e40af; }
+    .badge.green { background: #dcfce7; color: #166534; }
+    .badge.red { background: #fee2e2; color: #991b1b; }
+
+    .visor-preview-panel {
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #334155;
+      height: calc(100vh - 250px);
+      min-height: 600px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
     }
+
+    .visor-toolbar {
+      flex: 0 0 auto;
+      height: 46px;
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 0 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #0f172a;
+    }
+
+    .visor-doc-name {
+      font-weight: 600;
+      font-size: 0.82rem;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #e2e8f0;
+    }
+
+    .toolbar-actions {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tool-btn {
+      background: #334155;
+      color: #fff;
+      border: 1px solid #475569;
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .tool-btn:hover:not(:disabled) { background: #475569; }
+    .tool-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .tool-btn.primary { background: var(--accent); border-color: #1d4ed8; }
+    .tool-btn.primary:hover:not(:disabled) { background: #1d4ed8; }
+    .tool-btn.danger { background: #b91c1c; border-color: #991b1b; }
+    .tool-btn.danger:hover:not(:disabled) { background: #991b1b; }
+
+    .tool-sep {
+      width: 1px;
+      height: 18px;
+      background: #475569;
+      margin: 0 2px;
+    }
+
+    .zoom-label {
+      font-size: 0.76rem;
+      color: #cbd5e1;
+      min-width: 40px;
+      text-align: center;
+      font-weight: 600;
+    }
+
     .pdf-canvas-container {
-      flex: 1; overflow: auto; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 14px;
-    }
-    .pdf-canvas-container canvas { box-shadow: 0 4px 16px rgba(0,0,0,0.4); background: #fff; }
-
-    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
-    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-    th { background: var(--primary); color: #fff; padding: 9px 10px; text-align: left; white-space: nowrap; }
-    td { padding: 8px 10px; border-bottom: 1px solid #E2E8F0; }
-    tr:nth-child(even) td { background: #F8FAFC; }
-    .badge-count {
-      display: inline-block; padding: 2px 8px; border-radius: 99px;
-      background: #DCFCE7; color: #166534; font-weight: 700;
+      flex: 1 1 auto;
+      width: 100%;
+      overflow: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      background: #475569;
     }
 
-    .users-admin-grid { display: grid; grid-template-columns: 380px 1fr; gap: 16px; }
-    @media (max-width: 920px) { .users-admin-grid { grid-template-columns: 1fr; } }
-
-    .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(15,23,42,0.55);
-      display: none; align-items: center; justify-content: center; z-index: 100;
-    }
-    .modal {
-      background: #fff; border-radius: 10px; width: 92%; max-width: 440px; padding: 22px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    .pdf-page-canvas {
+      display: block;
+      margin: 0 auto;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+      background: #fff;
     }
 
-    .toast {
-      position: fixed; bottom: 20px; right: 20px; background: #0F172A; color: #fff;
-      padding: 12px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2); z-index: 200; display: none;
+    .visor-empty {
+      flex: 1 1 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #cbd5e1;
+      padding: 24px;
+      text-align: center;
+      font-size: 0.94rem;
     }
+
+    /* REPORTES */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .kpi-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-box span { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .kpi-box strong { font-size: 1.55rem; color: var(--primary-dark); }
+
+    .reporte-filtros {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+      background: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .table-scroll-wrapper {
+      width: 100%;
+      max-height: calc(100vh - 340px);
+      min-height: 460px;
+      overflow: auto;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.79rem;
+    }
+
+    .report-table th, .report-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #cbd5e1;
+      border-right: 1px solid #cbd5e1;
+      text-align: center;
+    }
+
+    .report-table thead tr:nth-child(1) th {
+      position: sticky;
+      top: 0;
+      background: #0f4c81;
+      color: #fff;
+      font-weight: 700;
+      z-index: 3;
+      height: 36px;
+    }
+
+    .report-table thead tr:nth-child(2) th {
+      position: sticky;
+      top: 36px;
+      background: #1d4ed8;
+      color: #fff;
+      font-weight: 600;
+      z-index: 3;
+      height: 30px;
+      font-size: 0.75rem;
+    }
+
+    .report-table thead tr:nth-child(3) th {
+      position: sticky;
+      top: 66px;
+      background: #3b82f6;
+      color: #fff;
+      font-weight: 600;
+      z-index: 3;
+      height: 28px;
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    .report-table thead tr:nth-child(4) th {
+      position: sticky;
+      top: 94px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-weight: 700;
+      z-index: 3;
+      height: 28px;
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    .report-table thead tr:nth-child(1) th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background: #0a355c;
+      text-align: left;
+      min-width: 240px;
+    }
+
+    .report-table tbody td:first-child {
+      position: sticky;
+      left: 0;
+      background: #f8fafc;
+      font-weight: 600;
+      color: #1e293b;
+      text-align: left;
+      z-index: 2;
+      white-space: nowrap;
+    }
+
+    .report-table tbody tr:hover td { background: #f1f5f9; }
+    .report-table tbody tr:hover td:first-child { background: #e2e8f0; }
+
+    .report-table tfoot td {
+      position: sticky;
+      bottom: 0;
+      background: #e2e8f0;
+      font-weight: 800;
+      color: #0f172a;
+      z-index: 3;
+      border-top: 2px solid #94a3b8;
+    }
+
+    .report-table tfoot td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background: #cbd5e1;
+      text-align: left;
+    }
+
+    .count-pill {
+      display: inline-block;
+      min-width: 26px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.76rem;
+    }
+
+    .count-zero { background: #f1f5f9; color: #94a3b8; font-weight: 500; }
+    .count-positive { background: #dcfce7; color: #166534; }
+    .count-total { background: #dbeafe; color: #1e40af; }
+
+    /* GESTIÓN DE USUARIOS Y ROLES */
+    .users-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 24px;
+    }
+
+    .simple-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    .simple-table th {
+      background: #0f4c81;
+      color: #fff;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .simple-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .simple-table tr:hover td { background: #f8fafc; }
+
+    .perm-table th, .perm-table td {
+      text-align: center;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+    }
+    .perm-table th:first-child, .perm-table td:first-child { text-align: left; font-weight: 700; }
+    .perm-table input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
+
     .hidden { display: none !important; }
+
+    @media (max-width: 1120px) {
+      .carga-grid, .visor-layout, .users-grid, .dash-charts-grid { grid-template-columns: 1fr; }
+      .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .doc-lista, .visor-preview-panel { height: 520px; }
+    }
+
+    @media (max-width: 780px) {
+      .form-row, .form-row-3, .form-row-4, .visor-filtros, .reporte-filtros, .kpi-grid, .dash-kpi-grid, .card-header-flex {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+      }
+      .navbar { flex-direction: column; gap: 10px; text-align: center; }
+      .user-info { text-align: center; }
+    }
   </style>
 </head>
 <body>
 
-  <header class="navbar">
-    <div class="brand">
-      <div class="brand-badge">PDF</div>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">PDF</div>
       <div>
-        <div class="brand-title">Gestión Documental — Capacitación</div>
-        <div class="brand-sub">Repositorio Centralizado en Google Drive</div>
+        <span class="brand-title">Gestión Documental — Capacitación</span>
+        <span class="brand-sub">Repositorio Centralizado en Google Drive</span>
       </div>
     </div>
-
-    <div class="nav-right hidden" id="navUserSection">
-      <a id="btnVerCarpetaDrive"
-         href="https://drive.google.com/drive/folders/1R4OrJ3nSTjeiHnt7yHwJrOnBhY8Ct2Vp"
-         target="_blank"
-         rel="noopener noreferrer"
-         class="btn-drive-view"
-         title="Abrir repositorio en Google Drive en modo Solo Lectura">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-        </svg>
-        Carpeta Drive (Solo Vista) ↗
-      </a>
-
+    <div id="userBadge" class="user-badge hidden">
       <div class="user-info">
-        <strong id="lblUserName">Usuario <span class="role-pill" id="lblUserRole">ROL</span></strong>
-        <span id="lblUserScope">Ámbito: TODAS</span>
+        <strong id="lblNombreUsuario">Usuario</strong>
+        <small id="lblSedeUsuario">Sede</small>
       </div>
-      <button class="btn-logout" onclick="logout()">Salir</button>
+      <button type="button" id="btnCerrarSesion" class="btn-outline">Salir</button>
     </div>
-  </header>
+  </nav>
 
-  <section id="loginView" class="login-box">
-    <h1>Iniciar Sesión</h1>
-    <p>Ingrese sus credenciales asignadas para acceder al sistema.</p>
-    <div class="form-group">
-      <label for="loginUser">Usuario</label>
-      <input type="text" id="loginUser" placeholder="Ej. cmendoza" autocomplete="username" />
-    </div>
-    <div class="form-group">
-      <label for="loginPass">Contraseña</label>
-      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"
-             onkeypress="if(event.key==='Enter') login()" />
-    </div>
-    <button class="btn btn-primary" style="width:100%; justify-content:center; padding:11px;" id="btnLogin" onclick="login()">
-      Ingresar al Sistema
-    </button>
-  </section>
-
-  <main id="appView" class="hidden">
-    <div class="tabs-wrapper">
-      <nav class="tabs" id="tabsNav">
-        <button class="tab-btn" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
-        <button class="tab-btn" data-tab="cargar" onclick="switchTab('cargar')">Cargar Documentos</button>
-        <button class="tab-btn" data-tab="visor" onclick="switchTab('visor')">Visor de Documentos</button>
-        <button class="tab-btn" data-tab="reportes" onclick="switchTab('reportes')">Reportes de Avance</button>
-        <button class="tab-btn" data-tab="usuarios" onclick="switchTab('usuarios')">Gestión de Usuarios</button>
-      </nav>
-    </div>
-
-    <div class="container">
-      <div id="noPermissionsBanner" class="card hidden" style="text-align:center; padding:40px;">
-        <h3 style="color:var(--primary-dark);">Sin módulos asignados</h3>
-        <p style="color:var(--muted);">Su rol no tiene permisos habilitados actualmente. Comuníquese con el Administrador.</p>
+  <!-- LOGIN -->
+  <main id="vistaLogin" class="auth-wrapper">
+    <div class="card auth-card">
+      <div class="card-header">
+        <h2>Iniciar Sesión</h2>
+        <p style="margin-bottom:20px">Ingrese sus credenciales asignadas para acceder al sistema.</p>
       </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginUsuario">Usuario</label>
+          <input type="text" id="loginUsuario" placeholder="Ej. rsanchez" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="loginClave">Contraseña</label>
+          <input type="password" id="loginClave" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" id="btnLogin" class="btn-primary">Ingresar al Sistema</button>
+      </form>
+      <div id="loginMensaje" class="alert hidden"></div>
+    </div>
+  </main>
 
-      <!-- DASHBOARD -->
-      <section id="tab-dashboard" class="card hidden">
-        <div class="section-header">
+  <!-- PANEL PRINCIPAL -->
+  <main id="vistaApp" class="main-wrapper hidden">
+
+    <div class="top-controls">
+      <div class="tabs-bar" id="tabsBar">
+        <button type="button" class="tab-btn hidden" id="tabDashboard">Dashboard</button>
+        <button type="button" class="tab-btn hidden" id="tabCarga">Cargar Documentos</button>
+        <button type="button" class="tab-btn hidden" id="tabVisor">Visor de Documentos</button>
+        <button type="button" class="tab-btn hidden" id="tabReportes">Reportes de Avance</button>
+        <button type="button" class="tab-btn hidden" id="tabUsuarios">Gestión de Usuarios</button>
+      </div>
+    </div>
+
+    <!-- MÓDULO: DASHBOARD -->
+    <section id="moduloDashboard" class="hidden">
+      <div class="card">
+        <div class="card-header-flex">
           <div>
             <h2>Dashboard Ejecutivo de Avance</h2>
-            <p id="dashScopeSubtitle">Resumen gráfico consolidado de carga documental en tiempo real</p>
+            <p id="dashSubtitulo">Resumen gráfico consolidado de carga documental en tiempo real.</p>
           </div>
-          <button class="btn btn-secondary" onclick="refreshAllData()">↻ Actualizar Indicadores</button>
+          <button type="button" id="btnRefrescarDash" class="btn-secondary">Actualizar Indicadores</button>
+        </div>
+
+        <div id="dashEstado" class="alert info hidden">Cargando indicadores gráficos...</div>
+
+        <div class="dash-kpi-grid">
+          <div class="dash-kpi blue">
+            <span>Total Documentos PDF</span>
+            <strong id="dashKpiTotal">0</strong>
+            <small>Archivos válidos en repositorio</small>
+          </div>
+          <div class="dash-kpi green">
+            <span>Sedes con Avance</span>
+            <strong id="dashKpiSedes">0 / 0</strong>
+            <small id="dashKpiPctSedes">0% de cobertura operativa</small>
+          </div>
+          <div class="dash-kpi amber">
+            <span>Sedes Pendientes</span>
+            <strong id="dashKpiPendientes">0</strong>
+            <small>Sin envíos registrados aún</small>
+          </div>
+          <div class="dash-kpi">
+            <span>Promedio por Sede Activa</span>
+            <strong id="dashKpiPromedio">0</strong>
+            <small>Documentos por sede con envío</small>
+          </div>
+        </div>
+
+        <div class="dash-charts-grid">
+          <div class="chart-card">
+            <h3>Documentos por Tipo Documental</h3>
+            <p>Distribución total según categoría de archivo.</p>
+            <div class="chart-box">
+              <canvas id="chartTipos"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Avance en Listas de Asistencia por Nivel</h3>
+            <p>Comparativo entre Nivel I, Nivel II y Nivel III.</p>
+            <div class="chart-box">
+              <canvas id="chartNiveles"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card full">
+            <h3>Ranking de Archivos Cargados por Usuario</h3>
+            <p>Usuarios con mayor volumen de documentos PDF cargados al repositorio.</p>
+            <div class="chart-box tall">
+              <canvas id="chartUsuarios"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MÓDULO: CARGA DE DOCUMENTOS -->
+    <section id="moduloCarga" class="carga-grid hidden">
+      <div class="card">
+        <div class="card-header-flex">
+          <div>
+            <h2>Carga de Documentos Oficiales</h2>
+            <p>Seleccione la ubicación y adjunte el archivo PDF escaneado (máx. 15 MB).</p>
+          </div>
+          <button type="button" id="btnToggleNuevoTipo" class="btn-secondary hidden">+ Nuevo Tipo Documental</button>
+        </div>
+
+        <div id="panelNuevoTipo" class="admin-box hidden">
+          <h3>Crear Nuevo Tipo Documental</h3>
+          <p>Se creará la carpeta en Drive y automáticamente las 50 subcarpetas de Sedes Operativas.</p>
+          <form id="formNuevoTipo">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="nuevoTipoNombre">Nombre de la Carpeta en Drive *</label>
+                <input type="text" id="nuevoTipoNombre" placeholder="Ej. INFORME DE CAPACITACION" required>
+              </div>
+              <div class="form-group">
+                <label for="nuevoTipoCodigo">Prefijo de Archivo *</label>
+                <input type="text" id="nuevoTipoCodigo" placeholder="Ej. INF_CAP" maxlength="20" required>
+              </div>
+            </div>
+            <button type="submit" id="btnCrearTipo" class="btn-primary">Crear Carpeta y 50 Subcarpetas de Sedes</button>
+          </form>
+          <div id="mensajeNuevoTipo" class="alert hidden"></div>
+        </div>
+
+        <form id="uploadForm">
+          <div class="form-group" id="bloqueSede">
+            <label for="buscarSede">Sede Operativa *</label>
+            <input type="text" id="buscarSede" class="search-input" placeholder="Escriba para filtrar sede (ej. CUSCO, LIMA, PUNO)...">
+            <select id="sede" required></select>
+          </div>
+
+          <div class="form-row-3" id="filaTipoNivel">
+            <div class="form-group">
+              <label for="tipoDocumento">Tipo de Documento *</label>
+              <select id="tipoDocumento" required></select>
+            </div>
+
+            <div class="form-group" id="grupoNivel">
+              <label for="nivel">Nivel *</label>
+              <select id="nivel" required>
+                <option value="NIVEL I">NIVEL I</option>
+                <option value="NIVEL II">NIVEL II</option>
+                <option value="NIVEL III">NIVEL III</option>
+              </select>
+            </div>
+
+            <div class="form-group hidden" id="grupoSubnivel">
+              <label for="subnivel">Perfil / Cargo *</label>
+              <select id="subnivel"></select>
+            </div>
+
+            <div class="form-group" id="grupoFechaAsistencia">
+              <label for="fechaAsistencia">Fecha de Control *</label>
+              <input type="date" id="fechaAsistencia" required>
+            </div>
+          </div>
+
+          <div class="ruta-box">
+            <span class="ruta-label">Carpeta destino en Drive (se guardará con fecha y hora estandarizada):</span>
+            <code id="rutaPreview"></code>
+          </div>
+
+          <div class="form-group">
+            <label>Archivo PDF *</label>
+            <div id="dropZone" class="drop-zone">
+              <input type="file" id="archivo" accept="application/pdf,.pdf" hidden>
+              <div class="drop-icon">PDF</div>
+              <p class="drop-title">Arrastra tu archivo PDF aquí o <span class="link-text">haz clic para examinar</span></p>
+              <small id="fileInfo" class="drop-sub">Solo formato .PDF • Tamaño máximo 15 MB</small>
+            </div>
+          </div>
+
+          <button type="submit" id="btnSubir" class="btn-primary">Subir Documento PDF</button>
+        </form>
+
+        <div id="mensaje" class="alert hidden"></div>
+      </div>
+
+      <div class="card historial-card">
+        <h3>Archivos enviados en esta sesión</h3>
+        <p class="historial-sub">Confirmaciones recientes con enlace directo a Google Drive.</p>
+        <div id="historialVacio" class="historial-empty">
+          Aún no se han cargado archivos en esta sesión.<br>Los documentos subidos aparecerán aquí.
+        </div>
+        <ul id="listaHistorial" class="historial-list hidden"></ul>
+      </div>
+    </section>
+
+    <!-- MÓDULO: VISOR DE DOCUMENTOS -->
+    <section id="moduloVisor" class="hidden">
+      <div class="card visor-card">
+        <div class="card-header-flex">
+          <div>
+            <h2>Visor de Documentos Almacenados</h2>
+            <p>Seleccione un archivo para visualizarlo, rotar páginas, imprimir o descargar.</p>
+          </div>
+          <button type="button" id="btnRefrescarVisor" class="btn-secondary">Actualizar Lista</button>
+        </div>
+
+        <div class="visor-filtros">
+          <div>
+            <label for="filtroVisorSede">Filtrar por Sede</label>
+            <select id="filtroVisorSede"><option value="">Todas las sedes</option></select>
+          </div>
+          <div>
+            <label for="filtroVisorTipo">Filtrar por Tipo</label>
+            <select id="filtroVisorTipo"><option value="">Todos los tipos</option></select>
+          </div>
+          <div>
+            <label for="filtroVisorTexto">Buscar archivo / nivel / perfil / fecha</label>
+            <input type="text" id="filtroVisorTexto" placeholder="Ej. SLE, CTL, APLICADOR, 25-08-2026...">
+          </div>
+        </div>
+
+        <div id="visorEstado" class="alert info hidden">Cargando documentos...</div>
+
+        <div class="visor-layout">
+          <div id="listaDocumentosVisor" class="doc-lista"></div>
+
+          <div class="visor-preview-panel">
+            <div class="visor-toolbar">
+              <span id="visorTituloDoc" class="visor-doc-name">Ningún documento seleccionado</span>
+
+              <div class="toolbar-actions" id="visorControles">
+                <button type="button" class="tool-btn" id="btnRotarIzq" title="Rotar 90° a la izquierda" disabled>↺ Rotar Izq</button>
+                <button type="button" class="tool-btn" id="btnRotarDer" title="Rotar 90° a la derecha" disabled>↻ Rotar Der</button>
+                <div class="tool-sep"></div>
+                <button type="button" class="tool-btn" id="btnZoomMenos" title="Alejar" disabled>−</button>
+                <span class="zoom-label" id="lblZoom">100%</span>
+                <button type="button" class="tool-btn" id="btnZoomMas" title="Acercar" disabled>+</button>
+                <div class="tool-sep"></div>
+                <button type="button" class="tool-btn" id="btnImprimirPdf" title="Imprimir documento" disabled>🖨 Imprimir</button>
+                <button type="button" class="tool-btn primary" id="btnDescargarPdf" title="Descargar archivo PDF" disabled>⬇ Descargar</button>
+                <div class="tool-sep" id="sepEliminar"></div>
+                <button type="button" class="tool-btn danger" id="btnEliminarPdf" title="Eliminar documento" disabled>🗑 Eliminar</button>
+              </div>
+            </div>
+
+            <div id="visorPlaceholder" class="visor-empty">
+              <p>Selecciona un documento de la lista izquierda para cargarlo en el visor interactivo.</p>
+            </div>
+
+            <div id="pdfCanvasContainer" class="pdf-canvas-container hidden"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MÓDULO: REPORTES DE AVANCE -->
+    <section id="moduloReportes" class="hidden">
+      <div class="card">
+        <div class="card-header-flex">
+          <div>
+            <h2>Reporte de Avance de Carga por Sede Operativa</h2>
+            <p id="subtituloReporte">Matriz consolidada con desglose por Nivel, Perfil y Fechas de Control.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" id="btnExportarExcel" class="btn-excel">📊 Exportar a Excel (.XLSX)</button>
+            <button type="button" id="btnRefrescarReporte" class="btn-secondary">Actualizar Reporte</button>
+          </div>
         </div>
 
         <div class="kpi-grid">
-          <div class="kpi-card blue">
-            <div class="kpi-title">Total Documentos PDF</div>
-            <div class="kpi-value" id="kpiTotalDocs">0</div>
-            <div class="kpi-sub">Archivos válidos en repositorio</div>
+          <div class="kpi-box">
+            <span>Total Documentos Cargados</span>
+            <strong id="kpiTotalDocs">0</strong>
           </div>
-          <div class="kpi-card green">
-            <div class="kpi-title">Sedes con Avance</div>
-            <div class="kpi-value" id="kpiSedesAvance">0 / 50</div>
-            <div class="kpi-sub" id="kpiPctAvance">0% de cobertura operativa</div>
+          <div class="kpi-box">
+            <span>Sedes con Envío Registrado</span>
+            <strong id="kpiSedesActivas">0 / 0</strong>
           </div>
-          <div class="kpi-card amber">
-            <div class="kpi-title">Sedes Pendientes</div>
-            <div class="kpi-value" id="kpiSedesPendientes">50</div>
-            <div class="kpi-sub">Sin envíos registrados aún</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-title">Promedio por Sede Activa</div>
-            <div class="kpi-value" id="kpiPromedioSede">0.0</div>
-            <div class="kpi-sub">Documentos por sede con envío</div>
+          <div class="kpi-box">
+            <span>Tipos Documentales Activos</span>
+            <strong id="kpiTiposActivos">0</strong>
           </div>
         </div>
 
-        <div class="charts-grid">
-          <div class="chart-box">
-            <h3>Documentos por Tipo Documental</h3>
-            <canvas id="chartTipo" height="170"></canvas>
-          </div>
-          <div class="chart-box">
-            <h3>Avance en Listas de Asistencia por Nivel</h3>
-            <canvas id="chartNivel" height="170"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-box">
-          <h3>Ranking de Archivos Cargados por Usuario (Top 20)</h3>
-          <canvas id="chartUsuarios" height="110"></canvas>
-        </div>
-      </section>
-
-      <!-- CARGAR DOCUMENTOS -->
-      <section id="tab-cargar" class="hidden">
-        <div class="upload-layout">
-          <div class="card">
-            <div class="section-header">
-              <div>
-                <h2>Carga de Documentos Oficiales</h2>
-                <p>Archivos en formato PDF (máximo 15 MB por documento)</p>
-              </div>
-              <button class="btn btn-secondary hidden" id="btnNewDocType" onclick="openNewTypeModal()">
-                + Nuevo Tipo Documental
-              </button>
-            </div>
-
-            <div class="form-group">
-              <label for="upSede">Sede Operativa *</label>
-              <input type="text" id="upSedeSearch" placeholder="Filtrar sede operativa..." oninput="filterSedeSelect()" style="margin-bottom:6px;" />
-              <select id="upSede" onchange="updateDrivePreview(); syncDriveFolderButton();"></select>
-            </div>
-
-            <div class="form-row-4">
-              <div>
-                <label for="upTipo">Tipo de Documento *</label>
-                <select id="upTipo" onchange="onTipoChange(); updateDrivePreview(); syncDriveFolderButton();"></select>
-              </div>
-              <div id="wrapNivel">
-                <label for="upNivel">Nivel *</label>
-                <select id="upNivel" onchange="onNivelChange(); updateDrivePreview();">
-                  <option value="">-- Seleccione --</option>
-                  <option value="NIVEL I">NIVEL I</option>
-                  <option value="NIVEL II">NIVEL II</option>
-                  <option value="NIVEL III">NIVEL III</option>
-                </select>
-              </div>
-              <div id="wrapPerfil">
-                <label for="upPerfil">Perfil / Cargo *</label>
-                <select id="upPerfil" onchange="updateDrivePreview();">
-                  <option value="">-- Seleccione --</option>
-                </select>
-              </div>
-              <div>
-                <label for="upFecha">Fecha de Control *</label>
-                <input type="date" id="upFecha" onchange="updateDrivePreview();" />
-              </div>
-            </div>
-
-            <div class="drive-preview">
-              <strong>Carpeta destino en Drive (se guardará con fecha y hora estandarizada):</strong>
-              <code id="lblDrivePath">CAPACITACIÓN / ...</code>
-            </div>
-
-            <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
-              <input type="file" id="fileInput" accept="application/pdf" class="hidden" onchange="handleFileSelect(event)" />
-              <div style="font-weight:800; color:var(--primary); font-size:15px; margin-bottom:6px;">[ PDF ]</div>
-              <div id="dropzoneText" style="font-weight:600; font-size:14px;">
-                Arrastre su archivo PDF aquí o haga clic para seleccionarlo
-              </div>
-              <div style="font-size:12px; color:var(--muted); margin-top:4px;">Solo formato .PDF • Tamaño máximo 15 MB</div>
-            </div>
-
-            <button class="btn btn-primary" style="width:100%; justify-content:center; padding:11px;" id="btnUpload" onclick="uploadDocument()">
-              Subir Documento PDF
-            </button>
-          </div>
-
-          <div class="card">
-            <div class="section-header">
-              <div>
-                <h2>Archivos enviados en esta sesión</h2>
-                <p>Confirmaciones recientes con enlace directo a Drive</p>
-              </div>
-            </div>
-            <div id="sessionUploadsList">
-              <p style="font-size:13px; color:var(--muted);">Aún no ha enviado archivos en esta sesión.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- VISOR DE DOCUMENTOS -->
-      <section id="tab-visor" class="card hidden">
-        <div class="section-header">
+        <div class="reporte-filtros">
           <div>
-            <h2>Visor de Documentos Almacenados</h2>
-            <p>Consulta interactiva, rotación, impresión, descarga y auditoría</p>
-          </div>
-          <button class="btn btn-secondary" onclick="refreshAllData()">↻ Actualizar Lista</button>
-        </div>
-
-        <div class="viewer-filters">
-          <div>
-            <label>Filtrar por Sede</label>
-            <select id="visFilterSede" onchange="renderViewerList(); syncDriveFolderButton();"></select>
+            <label for="filtroReporteSede">Buscar Sede Operativa</label>
+            <input type="text" id="filtroReporteSede" placeholder="Ej. CUSCO, LIMA, CAJAMARCA...">
           </div>
           <div>
-            <label>Filtrar por Tipo</label>
-            <select id="visFilterTipo" onchange="renderViewerList(); syncDriveFolderButton();"></select>
-          </div>
-          <div>
-            <label>Buscar palabra clave</label>
-            <input type="text" id="visSearch" placeholder="Archivo, SLE, CTL, APLICADOR, fecha o usuario..." oninput="renderViewerList()" />
-          </div>
-          <div style="display:flex; align-items:flex-end;">
-            <span id="visCountBadge" style="font-size:12.5px; font-weight:700; color:var(--primary); padding-bottom:10px;">0 archivos</span>
-          </div>
-        </div>
-
-        <div class="viewer-workspace">
-          <div class="doc-list" id="viewerDocList"></div>
-
-          <div class="pdf-stage">
-            <div class="pdf-toolbar">
-              <span id="currentPdfTitle" style="font-size:12.5px; font-weight:700;">Seleccione un documento de la lista</span>
-              <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="rotatePdf(-90)">↺ Rotar Izq</button>
-                <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="rotatePdf(90)">↻ Rotar Der</button>
-                <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="zoomPdf(-0.2)">−</button>
-                <span id="lblZoom" style="font-size:12px; align-self:center; padding:0 4px;">100%</span>
-                <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="zoomPdf(0.2)">+</button>
-                <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="printCurrentPdf()">Imprimir</button>
-                <button class="btn btn-primary" style="padding:5px 10px; font-size:12px;" onclick="downloadCurrentPdf()">Descargar</button>
-                <button class="btn btn-danger hidden" id="btnDeletePdf" style="padding:5px 10px; font-size:12px;" onclick="deleteCurrentPdf()">Eliminar</button>
-              </div>
-            </div>
-            <div class="pdf-canvas-container" id="pdfCanvasContainer">
-              <p style="color:#E2E8F0; margin-top:80px;">Haga clic en un documento PDF del panel izquierdo para visualizarlo.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- REPORTES DE AVANCE -->
-      <section id="tab-reportes" class="card hidden">
-        <div class="section-header">
-          <div>
-            <h2>Reporte de Avance de Carga por Sede Operativa</h2>
-            <p>Matriz consolidada por sede, tipo documental y nivel</p>
-          </div>
-          <button class="btn btn-success" onclick="exportReportExcel()">Exportar a Excel (.XLSX)</button>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:12px; margin-bottom:14px;">
-          <div>
-            <label>Buscar Sede Operativa</label>
-            <input type="text" id="repSearchSede" placeholder="Escriba el nombre de la sede..." oninput="renderReportTable()" />
-          </div>
-          <div>
-            <label>Estado de Avance</label>
-            <select id="repFilterStatus" onchange="renderReportTable()">
-              <option value="ALL">Mostrar todas las sedes</option>
-              <option value="WITH_DOCS">Solo sedes con archivos cargados (&gt; 0)</option>
-              <option value="PENDING">Solo sedes pendientes (0 archivos)</option>
+            <label for="filtroReporteEstado">Estado de Avance</label>
+            <select id="filtroReporteEstado">
+              <option value="TODOS">Mostrar todas las sedes</option>
+              <option value="CON_CARGA">Solo sedes con archivos cargados (&gt; 0)</option>
+              <option value="SIN_CARGA">Solo sedes pendientes (0 archivos)</option>
             </select>
           </div>
         </div>
 
-        <div class="table-wrap">
-          <table id="reportTable">
-            <thead>
-              <tr>
-                <th>SEDE OPERATIVA</th>
-                <th>LISTA ASIST. NIVEL I</th>
-                <th>LISTA ASIST. NIVEL II</th>
-                <th>LISTA ASIST. NIVEL III</th>
-                <th>OTROS DOCUMENTOS</th>
-                <th>TOTAL SEDE</th>
-              </tr>
-            </thead>
-            <tbody id="reportTableBody"></tbody>
+        <div id="reporteEstado" class="alert info hidden">Generando matriz de avance...</div>
+
+        <div class="table-scroll-wrapper">
+          <table class="report-table" id="tablaReporteAvance">
+            <thead id="theadReporte"></thead>
+            <tbody id="tbodyReporte"></tbody>
+            <tfoot id="tfootReporte"></tfoot>
           </table>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- GESTIÓN DE USUARIOS -->
-      <section id="tab-usuarios" class="hidden">
-        <div class="card" style="margin-bottom:16px;">
-          <div class="section-header">
-            <div>
-              <h2>Matriz de Permisos por Rol</h2>
-              <p>Configure los módulos habilitados para cada perfil del sistema</p>
-            </div>
-            <button class="btn btn-primary" onclick="saveRoleMatrix()">Guardar Matriz de Permisos</button>
+    <!-- MÓDULO: GESTIÓN DE USUARIOS Y PERMISOS -->
+    <section id="moduloUsuarios" class="hidden">
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header-flex">
+          <div>
+            <h2>Matriz de Permisos por Rol</h2>
+            <p>Configure qué módulos y acciones tiene habilitado cada perfil de usuario en el sistema.</p>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>ROL DEL SISTEMA</th>
-                  <th>Dashboard</th>
-                  <th>Cargar PDF</th>
-                  <th>Visor PDF</th>
-                  <th>Eliminar PDF</th>
-                  <th>Reportes</th>
-                  <th>Gestor Usuarios</th>
-                </tr>
-              </thead>
-              <tbody id="roleMatrixBody"></tbody>
-            </table>
-          </div>
+          <button type="button" id="btnGuardarPermisosRoles" class="btn-secondary">Guardar Matriz de Permisos</button>
         </div>
 
-        <div class="users-admin-grid">
-          <div class="card">
-            <h3 style="margin-top:0; color:var(--primary-dark);">Crear / Editar Usuario</h3>
+        <div style="overflow-x:auto;">
+          <table class="simple-table perm-table" id="tablaPermisosRoles">
+            <thead>
+              <tr>
+                <th>ROL DEL SISTEMA</th>
+                <th>Dashboard</th>
+                <th>Cargar Archivos</th>
+                <th>Visor de Archivos</th>
+                <th>Eliminar en Visor</th>
+                <th>Reportes</th>
+                <th>Gestor de Permisos</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPermisosRoles"></tbody>
+          </table>
+        </div>
+        <div id="mensajePermisosRoles" class="alert hidden"></div>
+      </div>
+
+      <div class="users-grid">
+        <div class="card">
+          <h3 style="margin:0 0 6px;color:var(--primary-dark);">Crear / Editar Usuario</h3>
+          <p style="margin:0 0 16px;font-size:0.84rem;color:var(--muted);">Si ingresa un usuario existente, se actualizarán sus datos y rol.</p>
+          <form id="formUsuario">
             <div class="form-group">
-              <label>Usuario (Login) *</label>
-              <input type="text" id="usrLogin" placeholder="Ej. jperez" />
+              <label for="uUsuario">Usuario (Login) *</label>
+              <input type="text" id="uUsuario" placeholder="Ej. jperez" required>
             </div>
             <div class="form-group">
-              <label>Contraseña *</label>
-              <input type="text" id="usrPass" placeholder="Contraseña asignada" />
+              <label for="uClave">Contraseña *</label>
+              <input type="text" id="uClave" placeholder="Contraseña de acceso" required>
             </div>
             <div class="form-group">
-              <label>Nombres y Apellidos *</label>
-              <input type="text" id="usrNombres" placeholder="Ej. Juan Pérez Gómez" />
+              <label for="uNombre">Nombres y Apellidos *</label>
+              <input type="text" id="uNombre" placeholder="Ej. Juan Pérez" required>
             </div>
             <div class="form-group">
-              <label>Rol Asignado *</label>
-              <select id="usrRol">
+              <label for="uRol">Rol Asignado *</label>
+              <select id="uRol" required>
                 <option value="ADMINISTRADOR">ADMINISTRADOR</option>
                 <option value="ASISTENTE">ASISTENTE</option>
                 <option value="COORDINADOR(A)">COORDINADOR(A)</option>
@@ -557,850 +1150,1631 @@
               </select>
             </div>
             <div class="form-group">
-              <label>Ámbito / Sede Operativa *</label>
-              <select id="usrAmbito"></select>
+              <label for="uSede">Ámbito / Sede Operativa *</label>
+              <select id="uSede" required></select>
             </div>
             <div class="form-group">
-              <label>Estado de Cuenta</label>
-              <select id="usrActivo">
+              <label for="uActivo">Estado de Cuenta *</label>
+              <select id="uActivo" required>
                 <option value="SI">ACTIVO (SI)</option>
                 <option value="NO">INACTIVO (NO)</option>
               </select>
             </div>
-            <div style="display:flex; gap:8px;">
-              <button class="btn btn-primary" style="flex:1; justify-content:center;" onclick="saveUserAccount()">Guardar Usuario</button>
-              <button class="btn btn-secondary" onclick="clearUserForm()">Limpiar</button>
-            </div>
-          </div>
+            <button type="submit" id="btnGuardarUsuario" class="btn-primary">Guardar Usuario</button>
+          </form>
+          <div id="mensajeUsuario" class="alert hidden"></div>
+        </div>
 
-          <div class="card">
-            <h3 style="margin-top:0; color:var(--primary-dark);">Usuarios Registrados</h3>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Usuario</th>
-                    <th>Nombres</th>
-                    <th>Rol</th>
-                    <th>Ámbito</th>
-                    <th>Estado</th>
-                    <th>Acción</th>
-                  </tr>
-                </thead>
-                <tbody id="usersTableBody"></tbody>
-              </table>
+        <div class="card">
+          <div class="card-header-flex">
+            <div>
+              <h3 style="margin:0 0 4px;color:var(--primary-dark);">Usuarios Registrados</h3>
+              <p style="margin:0;font-size:0.84rem;color:var(--muted);">Haz clic en "Editar" para cargar los datos en el formulario.</p>
             </div>
+            <button type="button" id="btnRefrescarUsuarios" class="btn-secondary">Actualizar Lista</button>
+          </div>
+          <div style="overflow-x:auto;max-height:520px;overflow-y:auto;">
+            <table class="simple-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Nombre Completo</th>
+                  <th>Rol</th>
+                  <th>Sede</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyUsuarios"></tbody>
+            </table>
           </div>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
+
   </main>
 
-  <!-- MODAL NUEVO TIPO DOCUMENTAL -->
-  <div class="modal-backdrop" id="modalNewType">
-    <div class="modal">
-      <h3 style="margin-top:0; color:var(--primary-dark);">Nuevo Tipo Documental</h3>
-      <p style="font-size:12.5px; color:var(--muted);">
-        Se creará automáticamente la carpeta principal y las 50 subcarpetas de Sedes Operativas en Google Drive.
-      </p>
-      <div class="form-group">
-        <label>Nombre de Carpeta / Tipo *</label>
-        <input type="text" id="newTypeName" placeholder="Ej. ACTA DE CONFORMIDAD" />
-      </div>
-      <div class="form-group">
-        <label>Prefijo Corto para Archivo *</label>
-        <input type="text" id="newTypePrefix" placeholder="Ej. ACTA_CONF" />
-      </div>
-      <div class="form-group">
-        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-          <input type="checkbox" id="newTypeReqNivel" style="width:auto;" checked />
-          Requiere desglose por Nivel y Perfil
-        </label>
-      </div>
-      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
-        <button class="btn btn-secondary" onclick="closeNewTypeModal()">Cancelar</button>
-        <button class="btn btn-primary" id="btnCreateDocType" onclick="createDocType()">Crear Carpeta y 50 Subcarpetas</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbw0CIB0IHeoGw29totAOZcXrGIRFtqv8PofpvwWGvXdGvxnG-smZQavKOQH1bs-qCGi/exec";
-    const DEFAULT_DRIVE_URL = "https://drive.google.com/drive/folders/1R4OrJ3nSTjeiHnt7yHwJrOnBhY8Ct2Vp";
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
 
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-    let STATE = {
-      user: null,
-      sedes: [],
-      tipos: [],
-      registros: [],
-      usuarios: [],
-      matrizPermisos: {},
-      selectedFile: null,
-      sessionUploads: [],
-      currentPdfDoc: null,
-      currentPdfRecord: null,
-      currentPdfBase64: null,
-      pdfRotation: 0,
-      pdfScale: 1.15,
-      charts: {}
+    const CONFIG = {
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbzxEQ7dazxEytY0zldW8QcWzuN9ZeqsDSUZ-gdZR0oQFlnyGZKqJ-gNg9hiWN6YQ6ZX/exec",
+      MAX_SIZE_MB: 15
     };
 
-    function showToast(msg, isError = false) {
-      const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.style.background = isError ? "#B91C1C" : "#0F172A";
-      t.style.display = "block";
-      clearTimeout(t._timer);
-      t._timer = setTimeout(() => { t.style.display = "none"; }, 4000);
+    const STORAGE_KEY = "sesion_capacitacion_pdf";
+
+    const SEDES_OPERATIVAS = [
+      "AMAZONAS-BAGUA GRANDE", "AMAZONAS-CHACHAPOYAS", "APURÍMAC-ABANCAY",
+      "APURÍMAC-ANDAHUAYLAS", "AREQUIPA-AREQUIPA", "AREQUIPA-CAMANÁ",
+      "AYACUCHO-HUAMANGA", "AYACUCHO-PUQUIO", "CAJAMARCA-CAJAMARCA",
+      "CAJAMARCA-CHOTA", "CAJAMARCA-JAÉN", "CALLAO", "CUSCO-CUSCO",
+      "CUSCO-LA CONVENCIÓN", "CUSCO-SICUANI", "HUANCAVELICA-HUANCAVELICA",
+      "HUANCAVELICA-PAMPAS", "HUÁNUCO-HUÁNUCO", "HUÁNUCO-TINGO MARÍA",
+      "ICA-CHINCHA", "ICA-ICA", "JUNÍN-HUANCAYO", "JUNÍN-TARMA",
+      "LA LIBERTAD-HUAMACHUCO", "LA LIBERTAD-TRUJILLO", "LAMBAYEQUE-CHICLAYO",
+      "LIMA METROPOLITANA-CENTRO", "LIMA METROPOLITANA-ESTE",
+      "LIMA METROPOLITANA-NORTE", "LIMA METROPOLITANA-SUR",
+      "LIMA PROVINCIAS-CAÑETE", "LIMA PROVINCIAS-HUACHO", "LORETO-IQUITOS",
+      "LORETO-YURIMAGUAS", "MADRE DE DIOS", "MOQUEGUA", "PASCO",
+      "PIURA-PIURA", "PIURA-SULLANA", "PUNO-AZÁNGARO", "PUNO-JULIACA",
+      "PUNO-PUNO", "SAN MARTÍN-MOYOBAMBA", "SAN MARTÍN-TARAPOTO",
+      "TACNA", "TUMBES", "UCAYALI-PUCALLPA", "ÁNCASH-CHIMBOTE",
+      "ÁNCASH-HUARAZ", "ÁNCASH-POMABAMBA"
+    ];
+
+    const PERFILES_POR_NIVEL = {
+      "NIVEL I": [],
+      "NIVEL II": [
+        { label: "SLE/CAL/CAE", carpeta: "SLE-CAL-CAE" },
+        { label: "CTL", carpeta: "CTL" }
+      ],
+      "NIVEL III": [
+        { label: "APLICADOR/ORIENTADOR", carpeta: "APLICADOR-ORIENTADOR" },
+        { label: "OPERADOR TECNOLÓGICO", carpeta: "OPERADOR TECNOLÓGICO" }
+      ]
+    };
+
+    let sesionActual = null;
+    let tiposDocumento = [];
+    let archivoSeleccionado = null;
+    let documentosVisorCache = [];
+    let reporteDataCache = null;
+    let rolesMatrizCache = [];
+
+    let pdfDocActual = null;
+    let pdfBlobUrlActual = null;
+    let pdfNombreActual = "";
+    let docSeleccionadoActual = null;
+    let rotacionActual = 0;
+    let escalaActual = 1.15;
+
+    let chartTiposInstance = null;
+    let chartNivelesInstance = null;
+    let chartUsuariosInstance = null;
+
+    const vistaLogin = document.getElementById("vistaLogin");
+    const vistaApp = document.getElementById("vistaApp");
+    const userBadge = document.getElementById("userBadge");
+    const loginForm = document.getElementById("loginForm");
+    const loginMensaje = document.getElementById("loginMensaje");
+    const btnLogin = document.getElementById("btnLogin");
+
+    const tabDashboard = document.getElementById("tabDashboard");
+    const tabCarga = document.getElementById("tabCarga");
+    const tabVisor = document.getElementById("tabVisor");
+    const tabReportes = document.getElementById("tabReportes");
+    const tabUsuarios = document.getElementById("tabUsuarios");
+
+    const moduloDashboard = document.getElementById("moduloDashboard");
+    const moduloCarga = document.getElementById("moduloCarga");
+    const moduloVisor = document.getElementById("moduloVisor");
+    const moduloReportes = document.getElementById("moduloReportes");
+    const moduloUsuarios = document.getElementById("moduloUsuarios");
+
+    const btnToggleNuevoTipo = document.getElementById("btnToggleNuevoTipo");
+    const panelNuevoTipo = document.getElementById("panelNuevoTipo");
+    const formNuevoTipo = document.getElementById("formNuevoTipo");
+    const btnCrearTipo = document.getElementById("btnCrearTipo");
+    const mensajeNuevoTipo = document.getElementById("mensajeNuevoTipo");
+
+    const buscarSede = document.getElementById("buscarSede");
+    const selectSede = document.getElementById("sede");
+    const filaTipoNivel = document.getElementById("filaTipoNivel");
+    const selectTipo = document.getElementById("tipoDocumento");
+    const grupoNivel = document.getElementById("grupoNivel");
+    const selectNivel = document.getElementById("nivel");
+    const grupoSubnivel = document.getElementById("grupoSubnivel");
+    const selectSubnivel = document.getElementById("subnivel");
+    const grupoFechaAsistencia = document.getElementById("grupoFechaAsistencia");
+    const inputFechaAsistencia = document.getElementById("fechaAsistencia");
+    const rutaPreview = document.getElementById("rutaPreview");
+
+    const dropZone = document.getElementById("dropZone");
+    const inputArchivo = document.getElementById("archivo");
+    const fileInfo = document.getElementById("fileInfo");
+    const uploadForm = document.getElementById("uploadForm");
+    const btnSubir = document.getElementById("btnSubir");
+    const mensaje = document.getElementById("mensaje");
+    const historialVacio = document.getElementById("historialVacio");
+    const listaHistorial = document.getElementById("listaHistorial");
+
+    const hoyISO = new Date().toISOString().split("T")[0];
+    inputFechaAsistencia.value = hoyISO;
+
+    function formatearFechaCarpeta(isoDate) {
+      if (!isoDate || !isoDate.includes("-")) return "";
+      const [yyyy, mm, dd] = isoDate.split("-");
+      return `${dd}-${mm}-${yyyy}`;
     }
 
-    async function apiCall(payload) {
-      const res = await fetch(API_URL, {
+    function cambiarPestana(activa) {
+      [tabDashboard, tabCarga, tabVisor, tabReportes, tabUsuarios].forEach(t => t.classList.remove("active"));
+      [moduloDashboard, moduloCarga, moduloVisor, moduloReportes, moduloUsuarios].forEach(m => m.classList.add("hidden"));
+
+      if (activa === "dashboard") {
+        tabDashboard.classList.add("active");
+        moduloDashboard.classList.remove("hidden");
+        cargarDashboard();
+      } else if (activa === "carga") {
+        tabCarga.classList.add("active");
+        moduloCarga.classList.remove("hidden");
+      } else if (activa === "visor") {
+        tabVisor.classList.add("active");
+        moduloVisor.classList.remove("hidden");
+        cargarDocumentosVisor();
+      } else if (activa === "reportes") {
+        tabReportes.classList.add("active");
+        moduloReportes.classList.remove("hidden");
+        cargarReporteAvance();
+      } else if (activa === "usuarios") {
+        tabUsuarios.classList.add("active");
+        moduloUsuarios.classList.remove("hidden");
+        cargarGestionUsuarios();
+      }
+    }
+
+    tabDashboard.addEventListener("click", () => cambiarPestana("dashboard"));
+    tabCarga.addEventListener("click", () => cambiarPestana("carga"));
+    tabVisor.addEventListener("click", () => cambiarPestana("visor"));
+    tabReportes.addEventListener("click", () => cambiarPestana("reportes"));
+    tabUsuarios.addEventListener("click", () => cambiarPestana("usuarios"));
+
+    async function llamarBackend(payload) {
+      if (!CONFIG.WEB_APP_URL || !CONFIG.WEB_APP_URL.startsWith("http")) {
+        throw new Error("Falta configurar CONFIG.WEB_APP_URL en index.html con el enlace /exec de Apps Script.");
+      }
+
+      const res = await fetch(CONFIG.WEB_APP_URL, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
       });
-      return await res.json();
+
+      const texto = await res.text();
+      try {
+        return JSON.parse(texto);
+      } catch (e) {
+        throw new Error("El servidor devolvió una respuesta inesperada. Verifica que la Web App esté publicada para 'Cualquier persona'.");
+      }
     }
 
-    window.addEventListener("DOMContentLoaded", () => {
-      const saved = localStorage.getItem("ed2026_pdf_user");
-      if (saved) {
-        try {
-          STATE.user = JSON.parse(saved);
-          initAppSession();
-        } catch (e) {
-          localStorage.removeItem("ed2026_pdf_user");
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const usuario = document.getElementById("loginUsuario").value.trim();
+      const clave = document.getElementById("loginClave").value.trim();
+
+      btnLogin.disabled = true;
+      mostrarAlerta(loginMensaje, "Verificando credenciales...", "info");
+
+      try {
+        const data = await llamarBackend({ accion: "login", usuario, clave });
+
+        if (!data.ok) {
+          mostrarAlerta(loginMensaje, data.error || "No se pudo iniciar sesión.", "error");
+          return;
         }
+
+        sesionActual = {
+          usuario: data.usuario,
+          clave: clave,
+          nombre: data.nombre,
+          sedeAsignada: String(data.sedeAsignada || "").trim().toUpperCase(),
+          rol: data.rol || "COORDINADOR(A)",
+          permisos: data.permisos || {}
+        };
+        tiposDocumento = data.tiposDocumento || [];
+        iniciarInterfazUsuario();
+      } catch (err) {
+        mostrarAlerta(loginMensaje, err.message || "Error de conexión con el servidor.", "error");
+      } finally {
+        btnLogin.disabled = false;
       }
-      document.getElementById("upFecha").value = new Date().toISOString().split("T")[0];
-      setupDropzoneEvents();
     });
 
-    function setupDropzoneEvents() {
-      const dz = document.getElementById("dropzone");
-      dz.addEventListener("dragover", e => {
-        e.preventDefault();
-        dz.classList.add("drag-over");
-      });
-      dz.addEventListener("dragleave", () => dz.classList.remove("drag-over"));
-      dz.addEventListener("drop", e => {
-        e.preventDefault();
-        dz.classList.remove("drag-over");
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-          processSelectedFile(e.dataTransfer.files[0]);
-        }
-      });
+    function iniciarInterfazUsuario() {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(sesionActual));
+
+      vistaLogin.classList.add("hidden");
+      vistaApp.classList.remove("hidden");
+      userBadge.classList.remove("hidden");
+
+      const p = sesionActual.permisos || {};
+
+      document.getElementById("lblNombreUsuario").innerHTML = `${sesionActual.nombre} <span class="role-pill">${sesionActual.rol}</span>`;
+      document.getElementById("lblSedeUsuario").textContent =
+        sesionActual.sedeAsignada === "TODAS" ? "Ámbito: Nacional (50 Sedes)" : `Sede: ${sesionActual.sedeAsignada}`;
+
+      tabDashboard.classList.toggle("hidden", !p.dashboard);
+      tabCarga.classList.toggle("hidden", !p.cargar);
+      tabVisor.classList.toggle("hidden", !p.visor);
+      tabReportes.classList.toggle("hidden", !p.reportes);
+      tabUsuarios.classList.toggle("hidden", !p.usuarios);
+
+      const btnEliminar = document.getElementById("btnEliminarPdf");
+      const sepEliminar = document.getElementById("sepEliminar");
+      btnEliminar.classList.toggle("hidden", !p.eliminar);
+      sepEliminar.classList.toggle("hidden", !p.eliminar);
+
+      if (p.usuarios && sesionActual.sedeAsignada === "TODAS") {
+        btnToggleNuevoTipo.classList.remove("hidden");
+      } else {
+        btnToggleNuevoTipo.classList.add("hidden");
+        panelNuevoTipo.classList.add("hidden");
+      }
+
+      if (sesionActual.sedeAsignada === "TODAS") {
+        buscarSede.classList.remove("hidden");
+        renderizarSedes(SEDES_OPERATIVAS);
+        selectSede.disabled = false;
+      } else {
+        buscarSede.classList.add("hidden");
+        renderizarSedes([sesionActual.sedeAsignada]);
+        selectSede.disabled = true;
+      }
+
+      renderizarTiposDocumento();
+      inicializarFiltrosVisor();
+      poblarSelectSedesUsuario();
+
+      if (p.dashboard) cambiarPestana("dashboard");
+      else if (p.cargar) cambiarPestana("carga");
+      else if (p.visor) cambiarPestana("visor");
+      else if (p.reportes) cambiarPestana("reportes");
+      else if (p.usuarios) cambiarPestana("usuarios");
     }
 
-    async function login() {
-      const usuario = document.getElementById("loginUser").value.trim();
-      const password = document.getElementById("loginPass").value.trim();
-      if (!usuario || !password) return showToast("Ingrese usuario y contraseña.", true);
+    document.getElementById("btnCerrarSesion").addEventListener("click", () => {
+      sessionStorage.removeItem(STORAGE_KEY);
+      sesionActual = null;
+      archivoSeleccionado = null;
+      reporteDataCache = null;
+      loginForm.reset();
+      uploadForm.reset();
+      inputFechaAsistencia.value = hoyISO;
+      loginMensaje.classList.add("hidden");
+      mensaje.classList.add("hidden");
+      panelNuevoTipo.classList.add("hidden");
+      vistaApp.classList.add("hidden");
+      userBadge.classList.add("hidden");
+      vistaLogin.classList.remove("hidden");
+    });
 
-      const btn = document.getElementById("btnLogin");
-      btn.disabled = true;
-      btn.textContent = "Verificando...";
+    // --- MÓDULO DASHBOARD ---
+    document.getElementById("btnRefrescarDash").addEventListener("click", cargarDashboard);
+
+    async function cargarDashboard() {
+      const dashEstado = document.getElementById("dashEstado");
+      mostrarAlerta(dashEstado, "Actualizando gráficos e indicadores ejecutivos...", "info");
 
       try {
-        const resp = await apiCall({ action: "login", usuario, password });
-        if (!resp.ok) {
-          showToast(resp.error || "Error de acceso", true);
+        const data = await llamarBackend({
+          accion: "reporte_avance",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave
+        });
+
+        if (!data.ok) {
+          mostrarAlerta(dashEstado, data.error, "error");
           return;
         }
-        STATE.user = resp.user;
-        localStorage.setItem("ed2026_pdf_user", JSON.stringify(resp.user));
-        initAppSession();
+
+        reporteDataCache = data;
+        dashEstado.classList.add("hidden");
+        document.getElementById("dashSubtitulo").textContent =
+          `Resumen gráfico consolidado • Ámbito: ${data.ambito} • Actualizado: ${data.generadoEn}`;
+
+        const filas = data.filas || [];
+        const totalDocs = filas.reduce((acc, f) => acc + f.total, 0);
+        const totalSedes = filas.length;
+        const sedesActivas = filas.filter(f => f.total > 0).length;
+        const sedesPendientes = totalSedes - sedesActivas;
+        const pctCobertura = totalSedes > 0 ? Math.round((sedesActivas / totalSedes) * 100) : 0;
+        const promedioActiva = sedesActivas > 0 ? (totalDocs / sedesActivas).toFixed(1) : "0";
+
+        document.getElementById("dashKpiTotal").textContent = totalDocs;
+        document.getElementById("dashKpiSedes").textContent = `${sedesActivas} / ${totalSedes}`;
+        document.getElementById("dashKpiPctSedes").textContent = `${pctCobertura}% de cobertura operativa`;
+        document.getElementById("dashKpiPendientes").textContent = sedesPendientes;
+        document.getElementById("dashKpiPromedio").textContent = promedioActiva;
+
+        renderizarGraficosDashboard(data);
       } catch (err) {
-        showToast("Error de conexión con el servidor.", true);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Ingresar al Sistema";
+        mostrarAlerta(dashEstado, err.message || "Error al cargar el Dashboard.", "error");
       }
     }
 
-    function logout() {
-      localStorage.removeItem("ed2026_pdf_user");
-      STATE.user = null;
-      document.getElementById("appView").classList.add("hidden");
-      document.getElementById("navUserSection").classList.add("hidden");
-      document.getElementById("loginView").classList.remove("hidden");
-    }
+    function renderizarGraficosDashboard(data) {
+      if (!window.Chart) return;
+      const stats = data.dashboardStats || { porTipo: {}, porNivel: {}, porUsuario: {} };
 
-    async function initAppSession() {
-      document.getElementById("loginView").classList.add("hidden");
-      document.getElementById("appView").classList.remove("hidden");
-      document.getElementById("navUserSection").classList.remove("hidden");
-
-      const u = STATE.user;
-      document.getElementById("lblUserName").innerHTML = `${u.nombres} <span class="role-pill">${u.rol}</span>`;
-      document.getElementById("lblUserScope").textContent = `Ámbito: ${u.ambito === "TODAS" ? "Nacional (50 Sedes)" : u.ambito}`;
-      document.getElementById("btnVerCarpetaDrive").href = u.driveViewUrl || DEFAULT_DRIVE_URL;
-
-      const p = u.permisos || {};
-      const tabMap = {
-        dashboard: p.dashboard,
-        cargar: p.cargar,
-        visor: p.visor,
-        reportes: p.reportes,
-        usuarios: p.gestorUsuarios
-      };
-
-      let firstAllowed = null;
-      document.querySelectorAll(".tab-btn").forEach(btn => {
-        const t = btn.dataset.tab;
-        if (tabMap[t]) {
-          btn.classList.remove("hidden");
-          if (!firstAllowed) firstAllowed = t;
-        } else {
-          btn.classList.add("hidden");
-        }
-      });
-
-      document.getElementById("btnDeletePdf").classList.toggle("hidden", !p.eliminar);
-      document.getElementById("btnNewDocType").classList.toggle("hidden", u.rol !== "ADMINISTRADOR");
-
-      if (firstAllowed) {
-        document.getElementById("noPermissionsBanner").classList.add("hidden");
-        switchTab(firstAllowed);
-      } else {
-        document.getElementById("noPermissionsBanner").classList.remove("hidden");
-      }
-
-      await refreshAllData();
-    }
-
-    function switchTab(tabName) {
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tabName));
-      ["dashboard", "cargar", "visor", "reportes", "usuarios"].forEach(id => {
-        document.getElementById("tab-" + id).classList.toggle("hidden", id !== tabName);
-      });
-    }
-
-    async function refreshAllData() {
-      if (!STATE.user) return;
-      try {
-        const resp = await apiCall({
-          action: "getBootstrapData",
-          ambito: STATE.user.ambito,
-          rol: STATE.user.rol
-        });
-        if (!resp.ok) return showToast(resp.error, true);
-
-        STATE.sedes = resp.sedes || [];
-        STATE.tipos = resp.tipos || [];
-        STATE.registros = resp.registros || [];
-        STATE.usuarios = resp.usuarios || [];
-        STATE.matrizPermisos = resp.matrizPermisos || {};
-
-        if (resp.driveViewUrl) {
-          STATE.user.driveViewUrl = resp.driveViewUrl;
-          document.getElementById("btnVerCarpetaDrive").href = resp.driveViewUrl;
-        }
-
-        populateSelectors();
-        renderDashboard();
-        renderViewerList();
-        renderReportTable();
-        if (STATE.user.rol === "ADMINISTRADOR") {
-          renderRoleMatrix();
-          renderUsersTable();
-        }
-      } catch (e) {
-        showToast("No se pudieron actualizar los datos.", true);
-      }
-    }
-
-    async function syncDriveFolderButton() {
-      const btn = document.getElementById("btnVerCarpetaDrive");
-      const sedeCarga = document.getElementById("upSede").value;
-      const tipoCarga = document.getElementById("upTipo").value;
-      const sedeVisor = document.getElementById("visFilterSede").value;
-      const tipoVisor = document.getElementById("visFilterTipo").value;
-
-      const sedeTarget = sedeVisor || sedeCarga || (STATE.user.ambito !== "TODAS" ? STATE.user.ambito : "");
-      const tipoTarget = tipoVisor || tipoCarga || "";
-
-      if (!sedeTarget && !tipoTarget) {
-        btn.href = STATE.user.driveViewUrl || DEFAULT_DRIVE_URL;
-        return;
-      }
-
-      try {
-        const resp = await apiCall({
-          action: "getDriveFolderViewUrl",
-          sede: sedeTarget,
-          tipo: tipoTarget
-        });
-        if (resp.ok && resp.url) btn.href = resp.url;
-      } catch (e) {}
-    }
-
-    function populateSelectors() {
-      const upSede = document.getElementById("upSede");
-      const upSedeSearch = document.getElementById("upSedeSearch");
-      upSede.innerHTML = "";
-
-      if (STATE.user.ambito !== "TODAS") {
-        const opt = document.createElement("option");
-        opt.value = STATE.user.ambito;
-        opt.textContent = STATE.user.ambito;
-        upSede.appendChild(opt);
-        upSede.disabled = true;
-        upSedeSearch.classList.add("hidden");
-      } else {
-        upSede.disabled = false;
-        upSedeSearch.classList.remove("hidden");
-        upSede.innerHTML = `<option value="">-- Seleccione Sede Operativa --</option>`;
-        STATE.sedes.forEach(s => {
-          upSede.innerHTML += `<option value="${s.nombre}">${s.nombre}</option>`;
-        });
-      }
-
-      const visSede = document.getElementById("visFilterSede");
-      visSede.innerHTML = STATE.user.ambito === "TODAS"
-        ? `<option value="">Todas las sedes (50)</option>`
-        : `<option value="${STATE.user.ambito}">${STATE.user.ambito}</option>`;
-      if (STATE.user.ambito === "TODAS") {
-        STATE.sedes.forEach(s => {
-          visSede.innerHTML += `<option value="${s.nombre}">${s.nombre}</option>`;
-        });
-      }
-
-      const usrAmbito = document.getElementById("usrAmbito");
-      usrAmbito.innerHTML = `<option value="TODAS">TODAS (Ámbito Nacional)</option>`;
-      STATE.sedes.forEach(s => {
-        usrAmbito.innerHTML += `<option value="${s.nombre}">${s.nombre}</option>`;
-      });
-
-      const upTipo = document.getElementById("upTipo");
-      const visTipo = document.getElementById("visFilterTipo");
-      upTipo.innerHTML = `<option value="">-- Seleccione Tipo --</option>`;
-      visTipo.innerHTML = `<option value="">Todos los tipos</option>`;
-      STATE.tipos.forEach(t => {
-        upTipo.innerHTML += `<option value="${t.nombre}" data-prefijo="${t.prefijo}" data-nivel="${t.requiereNivel}">${t.nombre}</option>`;
-        visTipo.innerHTML += `<option value="${t.nombre}">${t.nombre}</option>`;
-      });
-
-      onTipoChange();
-      updateDrivePreview();
-    }
-
-    function filterSedeSelect() {
-      const q = document.getElementById("upSedeSearch").value.toLowerCase();
-      const sel = document.getElementById("upSede");
-      Array.from(sel.options).forEach(opt => {
-        if (!opt.value) return;
-        opt.hidden = !opt.textContent.toLowerCase().includes(q);
-      });
-    }
-
-    function renderDashboard() {
-      const regs = STATE.registros;
-      const totalSedesScope = STATE.user.ambito === "TODAS" ? (STATE.sedes.length || 50) : 1;
-      const sedesConDocs = new Set(regs.map(r => r.sede));
-      const conAvance = sedesConDocs.size;
-      const pendientes = Math.max(0, totalSedesScope - conAvance);
-      const pct = totalSedesScope > 0 ? Math.round((conAvance / totalSedesScope) * 100) : 0;
-      const promedio = conAvance > 0 ? (regs.length / conAvance).toFixed(1) : "0.0";
-
-      document.getElementById("kpiTotalDocs").textContent = regs.length.toLocaleString();
-      document.getElementById("kpiSedesAvance").textContent = `${conAvance} / ${totalSedesScope}`;
-      document.getElementById("kpiPctAvance").textContent = `${pct}% de cobertura operativa`;
-      document.getElementById("kpiSedesPendientes").textContent = pendientes;
-      document.getElementById("kpiPromedioSede").textContent = promedio;
-
-      const byTipo = {};
-      regs.forEach(r => { byTipo[r.tipo] = (byTipo[r.tipo] || 0) + 1; });
-      drawChart("chartTipo", "doughnut", Object.keys(byTipo), Object.values(byTipo), "Documentos", ["#0F4C81", "#2563EB", "#16A34A", "#D97706", "#7C3AED"]);
-
-      const byNivel = { "NIVEL I": 0, "NIVEL II": 0, "NIVEL III": 0 };
-      regs.forEach(r => { if (byNivel.hasOwnProperty(r.nivel)) byNivel[r.nivel]++; });
-      drawChart("chartNivel", "bar", Object.keys(byNivel), Object.values(byNivel), "Archivos", ["#1D4ED8", "#0F4C81", "#16A34A"]);
-
-      const byUser = {};
-      regs.forEach(r => {
-        const label = `${r.nombreUsuario || r.usuario} (${r.usuario})`;
-        byUser[label] = (byUser[label] || 0) + 1;
-      });
-      const sortedUsers = Object.entries(byUser).sort((a, b) => b[1] - a[1]).slice(0, 20);
-      drawChart("chartUsuarios", "bar", sortedUsers.map(x => x[0]), sortedUsers.map(x => x[1]), "PDFs Cargados", "#0F4C81", { indexAxis: "y" });
-    }
-
-    function drawChart(canvasId, type, labels, data, label, colors, extraOpts = {}) {
-      if (STATE.charts[canvasId]) STATE.charts[canvasId].destroy();
-      const ctx = document.getElementById(canvasId).getContext("2d");
-      STATE.charts[canvasId] = new Chart(ctx, {
-        type: type,
-        data: { labels: labels, datasets: [{ label: label, data: data, backgroundColor: colors, borderRadius: 4 }] },
+      // 1. Gráfico Donut: Documentos por Tipo Documental
+      const labelsTipo = Object.keys(stats.porTipo);
+      const valsTipo = Object.values(stats.porTipo);
+      if (chartTiposInstance) chartTiposInstance.destroy();
+      chartTiposInstance = new Chart(document.getElementById("chartTipos"), {
+        type: "doughnut",
+        data: {
+          labels: labelsTipo,
+          datasets: [{
+            data: valsTipo,
+            backgroundColor: ["#0f4c81", "#2563eb", "#16a34a", "#d97706", "#7c3aed", "#0891b2"],
+            borderWidth: 2,
+            borderColor: "#ffffff"
+          }]
+        },
         options: {
           responsive: true,
-          plugins: { legend: { display: type === "doughnut", position: "right" } },
-          ...extraOpts
-        }
-      });
-    }
-
-    function onTipoChange() {
-      const sel = document.getElementById("upTipo");
-      const opt = sel.options[sel.selectedIndex];
-      const reqNivel = opt ? opt.dataset.nivel === "true" : true;
-      document.getElementById("wrapNivel").classList.toggle("hidden", !reqNivel);
-      document.getElementById("wrapPerfil").classList.toggle("hidden", !reqNivel);
-      if (!reqNivel) {
-        document.getElementById("upNivel").value = "";
-        document.getElementById("upPerfil").value = "";
-      }
-    }
-
-    function onNivelChange() {
-      const nivel = document.getElementById("upNivel").value;
-      const perfilSel = document.getElementById("upPerfil");
-      perfilSel.innerHTML = `<option value="">-- Seleccione --</option>`;
-      if (nivel === "NIVEL II") {
-        perfilSel.innerHTML += `<option value="SLE/CAL/CAE">SLE/CAL/CAE</option><option value="CTL">CTL</option>`;
-      } else if (nivel === "NIVEL III") {
-        perfilSel.innerHTML += `<option value="APLICADOR/ORIENTADOR">APLICADOR/ORIENTADOR</option><option value="OPERADOR TECNOLÓGICO">OPERADOR TECNOLÓGICO</option>`;
-      } else if (nivel === "NIVEL I") {
-        perfilSel.innerHTML += `<option value="GENERAL">GENERAL</option>`;
-      }
-    }
-
-    function updateDrivePreview() {
-      const sede = document.getElementById("upSede").value || "[SEDE]";
-      const tipo = document.getElementById("upTipo").value || "[TIPO]";
-      const nivel = document.getElementById("upNivel").value;
-      const perfil = document.getElementById("upPerfil").value;
-      const fecha = document.getElementById("upFecha").value;
-
-      const pathParts = ["CAPACITACIÓN", tipo, sede, nivel, perfil, fecha].filter(Boolean);
-      document.getElementById("lblDrivePath").textContent = pathParts.join(" / ");
-    }
-
-    function handleFileSelect(ev) {
-      if (ev.target.files && ev.target.files[0]) {
-        processSelectedFile(ev.target.files[0]);
-      }
-    }
-
-    function processSelectedFile(file) {
-      if (file.type !== "application/pdf") {
-        showToast("Solo se permiten archivos en formato PDF.", true);
-        document.getElementById("fileInput").value = "";
-        return;
-      }
-      if (file.size > 15 * 1024 * 1024) {
-        showToast("El archivo supera el límite máximo permitido de 15 MB.", true);
-        document.getElementById("fileInput").value = "";
-        return;
-      }
-      STATE.selectedFile = file;
-      const dz = document.getElementById("dropzone");
-      dz.classList.add("has-file");
-      document.getElementById("dropzoneText").textContent = `Listo para subir: ${file.name} (${(file.size / (1024*1024)).toFixed(2)} MB)`;
-    }
-
-    async function uploadDocument(replaceExisting = false) {
-      const sede = document.getElementById("upSede").value;
-      const tipoSel = document.getElementById("upTipo");
-      const tipo = tipoSel.value;
-      const opt = tipoSel.options[tipoSel.selectedIndex];
-      const prefijo = opt ? opt.dataset.prefijo : tipo;
-      const reqNivel = opt ? opt.dataset.nivel === "true" : false;
-      const nivel = document.getElementById("upNivel").value;
-      const perfil = document.getElementById("upPerfil").value;
-      const fechaControl = document.getElementById("upFecha").value;
-
-      if (!sede || !tipo) return showToast("Seleccione Sede Operativa y Tipo de Documento.", true);
-      if (reqNivel && (!nivel || !perfil || !fechaControl)) {
-        return showToast("Complete Nivel, Perfil y Fecha de Control.", true);
-      }
-      if (!STATE.selectedFile) return showToast("Adjunte un archivo PDF antes de subir.", true);
-
-      const btn = document.getElementById("btnUpload");
-      btn.disabled = true;
-      btn.textContent = "Subiendo documento a Google Drive...";
-
-      try {
-        const base64Data = await fileToBase64(STATE.selectedFile);
-        const resp = await apiCall({
-          action: "uploadPdf",
-          sede, tipo, prefijo, nivel, perfil, fechaControl,
-          usuario: STATE.user.usuario,
-          nombreUsuario: STATE.user.nombres,
-          base64Data,
-          replaceExisting
-        });
-
-        if (resp.duplicate) {
-          if (confirm("Ya existe un archivo idéntico en este instante. ¿Desea reemplazarlo?")) {
-            return uploadDocument(true);
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 14, font: { size: 12 } } }
           }
-          return;
         }
-        if (!resp.ok) return showToast(resp.error || "Error al subir el PDF.", true);
+      });
 
-        showToast("Documento cargado y estandarizado correctamente.");
-        STATE.sessionUploads.unshift(resp.registro);
-        renderSessionUploads();
-
-        if (resp.registro.folderUrl) {
-          document.getElementById("btnVerCarpetaDrive").href = resp.registro.folderUrl;
+      // 2. Gráfico Barras: Listas de Asistencia por Nivel
+      const labelsNivel = Object.keys(stats.porNivel);
+      const valsNivel = Object.values(stats.porNivel);
+      if (chartNivelesInstance) chartNivelesInstance.destroy();
+      chartNivelesInstance = new Chart(document.getElementById("chartNiveles"), {
+        type: "bar",
+        data: {
+          labels: labelsNivel,
+          datasets: [{
+            label: "Documentos Cargados",
+            data: valsNivel,
+            backgroundColor: ["#1d4ed8", "#0f4c81", "#16a34a"],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
         }
+      });
 
-        STATE.selectedFile = null;
-        document.getElementById("fileInput").value = "";
-        document.getElementById("dropzone").classList.remove("has-file");
-        document.getElementById("dropzoneText").textContent = "Arrastre su archivo PDF aquí o haga clic para seleccionarlo";
+      // 3. Gráfico Barras Horizontales: Ranking de Archivos Cargados por Usuario
+      const entradasUsuarios = Object.entries(stats.porUsuario || {})
+        .map(([usuario, total]) => ({ usuario, total }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 20);
 
-        await refreshAllData();
+      if (chartUsuariosInstance) chartUsuariosInstance.destroy();
+      chartUsuariosInstance = new Chart(document.getElementById("chartUsuarios"), {
+        type: "bar",
+        data: {
+          labels: entradasUsuarios.map(u => u.usuario),
+          datasets: [{
+            label: "Archivos Cargados",
+            data: entradasUsuarios.map(u => u.total),
+            backgroundColor: "#0f4c81",
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    }
+
+    // --- MÓDULO CARGA ---
+    btnToggleNuevoTipo.addEventListener("click", () => {
+      panelNuevoTipo.classList.toggle("hidden");
+      mensajeNuevoTipo.classList.add("hidden");
+    });
+
+    formNuevoTipo.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nombreTipo = document.getElementById("nuevoTipoNombre").value.trim().toUpperCase();
+      const codigoCorto = document.getElementById("nuevoTipoCodigo").value.trim().toUpperCase();
+
+      btnCrearTipo.disabled = true;
+      mostrarAlerta(mensajeNuevoTipo, "Creando carpeta principal y las 50 subcarpetas de sedes en Google Drive...", "info");
+
+      try {
+        const res = await llamarBackend({
+          accion: "crear_tipo",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          nombreTipo: nombreTipo,
+          codigoCorto: codigoCorto
+        });
+
+        if (res.ok) {
+          mostrarAlerta(mensajeNuevoTipo, res.mensaje, "success");
+          tiposDocumento = res.tiposDocumento;
+          renderizarTiposDocumento(nombreTipo);
+          inicializarFiltrosVisor();
+          formNuevoTipo.reset();
+        } else {
+          mostrarAlerta(mensajeNuevoTipo, `Error: ${res.error}`, "error");
+        }
       } catch (err) {
-        showToast("Error de red al subir el archivo.", true);
+        mostrarAlerta(mensajeNuevoTipo, err.message || "Error de red al crear el tipo documental.", "error");
       } finally {
-        btn.disabled = false;
-        btn.textContent = "Subir Documento PDF";
+        btnCrearTipo.disabled = false;
       }
-    }
+    });
 
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+    function renderizarTiposDocumento(seleccionarNombre = null) {
+      selectTipo.innerHTML = "";
+      tiposDocumento.forEach((t) => {
+        const opt = document.createElement("option");
+        opt.value = t.nombre;
+        opt.textContent = t.nombre;
+        selectTipo.appendChild(opt);
       });
+      if (seleccionarNombre) selectTipo.value = seleccionarNombre;
+      actualizarOpcionesSubnivel();
     }
 
-    function renderSessionUploads() {
-      const box = document.getElementById("sessionUploadsList");
-      if (!STATE.sessionUploads.length) return;
-      box.innerHTML = STATE.sessionUploads.map(r => `
-        <div class="session-item">
-          <div>
-            <div style="font-weight:700; font-size:12.5px; word-break:break-all;">${r.nombreArchivo}</div>
-            <div style="font-size:11.5px; color:var(--muted);">${r.fechaCarga} • ${r.tamanoMb} MB</div>
-          </div>
-          <a href="${r.fileUrl}" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:700; font-size:12px; white-space:nowrap;">
-            Ver PDF ↗
-          </a>
-        </div>
-      `).join("");
+    function renderizarSedes(lista) {
+      selectSede.innerHTML = "";
+      lista.forEach((s) => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        selectSede.appendChild(opt);
+      });
+      actualizarVistaRuta();
     }
 
-    function openNewTypeModal() { document.getElementById("modalNewType").style.display = "flex"; }
-    function closeNewTypeModal() { document.getElementById("modalNewType").style.display = "none"; }
+    buscarSede.addEventListener("input", () => {
+      const filtro = buscarSede.value.trim().toUpperCase();
+      const filtradas = SEDES_OPERATIVAS.filter((s) => s.includes(filtro));
+      renderizarSedes(filtradas.length ? filtradas : ["SIN COINCIDENCIAS"]);
+    });
 
-    async function createDocType() {
-      const nombreTipo = document.getElementById("newTypeName").value.trim();
-      const prefijo = document.getElementById("newTypePrefix").value.trim();
-      const requiereNivel = document.getElementById("newTypeReqNivel").checked;
-      if (!nombreTipo || !prefijo) return showToast("Complete nombre y prefijo.", true);
+    function actualizarOpcionesSubnivel() {
+      const perfiles = PERFILES_POR_NIVEL[selectNivel.value] || [];
+      selectSubnivel.innerHTML = "";
+      perfiles.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.label;
+        opt.dataset.carpeta = p.carpeta;
+        opt.textContent = p.label;
+        selectSubnivel.appendChild(opt);
+      });
+      actualizarVistaRuta();
+    }
 
-      const btn = document.getElementById("btnCreateDocType");
-      btn.disabled = true;
-      btn.textContent = "Creando 50 subcarpetas...";
-      try {
-        const resp = await apiCall({
-          action: "createDocType",
-          actorUsuario: STATE.user.usuario,
-          nombreTipo, prefijo, requiereNivel
-        });
-        if (!resp.ok) return showToast(resp.error, true);
-        showToast("Tipo documental y 50 subcarpetas creadas en Drive.");
-        document.getElementById("newTypeName").value = "";
-        document.getElementById("newTypePrefix").value = "";
-        closeNewTypeModal();
-        await refreshAllData();
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Crear Carpeta y 50 Subcarpetas";
+    function actualizarVistaRuta() {
+      const tipoObj = tiposDocumento.find(t => t.nombre === selectTipo.value);
+      const tieneNiveles = tipoObj ? tipoObj.tieneNiveles : false;
+      const perfiles = PERFILES_POR_NIVEL[selectNivel.value] || [];
+      const tieneSubnivel = tieneNiveles && perfiles.length > 0;
+
+      grupoNivel.style.display = tieneNiveles ? "flex" : "none";
+      grupoFechaAsistencia.style.display = tieneNiveles ? "flex" : "none";
+      selectNivel.required = tieneNiveles;
+      inputFechaAsistencia.required = tieneNiveles;
+
+      if (tieneSubnivel) {
+        grupoSubnivel.classList.remove("hidden");
+        selectSubnivel.required = true;
+        filaTipoNivel.className = "form-row-4";
+      } else {
+        grupoSubnivel.classList.add("hidden");
+        selectSubnivel.required = false;
+        filaTipoNivel.className = tieneNiveles ? "form-row-3" : "form-group";
       }
-    }
 
-    function renderViewerList() {
-      const fSede = document.getElementById("visFilterSede").value;
-      const fTipo = document.getElementById("visFilterTipo").value;
-      const q = document.getElementById("visSearch").value.toLowerCase();
-
-      const filtered = STATE.registros.filter(r => {
-        if (fSede && r.sede !== fSede) return false;
-        if (fTipo && r.tipo !== fTipo) return false;
-        if (q) {
-          const hay = `${r.nombreArchivo} ${r.sede} ${r.tipo} ${r.nivel} ${r.perfil} ${r.fechaControl} ${r.nombreUsuario}`.toLowerCase();
-          if (!hay.includes(q)) return false;
+      let ruta = `CAPACITACIÓN / ${selectTipo.value} / ${selectSede.value}`;
+      if (tieneNiveles) {
+        ruta += ` / ${selectNivel.value}`;
+        if (tieneSubnivel && selectSubnivel.selectedOptions[0]) {
+          ruta += ` / ${selectSubnivel.selectedOptions[0].dataset.carpeta}`;
         }
-        return true;
-      });
-
-      document.getElementById("visCountBadge").textContent = `${filtered.length} archivo(s)`;
-      const list = document.getElementById("viewerDocList");
-      list.innerHTML = filtered.map(r => `
-        <div class="doc-item ${STATE.currentPdfRecord && STATE.currentPdfRecord.fileId === r.fileId ? 'active' : ''}"
-             onclick="openPdfInViewer('${r.fileId}')">
-          <div style="font-weight:700; font-size:12px; word-break:break-all;">${r.nombreArchivo}</div>
-          <div style="font-size:11px; color:#1E40AF; margin:3px 0;">${r.sede} • ${r.nivel || r.tipo}</div>
-          <div style="font-size:11px; color:var(--muted);">Subido por: ${r.nombreUsuario} (${r.fechaCarga})</div>
-        </div>
-      `).join("");
+        const fechaFmt = formatearFechaCarpeta(inputFechaAsistencia.value) || "[FECHA]";
+        ruta += ` / ${fechaFmt}`;
+      }
+      rutaPreview.textContent = ruta;
     }
 
-    async function openPdfInViewer(fileId) {
-      const rec = STATE.registros.find(r => r.fileId === fileId);
-      if (!rec) return;
-      STATE.currentPdfRecord = rec;
-      STATE.pdfRotation = 0;
-      STATE.pdfScale = 1.15;
-      renderViewerList();
+    selectSede.addEventListener("change", actualizarVistaRuta);
+    selectTipo.addEventListener("change", actualizarOpcionesSubnivel);
+    selectNivel.addEventListener("change", actualizarOpcionesSubnivel);
+    selectSubnivel.addEventListener("change", actualizarVistaRuta);
+    inputFechaAsistencia.addEventListener("change", actualizarVistaRuta);
 
-      document.getElementById("currentPdfTitle").textContent = rec.nombreArchivo;
-      const container = document.getElementById("pdfCanvasContainer");
-      container.innerHTML = `<p style="color:#fff; margin-top:80px;">Cargando páginas del documento PDF...</p>`;
+    dropZone.addEventListener("click", () => inputArchivo.click());
+    dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragover"); });
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      if (e.dataTransfer.files.length) procesarArchivoSeleccionado(e.dataTransfer.files[0]);
+    });
+    inputArchivo.addEventListener("change", () => {
+      if (inputArchivo.files.length) procesarArchivoSeleccionado(inputArchivo.files[0]);
+    });
+
+    function procesarArchivoSeleccionado(file) {
+      if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+        mostrarAlerta(mensaje, "Formato no válido. Selecciona únicamente un archivo PDF.", "error");
+        return;
+      }
+      if (file.size > CONFIG.MAX_SIZE_MB * 1024 * 1024) {
+        mostrarAlerta(mensaje, `El archivo supera el límite de ${CONFIG.MAX_SIZE_MB} MB.`, "error");
+        return;
+      }
+      archivoSeleccionado = file;
+      const mb = (file.size / (1024 * 1024)).toFixed(2);
+      fileInfo.textContent = `Listo para subir: ${file.name} (${mb} MB)`;
+      dropZone.classList.add("has-file");
+      mensaje.classList.add("hidden");
+    }
+
+    uploadForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!archivoSeleccionado || selectSede.value === "SIN COINCIDENCIAS") {
+        mostrarAlerta(mensaje, "Verifica la sede seleccionada y adjunta un archivo PDF.", "error");
+        return;
+      }
+      enviarArchivo(false);
+    });
+
+    function enviarArchivo(forzarReemplazo) {
+      btnSubir.disabled = true;
+      mostrarAlerta(mensaje, forzarReemplazo ? "Reemplazando archivo en Drive..." : "Subiendo PDF y registrando en bitácora...", "info");
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result.split(",")[1];
+        try {
+          const res = await llamarBackend({
+            accion: "upload",
+            usuario: sesionActual.usuario,
+            clave: sesionActual.clave,
+            sede: selectSede.value,
+            tipoDocumento: selectTipo.value,
+            nivel: selectNivel.value,
+            subnivel: selectSubnivel.value || "",
+            fechaAsistencia: formatearFechaCarpeta(inputFechaAsistencia.value),
+            nombreArchivo: archivoSeleccionado.name,
+            forzarReemplazo: forzarReemplazo,
+            base64: base64
+          });
+
+          if (res.duplicado) {
+            const confirmar = confirm(
+              `AVISO DE DUPLICADO:\n\nEl archivo "${res.nombreExistente}" ya fue subido anteriormente en esta carpeta.\n\n¿Deseas REEMPLAZARLO por esta nueva versión?`
+            );
+            if (confirmar) {
+              enviarArchivo(true);
+            } else {
+              mostrarAlerta(mensaje, "Carga cancelada. Se conservó el archivo existente en Drive.", "info");
+              btnSubir.disabled = false;
+            }
+            return;
+          }
+
+          if (res.ok) {
+            mostrarAlerta(mensaje, `[${res.accionRealizada}] Guardado como "${res.nombreGuardado}" en ${res.ruta}.`, "success");
+            agregarAlHistorial(res);
+            archivoSeleccionado = null;
+            inputArchivo.value = "";
+            dropZone.classList.remove("has-file");
+            fileInfo.textContent = "Solo formato .PDF • Tamaño máximo 15 MB";
+          } else {
+            mostrarAlerta(mensaje, `Error: ${res.error}`, "error");
+          }
+        } catch (err) {
+          mostrarAlerta(mensaje, err.message || "Error de red al conectar con Google Drive.", "error");
+        } finally {
+          btnSubir.disabled = false;
+        }
+      };
+      reader.readAsDataURL(archivoSeleccionado);
+    }
+
+    function agregarAlHistorial(res) {
+      historialVacio.classList.add("hidden");
+      listaHistorial.classList.remove("hidden");
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div>
+          <strong>${res.nombreGuardado}</strong><br>
+          <small style="color:#64748b">${res.ruta} • ${res.hora} (${res.accionRealizada})</small>
+        </div>
+        <a href="${res.url}" target="_blank" rel="noopener">Ver PDF ↗</a>
+      `;
+      listaHistorial.prepend(li);
+    }
+
+    // --- MÓDULO VISOR ---
+    const filtroVisorSede = document.getElementById("filtroVisorSede");
+    const filtroVisorTipo = document.getElementById("filtroVisorTipo");
+    const filtroVisorTexto = document.getElementById("filtroVisorTexto");
+    const listaDocumentosVisor = document.getElementById("listaDocumentosVisor");
+    const visorEstado = document.getElementById("visorEstado");
+    const visorPlaceholder = document.getElementById("visorPlaceholder");
+    const pdfCanvasContainer = document.getElementById("pdfCanvasContainer");
+    const visorTituloDoc = document.getElementById("visorTituloDoc");
+
+    const btnRotarIzq = document.getElementById("btnRotarIzq");
+    const btnRotarDer = document.getElementById("btnRotarDer");
+    const btnZoomMenos = document.getElementById("btnZoomMenos");
+    const btnZoomMas = document.getElementById("btnZoomMas");
+    const lblZoom = document.getElementById("lblZoom");
+    const btnImprimirPdf = document.getElementById("btnImprimirPdf");
+    const btnDescargarPdf = document.getElementById("btnDescargarPdf");
+    const btnEliminarPdf = document.getElementById("btnEliminarPdf");
+
+    function inicializarFiltrosVisor() {
+      filtroVisorSede.innerHTML = '<option value="">Todas las sedes</option>';
+      const sedesFiltro = sesionActual.sedeAsignada === "TODAS" ? SEDES_OPERATIVAS : [sesionActual.sedeAsignada];
+      sedesFiltro.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        filtroVisorSede.appendChild(opt);
+      });
+
+      filtroVisorTipo.innerHTML = '<option value="">Todos los tipos</option>';
+      tiposDocumento.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t.nombre;
+        opt.textContent = t.nombre;
+        filtroVisorTipo.appendChild(opt);
+      });
+    }
+
+    document.getElementById("btnRefrescarVisor").addEventListener("click", cargarDocumentosVisor);
+    filtroVisorSede.addEventListener("change", renderizarListaVisor);
+    filtroVisorTipo.addEventListener("change", renderizarListaVisor);
+    filtroVisorTexto.addEventListener("input", renderizarListaVisor);
+
+    async function cargarDocumentosVisor() {
+      mostrarAlerta(visorEstado, "Consultando documentos registrados...", "info");
+      listaDocumentosVisor.innerHTML = "";
 
       try {
-        const resp = await apiCall({ action: "getPdfBase64", fileId });
-        if (!resp.ok) {
-          container.innerHTML = `<p style="color:#FCA5A5;">${resp.error}</p>`;
+        const data = await llamarBackend({
+          accion: "listar_documentos",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave
+        });
+        if (!data.ok) {
+          mostrarAlerta(visorEstado, data.error, "error");
           return;
         }
-        STATE.currentPdfBase64 = resp.base64;
-        const binary = atob(resp.base64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-
-        STATE.currentPdfDoc = await pdfjsLib.getDocument({ data: bytes }).promise;
-        renderPdfPages();
-      } catch (e) {
-        container.innerHTML = `<p style="color:#FCA5A5;">Error al renderizar el PDF.</p>`;
+        documentosVisorCache = data.documentos || [];
+        visorEstado.classList.add("hidden");
+        renderizarListaVisor();
+      } catch (err) {
+        mostrarAlerta(visorEstado, err.message || "Error al cargar el listado de documentos.", "error");
       }
     }
 
-    async function renderPdfPages() {
-      if (!STATE.currentPdfDoc) return;
-      const container = document.getElementById("pdfCanvasContainer");
-      container.innerHTML = "";
-      document.getElementById("lblZoom").textContent = `${Math.round(STATE.pdfScale * 100)}%`;
+    function renderizarListaVisor() {
+      const fSede = filtroVisorSede.value;
+      const fTipo = filtroVisorTipo.value;
+      const fTexto = filtroVisorTexto.value.trim().toLowerCase();
 
-      for (let pageNum = 1; pageNum <= STATE.currentPdfDoc.numPages; pageNum++) {
-        const page = await STATE.currentPdfDoc.getPage(pageNum);
-        const viewport = page.getViewport({ scale: STATE.pdfScale, rotation: STATE.pdfRotation });
-        const canvas = document.createElement("canvas");
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        container.appendChild(canvas);
-        await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+      const filtrados = documentosVisorCache.filter(d => {
+        if (fSede && d.sede !== fSede) return false;
+        if (fTipo && d.tipoDocumento !== fTipo) return false;
+        if (fTexto) {
+          const bloque = `${d.archivo} ${d.nivel} ${d.fechaAsistencia} ${d.nombreUsuario}`.toLowerCase();
+          if (!bloque.includes(fTexto)) return false;
+        }
+        return true;
+      });
+
+      listaDocumentosVisor.innerHTML = "";
+      if (!filtrados.length) {
+        listaDocumentosVisor.innerHTML = '<p style="color:#64748b;font-size:0.86rem;padding:12px;">No se encontraron documentos con esos filtros.</p>';
+        return;
       }
+
+      filtrados.forEach((doc) => {
+        const div = document.createElement("div");
+        div.className = "doc-item";
+        const badgeNivel = doc.nivel && doc.nivel !== "-" ? `<span class="badge blue">${doc.nivel}</span>` : "";
+        const badgeFecha = doc.fechaAsistencia && doc.fechaAsistencia !== "-" ? `<span class="badge">${doc.fechaAsistencia}</span>` : "";
+
+        div.innerHTML = `
+          <div class="doc-title">${doc.archivo}</div>
+          <div class="doc-meta">
+            <span class="badge">${doc.sede}</span>
+            ${badgeNivel}
+            ${badgeFecha}
+          </div>
+          <div style="font-size:0.74rem;color:#64748b;margin-top:5px;">
+            Subido: ${doc.fechaHora} por ${doc.nombreUsuario}
+          </div>
+        `;
+
+        div.addEventListener("click", () => {
+          document.querySelectorAll(".doc-item").forEach(el => el.classList.remove("selected"));
+          div.classList.add("selected");
+          cargarDocumentoEnVisorInteractivo(doc);
+        });
+
+        listaDocumentosVisor.appendChild(div);
+      });
     }
 
-    function rotatePdf(deg) {
-      if (!STATE.currentPdfDoc) return;
-      STATE.pdfRotation = (STATE.pdfRotation + deg + 360) % 360;
-      renderPdfPages();
+    function habilitarControlesVisor(habilitar) {
+      const puedeEliminar = sesionActual && sesionActual.permisos && sesionActual.permisos.eliminar;
+      [btnRotarIzq, btnRotarDer, btnZoomMenos, btnZoomMas, btnImprimirPdf, btnDescargarPdf].forEach(b => {
+        b.disabled = !habilitar;
+      });
+      btnEliminarPdf.disabled = !(habilitar && puedeEliminar);
     }
 
-    function zoomPdf(delta) {
-      if (!STATE.currentPdfDoc) return;
-      STATE.pdfScale = Math.min(2.5, Math.max(0.5, STATE.pdfScale + delta));
-      renderPdfPages();
-    }
+    async function cargarDocumentoEnVisorInteractivo(doc) {
+      docSeleccionadoActual = doc;
+      habilitarControlesVisor(false);
+      visorTituloDoc.textContent = doc.archivo;
+      pdfCanvasContainer.classList.add("hidden");
+      visorPlaceholder.classList.remove("hidden");
+      visorPlaceholder.innerHTML = `<p>Descargando y renderizando <strong>${doc.archivo}</strong>...</p>`;
 
-    function downloadCurrentPdf() {
-      if (!STATE.currentPdfBase64 || !STATE.currentPdfRecord) return;
-      const link = document.createElement("a");
-      link.href = "data:application/pdf;base64," + STATE.currentPdfBase64;
-      link.download = STATE.currentPdfRecord.nombreArchivo;
-      link.click();
-    }
+      if (pdfBlobUrlActual) {
+        URL.revokeObjectURL(pdfBlobUrlActual);
+        pdfBlobUrlActual = null;
+      }
 
-    function printCurrentPdf() {
-      if (!STATE.currentPdfBase64) return;
-      const win = window.open("", "_blank");
-      win.document.write(`<iframe src="data:application/pdf;base64,${STATE.currentPdfBase64}" style="width:100%;height:100%;border:none;"></iframe>`);
-    }
-
-    async function deleteCurrentPdf() {
-      if (!STATE.currentPdfRecord) return;
-      if (!confirm(`¿Confirma eliminar el archivo "${STATE.currentPdfRecord.nombreArchivo}"? Esta acción quedará auditada.`)) return;
+      if (!doc.fileId) {
+        visorPlaceholder.innerHTML = `<p style="color:#fca5a5;">Este registro no tiene un ID de Google Drive válido en la bitácora.</p>`;
+        return;
+      }
 
       try {
-        const resp = await apiCall({
-          action: "deletePdf",
-          fileId: STATE.currentPdfRecord.fileId,
-          usuario: STATE.user.usuario,
-          nombreUsuario: STATE.user.nombres
+        const data = await llamarBackend({
+          accion: "obtener_pdf_base64",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          fileId: doc.fileId
         });
-        if (!resp.ok) return showToast(resp.error, true);
 
-        showToast("Archivo eliminado y registrado en AUDITORIA_ELIMINADOS.");
-        STATE.currentPdfDoc = null;
-        STATE.currentPdfRecord = null;
-        document.getElementById("pdfCanvasContainer").innerHTML = `<p style="color:#E2E8F0; margin-top:80px;">Documento eliminado.</p>`;
-        await refreshAllData();
-      } catch (e) {
-        showToast("Error al eliminar el documento.", true);
+        if (!data.ok || !data.base64) {
+          visorPlaceholder.innerHTML = `<p style="color:#fca5a5;">Error del servidor: ${data.error || "No se recibió el contenido del PDF."}</p>`;
+          return;
+        }
+
+        const binaryString = atob(data.base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        const limiteBusqueda = Math.min(bytes.length, 1024);
+        let inicioPdf = -1;
+        for (let i = 0; i <= limiteBusqueda - 5; i++) {
+          if (
+            bytes[i] === 0x25 &&
+            bytes[i + 1] === 0x50 &&
+            bytes[i + 2] === 0x44 &&
+            bytes[i + 3] === 0x46 &&
+            bytes[i + 4] === 0x2D
+          ) {
+            inicioPdf = i;
+            break;
+          }
+        }
+
+        if (inicioPdf === -1) {
+          const muestra = String.fromCharCode(...bytes.slice(0, 12)).replace(/[^\x20-\x7E]/g, ".");
+          visorPlaceholder.innerHTML = `
+            <p style="color:#fca5a5;margin-bottom:8px;">
+              El archivo almacenado en Drive no contiene una estructura PDF válida (inicio: "${muestra}").
+            </p>
+            ${doc.url ? `<a href="${doc.url}" target="_blank" rel="noopener" class="btn-secondary">Revisar en Google Drive ↗</a>` : ""}
+          `;
+          return;
+        }
+
+        const bytesLimpios = inicioPdf > 0 ? bytes.subarray(inicioPdf) : bytes;
+
+        const blob = new Blob([bytesLimpios], { type: "application/pdf" });
+        pdfBlobUrlActual = URL.createObjectURL(blob);
+        pdfNombreActual = data.nombre || doc.archivo;
+
+        const loadingTask = pdfjsLib.getDocument({
+          data: bytesLimpios.slice(0),
+          disableWorker: true
+        });
+        pdfDocActual = await loadingTask.promise;
+
+        visorPlaceholder.classList.add("hidden");
+        pdfCanvasContainer.classList.remove("hidden");
+
+        rotacionActual = 0;
+        const primeraPagina = await pdfDocActual.getPage(1);
+        const viewportBase = primeraPagina.getViewport({ scale: 1 });
+        const anchoDisponible = pdfCanvasContainer.clientWidth - 48;
+        escalaActual = anchoDisponible > 200
+          ? Math.min(1.5, Math.max(0.7, Math.round((anchoDisponible / viewportBase.width) * 100) / 100))
+          : 1.15;
+        lblZoom.textContent = `${Math.round(escalaActual * 100)}%`;
+
+        habilitarControlesVisor(true);
+        await renderizarTodasLasPaginas();
+
+      } catch (err) {
+        visorPlaceholder.innerHTML = `
+          <p style="color:#fca5a5;margin-bottom:8px;">No se pudo renderizar el documento PDF (${err.message || "Error de lectura"}).</p>
+          ${doc.url ? `<a href="${doc.url}" target="_blank" rel="noopener" class="btn-secondary">Abrir directamente en Google Drive ↗</a>` : ""}
+        `;
       }
     }
 
-    function buildReportRows() {
-      const q = document.getElementById("repSearchSede").value.toLowerCase();
-      const status = document.getElementById("repFilterStatus").value;
-      const sedesList = STATE.user.ambito === "TODAS"
-        ? STATE.sedes.map(s => s.nombre)
-        : [STATE.user.ambito];
+    async function renderizarTodasLasPaginas() {
+      if (!pdfDocActual) return;
+      pdfCanvasContainer.innerHTML = "";
 
-      return sedesList.map(sede => {
-        const rSede = STATE.registros.filter(r => r.sede === sede);
-        const n1 = rSede.filter(r => r.nivel === "NIVEL I").length;
-        const n2 = rSede.filter(r => r.nivel === "NIVEL II").length;
-        const n3 = rSede.filter(r => r.nivel === "NIVEL III").length;
-        const otros = rSede.filter(r => !r.nivel).length;
-        const total = rSede.length;
-        return { sede, n1, n2, n3, otros, total };
-      }).filter(row => {
-        if (q && !row.sede.toLowerCase().includes(q)) return false;
-        if (status === "WITH_DOCS" && row.total === 0) return false;
-        if (status === "PENDING" && row.total > 0) return false;
+      for (let num = 1; num <= pdfDocActual.numPages; num++) {
+        const page = await pdfDocActual.getPage(num);
+        const viewport = page.getViewport({ scale: escalaActual, rotation: rotacionActual });
+
+        const canvas = document.createElement("canvas");
+        canvas.className = "pdf-page-canvas";
+        const ctx = canvas.getContext("2d");
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        pdfCanvasContainer.appendChild(canvas);
+
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+      }
+    }
+
+    btnRotarIzq.addEventListener("click", async () => {
+      rotacionActual = (rotacionActual - 90 + 360) % 360;
+      await renderizarTodasLasPaginas();
+    });
+
+    btnRotarDer.addEventListener("click", async () => {
+      rotacionActual = (rotacionActual + 90) % 360;
+      await renderizarTodasLasPaginas();
+    });
+
+    btnZoomMenos.addEventListener("click", async () => {
+      if (escalaActual <= 0.5) return;
+      escalaActual = Math.round((escalaActual - 0.15) * 100) / 100;
+      lblZoom.textContent = `${Math.round(escalaActual * 100)}%`;
+      await renderizarTodasLasPaginas();
+    });
+
+    btnZoomMas.addEventListener("click", async () => {
+      if (escalaActual >= 2.5) return;
+      escalaActual = Math.round((escalaActual + 0.15) * 100) / 100;
+      lblZoom.textContent = `${Math.round(escalaActual * 100)}%`;
+      await renderizarTodasLasPaginas();
+    });
+
+    btnDescargarPdf.addEventListener("click", () => {
+      if (!pdfBlobUrlActual) return;
+      const a = document.createElement("a");
+      a.href = pdfBlobUrlActual;
+      a.download = pdfNombreActual || "documento.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    btnImprimirPdf.addEventListener("click", () => {
+      if (!pdfBlobUrlActual) return;
+      const printFrame = document.createElement("iframe");
+      printFrame.style.display = "none";
+      printFrame.src = pdfBlobUrlActual;
+      document.body.appendChild(printFrame);
+      printFrame.onload = () => {
+        printFrame.contentWindow.focus();
+        printFrame.contentWindow.print();
+      };
+    });
+
+    btnEliminarPdf.addEventListener("click", async () => {
+      if (!docSeleccionadoActual || !docSeleccionadoActual.fileId) return;
+      if (!sesionActual.permisos.eliminar) {
+        alert("Su rol no tiene permisos para eliminar documentos.");
+        return;
+      }
+
+      const confirmar = confirm(
+        `¿Estás seguro de eliminar el archivo?\n\n"${docSeleccionadoActual.archivo}"\n\nSe enviará a la papelera de Google Drive y se quitará del listado.`
+      );
+      if (!confirmar) return;
+
+      habilitarControlesVisor(false);
+      visorTituloDoc.textContent = "Eliminando archivo...";
+
+      try {
+        const data = await llamarBackend({
+          accion: "eliminar_documento",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          fileId: docSeleccionadoActual.fileId
+        });
+
+        if (!data.ok) {
+          alert(`Error al eliminar: ${data.error}`);
+          habilitarControlesVisor(true);
+          visorTituloDoc.textContent = docSeleccionadoActual.archivo;
+          return;
+        }
+
+        if (pdfBlobUrlActual) {
+          URL.revokeObjectURL(pdfBlobUrlActual);
+          pdfBlobUrlActual = null;
+        }
+        pdfDocActual = null;
+        docSeleccionadoActual = null;
+
+        pdfCanvasContainer.innerHTML = "";
+        pdfCanvasContainer.classList.add("hidden");
+        visorPlaceholder.classList.remove("hidden");
+        visorPlaceholder.innerHTML = `<p style="color:#86efac;">${data.mensaje}</p>`;
+        visorTituloDoc.textContent = "Ningún documento seleccionado";
+
+        await cargarDocumentosVisor();
+      } catch (err) {
+        alert(err.message || "Error de red al intentar eliminar el documento.");
+        habilitarControlesVisor(true);
+      }
+    });
+
+    // --- MÓDULO REPORTES ---
+    const reporteEstado = document.getElementById("reporteEstado");
+    const filtroReporteSede = document.getElementById("filtroReporteSede");
+    const filtroReporteEstado = document.getElementById("filtroReporteEstado");
+    const theadReporte = document.getElementById("theadReporte");
+    const tbodyReporte = document.getElementById("tbodyReporte");
+    const tfootReporte = document.getElementById("tfootReporte");
+    const subtituloReporte = document.getElementById("subtituloReporte");
+
+    document.getElementById("btnRefrescarReporte").addEventListener("click", cargarReporteAvance);
+    filtroReporteSede.addEventListener("input", renderizarTablaReporte);
+    filtroReporteEstado.addEventListener("change", renderizarTablaReporte);
+
+    async function cargarReporteAvance() {
+      mostrarAlerta(reporteEstado, "Calculando avance por sede, tipo documental, nivel, perfil y fechas...", "info");
+      try {
+        const data = await llamarBackend({
+          accion: "reporte_avance",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave
+        });
+        if (!data.ok) {
+          mostrarAlerta(reporteEstado, data.error, "error");
+          return;
+        }
+
+        reporteDataCache = data;
+        reporteEstado.classList.add("hidden");
+        subtituloReporte.textContent = `Matriz consolidada con desglose por Nivel, Perfil y Fechas • Generado: ${data.generadoEn}`;
+        renderizarTablaReporte();
+      } catch (err) {
+        mostrarAlerta(reporteEstado, err.message || "Error al generar el reporte de avance.", "error");
+      }
+    }
+
+    function obtenerFilasReporteFiltradas() {
+      if (!reporteDataCache) return [];
+      const textoSede = filtroReporteSede.value.trim().toUpperCase();
+      const estadoFiltro = filtroReporteEstado.value;
+
+      return reporteDataCache.filas.filter(f => {
+        if (textoSede && !f.sede.includes(textoSede)) return false;
+        if (estadoFiltro === "CON_CARGA" && f.total === 0) return false;
+        if (estadoFiltro === "SIN_CARGA" && f.total > 0) return false;
         return true;
       });
     }
 
-    function renderReportTable() {
-      const rows = buildReportRows();
-      const tbody = document.getElementById("reportTableBody");
-      let t1 = 0, t2 = 0, t3 = 0, to = 0, tt = 0;
+    function renderizarTablaReporte() {
+      if (!reporteDataCache) return;
 
-      tbody.innerHTML = rows.map(r => {
-        t1 += r.n1; t2 += r.n2; t3 += r.n3; to += r.otros; tt += r.total;
-        return `
-          <tr>
-            <td><strong>${r.sede}</strong></td>
-            <td>${r.n1 > 0 ? `<span class="badge-count">${r.n1}</span>` : 0}</td>
-            <td>${r.n2 > 0 ? `<span class="badge-count">${r.n2}</span>` : 0}</td>
-            <td>${r.n3 > 0 ? `<span class="badge-count">${r.n3}</span>` : 0}</td>
-            <td>${r.otros > 0 ? `<span class="badge-count">${r.otros}</span>` : 0}</td>
-            <td><strong style="color:var(--primary);">${r.total}</strong></td>
-          </tr>
-        `;
-      }).join("") + `
-        <tr style="background:#CBD5E1; font-weight:800;">
-          <td>TOTAL GENERAL (${rows.length} SEDES)</td>
-          <td>${t1}</td><td>${t2}</td><td>${t3}</td><td>${to}</td><td>${tt}</td>
-        </tr>
-      `;
+      const { estructuraTipos, filas } = reporteDataCache;
+      const filasFiltradas = obtenerFilasReporteFiltradas();
+
+      const totalGeneralDocs = filas.reduce((acc, f) => acc + f.total, 0);
+      const sedesConCarga = filas.filter(f => f.total > 0).length;
+      document.getElementById("kpiTotalDocs").textContent = totalGeneralDocs;
+      document.getElementById("kpiSedesActivas").textContent = `${sedesConCarga} / ${filas.length}`;
+      document.getElementById("kpiTiposActivos").textContent = estructuraTipos.length;
+
+      let tr1 = `<tr><th rowspan="4">SEDE OPERATIVA</th>`;
+      let tr2 = `<tr>`;
+      let tr3 = `<tr>`;
+      let tr4 = `<tr>`;
+
+      const columnasHojaOrdenadas = [];
+
+      estructuraTipos.forEach(et => {
+        if (!et.tieneNiveles) {
+          tr1 += `<th rowspan="4">${et.nombre}</th>`;
+          columnasHojaOrdenadas.push(et.columnas[0]);
+        } else {
+          tr1 += `<th colspan="${et.colspan}">${et.nombre}</th>`;
+          et.niveles.forEach(nd => {
+            tr2 += `<th colspan="${nd.colspan}">${nd.nivel}</th>`;
+            if (!nd.tienePerfiles) {
+              nd.perfiles[0].fechas.forEach(f => {
+                tr3 += `<th rowspan="2" style="background:#eff6ff;color:#1e3a8a;">${f}</th>`;
+              });
+            } else {
+              nd.perfiles.forEach(pd => {
+                tr3 += `<th colspan="${pd.colspan}">${pd.perfil}</th>`;
+                pd.fechas.forEach(f => {
+                  tr4 += `<th>${f}</th>`;
+                });
+              });
+            }
+          });
+          et.columnas.forEach(col => columnasHojaOrdenadas.push(col));
+        }
+      });
+
+      tr1 += `<th rowspan="4">TOTAL SEDE</th></tr>`;
+      tr2 += `</tr>`;
+      tr3 += `</tr>`;
+      tr4 += `</tr>`;
+      theadReporte.innerHTML = tr1 + tr2 + tr3 + tr4;
+
+      const totalesCol = {};
+      columnasHojaOrdenadas.forEach(c => { totalesCol[c.key] = 0; });
+      let granTotalFiltrado = 0;
+
+      if (!filasFiltradas.length) {
+        tbodyReporte.innerHTML = `<tr><td colspan="${columnasHojaOrdenadas.length + 2}" style="text-align:center;color:#64748b;padding:24px;">No hay sedes que coincidan con el filtro aplicado.</td></tr>`;
+      } else {
+        let bodyHtml = "";
+        filasFiltradas.forEach(f => {
+          bodyHtml += `<tr><td>${f.sede}</td>`;
+          columnasHojaOrdenadas.forEach(c => {
+            const cant = f.conteos[c.key] || 0;
+            totalesCol[c.key] += cant;
+            const clasePill = cant > 0 ? "count-pill count-positive" : "count-pill count-zero";
+            bodyHtml += `<td><span class="${clasePill}">${cant}</span></td>`;
+          });
+          granTotalFiltrado += f.total;
+          const claseTotal = f.total > 0 ? "count-pill count-total" : "count-pill count-zero";
+          bodyHtml += `<td><span class="${claseTotal}">${f.total}</span></td></tr>`;
+        });
+        tbodyReporte.innerHTML = bodyHtml;
+      }
+
+      let footHtml = `<tr><td>TOTAL GENERAL (${filasFiltradas.length} sedes)</td>`;
+      columnasHojaOrdenadas.forEach(c => {
+        footHtml += `<td>${totalesCol[c.key]}</td>`;
+      });
+      footHtml += `<td>${granTotalFiltrado}</td></tr>`;
+      tfootReporte.innerHTML = footHtml;
     }
 
-    function exportReportExcel() {
-      const rows = buildReportRows();
-      const wsData = [
-        ["REPORTE DE AVANCE DE CARGA DOCUMENTAL — CAPACITACIÓN"],
-        [`Generado por: ${STATE.user.nombres} (${STATE.user.rol}) | Ámbito: ${STATE.user.ambito} | Fecha: ${new Date().toLocaleString()}`],
-        [],
-        ["SEDE OPERATIVA", "NIVEL I", "NIVEL II", "NIVEL III", "OTROS DOCUMENTOS", "TOTAL SEDE"]
+    document.getElementById("btnExportarExcel").addEventListener("click", () => {
+      if (!reporteDataCache || !window.XLSX) return;
+
+      const { estructuraTipos, generadoEn, timestampArchivo, usuarioGenerador, ambito } = reporteDataCache;
+      const filasExportar = obtenerFilasReporteFiltradas();
+
+      const ahoraLocal = new Date();
+      const fechaHoraExport = ahoraLocal.toLocaleString("es-PE", { hour12: false });
+      const estadoTexto = document.getElementById("filtroReporteEstado").selectedOptions[0].text;
+      const filtroSedeTexto = filtroReporteSede.value.trim().toUpperCase() || "NINGUNO";
+
+      const bordeFino = {
+        top: { style: "thin", color: { rgb: "CBD5E1" } },
+        bottom: { style: "thin", color: { rgb: "CBD5E1" } },
+        left: { style: "thin", color: { rgb: "CBD5E1" } },
+        right: { style: "thin", color: { rgb: "CBD5E1" } }
+      };
+
+      const bordeCabecera = {
+        top: { style: "thin", color: { rgb: "FFFFFF" } },
+        bottom: { style: "thin", color: { rgb: "FFFFFF" } },
+        left: { style: "thin", color: { rgb: "FFFFFF" } },
+        right: { style: "thin", color: { rgb: "FFFFFF" } }
+      };
+
+      const estiloBanner = {
+        font: { name: "Calibri", sz: 13, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "0A355C" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      const estiloMetaLabel = {
+        font: { name: "Calibri", sz: 9, bold: true, color: { rgb: "1E293B" } },
+        fill: { fgColor: { rgb: "E2E8F0" } },
+        border: bordeFino,
+        alignment: { horizontal: "left", vertical: "center" }
+      };
+
+      const estiloMetaVal = {
+        font: { name: "Calibri", sz: 9, color: { rgb: "0F172A" } },
+        fill: { fgColor: { rgb: "F8FAFC" } },
+        border: bordeFino,
+        alignment: { horizontal: "left", vertical: "center" }
+      };
+
+      const estiloThTipo = {
+        font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "0F4C81" } },
+        border: bordeCabecera,
+        alignment: { horizontal: "center", vertical: "center", wrapText: true }
+      };
+
+      const estiloThSede = {
+        font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "0A355C" } },
+        border: bordeCabecera,
+        alignment: { horizontal: "center", vertical: "center", wrapText: true }
+      };
+
+      const estiloThNivel = {
+        font: { name: "Calibri", sz: 9, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "1D4ED8" } },
+        border: bordeCabecera,
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      const estiloThPerfil = {
+        font: { name: "Calibri", sz: 9, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "3B82F6" } },
+        border: bordeCabecera,
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      const estiloThFecha = {
+        font: { name: "Calibri", sz: 9, bold: true, color: { rgb: "1E3A8A" } },
+        fill: { fgColor: { rgb: "DBEAFE" } },
+        border: bordeFino,
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      let totalColsTabla = 2;
+      estructuraTipos.forEach(et => { totalColsTabla += et.colspan; });
+      const ultimaColIdx = Math.max(totalColsTabla - 1, 6);
+
+      const filaBanner = Array(ultimaColIdx + 1).fill("");
+      filaBanner[0] = "REPORTE DE AVANCE DE CARGA DOCUMENTAL — EVALUACIÓN DOCENTE 2026 (CAPACITACIÓN)";
+
+      const aoa = [
+        filaBanner,
+        ["CÓDIGO DE REPORTE:", "RPT-AVANCE-CAP-ED2026", "", "FECHA Y HORA DE DESCARGA:", fechaHoraExport],
+        ["ÁMBITO DE CONSULTA:", ambito, "", "DATOS CONSULTADOS AL:", generadoEn],
+        ["GENERADO POR:", usuarioGenerador, "", "FILTRO APLICADO:", `${estadoTexto} (Sede: ${filtroSedeTexto})`],
+        []
       ];
-      rows.forEach(r => wsData.push([r.sede, r.n1, r.n2, r.n3, r.otros, r.total]));
+
+      const rowTipo = ["SEDE OPERATIVA"];
+      const rowNivel = [""];
+      const rowPerfil = [""];
+      const rowFecha = [""];
+      const merges = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: ultimaColIdx } },
+        { s: { r: 5, c: 0 }, e: { r: 8, c: 0 } }
+      ];
+
+      const columnasHoja = [];
+      let colIdx = 1;
+
+      estructuraTipos.forEach(et => {
+        if (!et.tieneNiveles) {
+          rowTipo.push(et.nombre);
+          rowNivel.push("");
+          rowPerfil.push("");
+          rowFecha.push("");
+          merges.push({ s: { r: 5, c: colIdx }, e: { r: 8, c: colIdx } });
+          columnasHoja.push(et.columnas[0]);
+          colIdx += 1;
+        } else {
+          const inicioTipo = colIdx;
+          et.niveles.forEach(nd => {
+            const inicioNivel = colIdx;
+            if (!nd.tienePerfiles) {
+              nd.perfiles[0].fechas.forEach(f => {
+                rowTipo.push(colIdx === inicioTipo ? et.nombre : "");
+                rowNivel.push(colIdx === inicioNivel ? nd.nivel : "");
+                rowPerfil.push(f);
+                rowFecha.push("");
+                merges.push({ s: { r: 7, c: colIdx }, e: { r: 8, c: colIdx } });
+                colIdx += 1;
+              });
+            } else {
+              nd.perfiles.forEach(pd => {
+                const inicioPerfil = colIdx;
+                pd.fechas.forEach((f, idxF) => {
+                  rowTipo.push(colIdx === inicioTipo ? et.nombre : "");
+                  rowNivel.push(colIdx === inicioNivel ? nd.nivel : "");
+                  rowPerfil.push(idxF === 0 ? pd.perfil : "");
+                  rowFecha.push(f);
+                  colIdx += 1;
+                });
+                if (pd.colspan > 1) {
+                  merges.push({ s: { r: 7, c: inicioPerfil }, e: { r: 7, c: colIdx - 1 } });
+                }
+              });
+            }
+            if (nd.colspan > 1) {
+              merges.push({ s: { r: 6, c: inicioNivel }, e: { r: 6, c: colIdx - 1 } });
+            }
+          });
+          if (et.colspan > 1) {
+            merges.push({ s: { r: 5, c: inicioTipo }, e: { r: 5, c: colIdx - 1 } });
+          }
+          et.columnas.forEach(c => columnasHoja.push(c));
+        }
+      });
+
+      const colTotalIdx = colIdx;
+      rowTipo.push("TOTAL SEDE");
+      rowNivel.push("");
+      rowPerfil.push("");
+      rowFecha.push("");
+      merges.push({ s: { r: 5, c: colTotalIdx }, e: { r: 8, c: colTotalIdx } });
+
+      aoa.push(rowTipo, rowNivel, rowPerfil, rowFecha);
+
+      const totalesCol = {};
+      columnasHoja.forEach(c => { totalesCol[c.key] = 0; });
+      let granTotal = 0;
+
+      filasExportar.forEach(f => {
+        const filaExcel = [f.sede];
+        columnasHoja.forEach(c => {
+          const cant = f.conteos[c.key] || 0;
+          totalesCol[c.key] += cant;
+          filaExcel.push(cant);
+        });
+        granTotal += f.total;
+        filaExcel.push(f.total);
+        aoa.push(filaExcel);
+      });
+
+      const filaTotalesExcel = [`TOTAL GENERAL (${filasExportar.length} sedes)`];
+      columnasHoja.forEach(c => filaTotalesExcel.push(totalesCol[c.key]));
+      filaTotalesExcel.push(granTotal);
+      aoa.push(filaTotalesExcel);
 
       const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.aoa_to_sheet(wsData);
-      ws["!cols"] = [{ wch: 34 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 14 }];
-      XLSX.utils.book_append_sheet(wb, ws, "Avance_Sedes");
-      XLSX.writeFile(wb, `Reporte_Avance_Sedes_${new Date().toISOString().slice(0,10)}.xlsx`);
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws["!merges"] = merges;
+
+      const filaInicioDatos = 9;
+      const filaTotalIdx = filaInicioDatos + filasExportar.length;
+
+      for (let r = 0; r <= filaTotalIdx; r++) {
+        for (let c = 0; c <= ultimaColIdx; c++) {
+          const ref = XLSX.utils.encode_cell({ r, c });
+          if (!ws[ref]) ws[ref] = { t: "s", v: "" };
+
+          if (r === 0) { ws[ref].s = estiloBanner; continue; }
+          if (r >= 1 && r <= 3) {
+            if (c === 0 || c === 3) ws[ref].s = estiloMetaLabel;
+            else if (c === 1 || c === 4) ws[ref].s = estiloMetaVal;
+            continue;
+          }
+          if (r === 4) continue;
+
+          if (r === 5) {
+            ws[ref].s = (c === 0 || c === colTotalIdx) ? estiloThSede : estiloThTipo;
+            continue;
+          }
+          if (r === 6) {
+            ws[ref].s = (c === 0 || c === colTotalIdx) ? estiloThSede : (rowNivel[c] !== "" || ws[ref].v !== "" ? estiloThNivel : estiloThTipo);
+            continue;
+          }
+          if (r === 7) {
+            if (c === 0 || c === colTotalIdx) { ws[ref].s = estiloThSede; continue; }
+            const colMeta = columnasHoja[c - 1];
+            if (!colMeta || colMeta.nivel === "-") ws[ref].s = estiloThTipo;
+            else if (colMeta.perfil === "-") ws[ref].s = estiloThFecha;
+            else ws[ref].s = estiloThPerfil;
+            continue;
+          }
+          if (r === 8) {
+            if (c === 0 || c === colTotalIdx) { ws[ref].s = estiloThSede; continue; }
+            const colMeta = columnasHoja[c - 1];
+            ws[ref].s = (!colMeta || colMeta.nivel === "-") ? estiloThTipo : estiloThFecha;
+            continue;
+          }
+
+          if (r === filaTotalIdx && c <= colTotalIdx) {
+            ws[ref].s = {
+              font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "0A355C" } },
+              fill: { fgColor: { rgb: "CBD5E1" } },
+              border: {
+                top: { style: "medium", color: { rgb: "0F4C81" } },
+                bottom: { style: "double", color: { rgb: "0F4C81" } },
+                left: { style: "thin", color: { rgb: "94A3B8" } },
+                right: { style: "thin", color: { rgb: "94A3B8" } }
+              },
+              alignment: { horizontal: c === 0 ? "left" : "center", vertical: "center" }
+            };
+            continue;
+          }
+
+          if (r >= filaInicioDatos && r < filaTotalIdx && c <= colTotalIdx) {
+            const esFilaPar = (r % 2 === 0);
+            const valorNum = Number(ws[ref].v || 0);
+
+            if (c === 0) {
+              ws[ref].s = {
+                font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "1E293B" } },
+                fill: { fgColor: { rgb: esFilaPar ? "F8FAFC" : "FFFFFF" } },
+                border: bordeFino,
+                alignment: { horizontal: "left", vertical: "center" }
+              };
+            } else if (c === colTotalIdx) {
+              ws[ref].s = {
+                font: { name: "Calibri", sz: 10, bold: true, color: { rgb: valorNum > 0 ? "1E40AF" : "94A3B8" } },
+                fill: { fgColor: { rgb: valorNum > 0 ? "DBEAFE" : "F1F5F9" } },
+                border: bordeFino,
+                alignment: { horizontal: "center", vertical: "center" }
+              };
+            } else {
+              ws[ref].s = {
+                font: {
+                  name: "Calibri",
+                  sz: 10,
+                  bold: valorNum > 0,
+                  color: { rgb: valorNum > 0 ? "166534" : "94A3B8" }
+                },
+                fill: {
+                  fgColor: { rgb: valorNum > 0 ? "DCFCE7" : (esFilaPar ? "F8FAFC" : "FFFFFF") }
+                },
+                border: bordeFino,
+                alignment: { horizontal: "center", vertical: "center" }
+              };
+            }
+          }
+        }
+      }
+
+      const wsrows = [{ hpt: 28 }, { hpt: 19 }, { hpt: 19 }, { hpt: 19 }, { hpt: 10 }, { hpt: 26 }, { hpt: 22 }, { hpt: 22 }, { hpt: 22 }];
+      for (let i = 0; i < filasExportar.length; i++) wsrows.push({ hpt: 20 });
+      wsrows.push({ hpt: 24 });
+      ws["!rows"] = wsrows;
+
+      const wscols = [{ wch: 32 }];
+      columnasHoja.forEach(() => wscols.push({ wch: 15 }));
+      wscols.push({ wch: 14 });
+      ws["!cols"] = wscols;
+
+      ws["!freeze"] = { xSplit: 1, ySplit: 9 };
+
+      XLSX.utils.book_append_sheet(wb, ws, "Avance_ED2026");
+
+      const tagDescarga = timestampArchivo || ahoraLocal.toISOString().replace(/[-:T]/g, "").slice(0, 15);
+      XLSX.writeFile(wb, `RPT_Avance_Documental_ED2026_${tagDescarga}.xlsx`);
+    });
+
+    // --- MÓDULO GESTIÓN DE USUARIOS Y PERMISOS ---
+    function poblarSelectSedesUsuario() {
+      const sel = document.getElementById("uSede");
+      sel.innerHTML = '<option value="TODAS">TODAS (Ámbito Nacional)</option>';
+      SEDES_OPERATIVAS.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        sel.appendChild(opt);
+      });
     }
 
-    function renderRoleMatrix() {
-      const roles = ["ADMINISTRADOR", "ASISTENTE", "COORDINADOR(A)", "JEFATURA"];
-      const keys = ["dashboard", "cargar", "visor", "eliminar", "reportes", "gestorUsuarios"];
-      const tbody = document.getElementById("roleMatrixBody");
+    document.getElementById("btnRefrescarUsuarios").addEventListener("click", cargarGestionUsuarios);
 
-      tbody.innerHTML = roles.map(rol => {
-        const p = STATE.matrizPermisos[rol] || {};
-        return `
-          <tr>
-            <td><strong>${rol}</strong></td>
-            ${keys.map(k => `
-              <td>
-                <input type="checkbox" data-rol="${rol}" data-perm="${k}" ${p[k] ? "checked" : ""} style="width:16px; height:16px;" />
-              </td>
-            `).join("")}
-          </tr>
+    async function cargarGestionUsuarios() {
+      const msgUsers = document.getElementById("mensajeUsuario");
+      const tbodyUsers = document.getElementById("tbodyUsuarios");
+      tbodyUsers.innerHTML = '<tr><td colspan="6">Cargando usuarios y permisos...</td></tr>';
+
+      try {
+        const data = await llamarBackend({
+          accion: "listar_usuarios_roles",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave
+        });
+
+        if (!data.ok) {
+          mostrarAlerta(msgUsers, data.error, "error");
+          return;
+        }
+
+        rolesMatrizCache = data.rolesMatriz || [];
+        renderizarMatrizPermisos(rolesMatrizCache);
+        renderizarTablaUsuarios(data.usuarios || []);
+      } catch (err) {
+        mostrarAlerta(msgUsers, err.message || "Error al cargar usuarios.", "error");
+      }
+    }
+
+    function renderizarMatrizPermisos(matriz) {
+      const tbody = document.getElementById("tbodyPermisosRoles");
+      tbody.innerHTML = "";
+
+      matriz.forEach((r, idx) => {
+        const esAdmin = r.rol === "ADMINISTRADOR";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.rol}</td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="dashboard" ${r.dashboard ? "checked" : ""}></td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="cargar" ${r.cargar ? "checked" : ""}></td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="visor" ${r.visor ? "checked" : ""}></td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="eliminar" ${r.eliminar ? "checked" : ""}></td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="reportes" ${r.reportes ? "checked" : ""}></td>
+          <td><input type="checkbox" data-idx="${idx}" data-perm="usuarios" ${r.usuarios ? "checked" : ""} ${esAdmin ? "disabled" : ""}></td>
         `;
-      }).join("");
+        tbody.appendChild(tr);
+      });
     }
 
-    async function saveRoleMatrix() {
-      const matriz = {};
-      document.querySelectorAll("#roleMatrixBody input[type=checkbox]").forEach(chk => {
-        const rol = chk.dataset.rol;
+    document.getElementById("btnGuardarPermisosRoles").addEventListener("click", async () => {
+      const msgPerm = document.getElementById("mensajePermisosRoles");
+      const checks = document.querySelectorAll("#tbodyPermisosRoles input[type='checkbox']");
+
+      checks.forEach(chk => {
+        const idx = Number(chk.dataset.idx);
         const perm = chk.dataset.perm;
-        if (!matriz[rol]) matriz[rol] = {};
-        matriz[rol][perm] = chk.checked;
+        if (rolesMatrizCache[idx]) {
+          rolesMatrizCache[idx][perm] = chk.checked;
+        }
       });
-      const resp = await apiCall({
-        action: "saveRoleMatrix",
-        actorUsuario: STATE.user.usuario,
-        matriz
-      });
-      if (!resp.ok) return showToast(resp.error, true);
-      showToast("Matriz de permisos actualizada.");
-      await refreshAllData();
-    }
 
-    function renderUsersTable() {
-      const tbody = document.getElementById("usersTableBody");
-      tbody.innerHTML = STATE.usuarios.map((u, idx) => `
-        <tr>
+      mostrarAlerta(msgPerm, "Guardando matriz de permisos...", "info");
+
+      try {
+        const res = await llamarBackend({
+          accion: "guardar_permisos_roles",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          rolesMatriz: rolesMatrizCache
+        });
+
+        if (res.ok) {
+          mostrarAlerta(msgPerm, res.mensaje, "success");
+          rolesMatrizCache = res.rolesMatriz || rolesMatrizCache;
+          const miRol = rolesMatrizCache.find(m => m.rol === sesionActual.rol);
+          if (miRol) {
+            sesionActual.permisos = miRol;
+            iniciarInterfazUsuario();
+            cambiarPestana("usuarios");
+          }
+        } else {
+          mostrarAlerta(msgPerm, res.error, "error");
+        }
+      } catch (err) {
+        mostrarAlerta(msgPerm, err.message || "Error al guardar permisos.", "error");
+      }
+    });
+
+    function renderizarTablaUsuarios(usuarios) {
+      const tbody = document.getElementById("tbodyUsuarios");
+      tbody.innerHTML = "";
+
+      usuarios.forEach(u => {
+        const tr = document.createElement("tr");
+        const estadoBadge = u.activo === "SI"
+          ? '<span class="badge green">ACTIVO</span>'
+          : '<span class="badge red">INACTIVO</span>';
+
+        tr.innerHTML = `
           <td><strong>${u.usuario}</strong></td>
-          <td>${u.nombres}</td>
-          <td>${u.rol}</td>
-          <td>${u.ambito}</td>
-          <td>${u.activo === "SI" ? "ACTIVO" : "INACTIVO"}</td>
-          <td>
-            <button class="btn btn-secondary" style="padding:4px 10px; font-size:12px;"
-                    onclick="editUserByIndex(${idx})">Editar</button>
-          </td>
-        </tr>
-      `).join("");
-    }
+          <td>${u.nombre}</td>
+          <td><span class="badge blue">${u.rol}</span></td>
+          <td>${u.sede}</td>
+          <td>${estadoBadge}</td>
+          <td><button type="button" class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;">Editar</button></td>
+        `;
 
-    function editUserByIndex(idx) {
-      const u = STATE.usuarios[idx];
-      if (!u) return;
-      document.getElementById("usrLogin").value = u.usuario;
-      document.getElementById("usrPass").value = u.password;
-      document.getElementById("usrNombres").value = u.nombres;
-      document.getElementById("usrRol").value = u.rol;
-      document.getElementById("usrAmbito").value = u.ambito;
-      document.getElementById("usrActivo").value = u.activo;
-    }
+        tr.querySelector("button").addEventListener("click", () => {
+          document.getElementById("uUsuario").value = u.usuario;
+          document.getElementById("uClave").value = u.clave;
+          document.getElementById("uNombre").value = u.nombre;
+          document.getElementById("uRol").value = u.rol;
+          document.getElementById("uSede").value = u.sede;
+          document.getElementById("uActivo").value = u.activo;
+        });
 
-    function clearUserForm() {
-      document.getElementById("usrLogin").value = "";
-      document.getElementById("usrPass").value = "";
-      document.getElementById("usrNombres").value = "";
-      document.getElementById("usrRol").value = "ASISTENTE";
-      document.getElementById("usrAmbito").value = "TODAS";
-      document.getElementById("usrActivo").value = "SI";
-    }
-
-    async function saveUserAccount() {
-      const userData = {
-        usuario: document.getElementById("usrLogin").value.trim(),
-        password: document.getElementById("usrPass").value.trim(),
-        nombres: document.getElementById("usrNombres").value.trim(),
-        rol: document.getElementById("usrRol").value,
-        ambito: document.getElementById("usrAmbito").value,
-        activo: document.getElementById("usrActivo").value
-      };
-      const resp = await apiCall({
-        action: "saveUser",
-        actorUsuario: STATE.user.usuario,
-        userData
+        tbody.appendChild(tr);
       });
-      if (!resp.ok) return showToast(resp.error, true);
-      showToast("Cuenta de usuario guardada correctamente.");
-      clearUserForm();
-      await refreshAllData();
+    }
+
+    document.getElementById("formUsuario").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msgUser = document.getElementById("mensajeUsuario");
+      const btnSave = document.getElementById("btnGuardarUsuario");
+
+      btnSave.disabled = true;
+      mostrarAlerta(msgUser, "Guardando usuario...", "info");
+
+      try {
+        const res = await llamarBackend({
+          accion: "guardar_usuario",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          uUsuario: document.getElementById("uUsuario").value.trim(),
+          uClave: document.getElementById("uClave").value.trim(),
+          uNombre: document.getElementById("uNombre").value.trim(),
+          uRol: document.getElementById("uRol").value,
+          uSede: document.getElementById("uSede").value,
+          uActivo: document.getElementById("uActivo").value
+        });
+
+        if (res.ok) {
+          mostrarAlerta(msgUser, res.mensaje, "success");
+          document.getElementById("formUsuario").reset();
+          await cargarGestionUsuarios();
+        } else {
+          mostrarAlerta(msgUser, res.error, "error");
+        }
+      } catch (err) {
+        mostrarAlerta(msgUser, err.message || "Error al guardar usuario.", "error");
+      } finally {
+        btnSave.disabled = false;
+      }
+    });
+
+    function mostrarAlerta(el, texto, tipo) {
+      el.textContent = texto;
+      el.className = `alert ${tipo}`;
+    }
+
+    // --- RESTAURAR SESIÓN SEGURA ---
+    try {
+      const sesionGuardada = sessionStorage.getItem(STORAGE_KEY);
+      if (sesionGuardada) {
+        const parsed = JSON.parse(sesionGuardada);
+        if (parsed && parsed.usuario && parsed.clave) {
+          sesionActual = parsed;
+          iniciarInterfazUsuario();
+          llamarBackend({
+            accion: "get_tipos",
+            usuario: sesionActual.usuario,
+            clave: sesionActual.clave
+          }).then(data => {
+            if (data.ok) {
+              tiposDocumento = data.tiposDocumento;
+              sesionActual.rol = data.rol || sesionActual.rol;
+              sesionActual.permisos = data.permisos || sesionActual.permisos;
+              renderizarTiposDocumento();
+              inicializarFiltrosVisor();
+            }
+          }).catch(() => {});
+        } else {
+          sessionStorage.removeItem(STORAGE_KEY);
+        }
+      }
+    } catch (e) {
+      sessionStorage.removeItem(STORAGE_KEY);
     }
   </script>
 </body>
