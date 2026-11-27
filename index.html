@@ -56,7 +56,7 @@
     .brand-title { display: block; font-weight: 700; font-size: 1.05rem; }
     .brand-sub { display: block; font-size: 0.78rem; opacity: 0.85; }
 
-    .user-badge { display: flex; align-items: center; gap: 14px; }
+    .user-badge { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: flex-end; }
     .user-info { text-align: right; line-height: 1.35; }
     .user-info strong { display: block; font-size: 0.9rem; }
     .user-info small { font-size: 0.76rem; opacity: 0.9; }
@@ -71,6 +71,22 @@
       letter-spacing: 0.3px;
       margin-left: 6px;
     }
+
+    .btn-drive-view {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: var(--primary-dark);
+      border: 1px solid #bfdbfe;
+      padding: 7px 13px;
+      border-radius: 7px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-drive-view:hover { background: #dbeafe; }
 
     .btn-outline {
       background: rgba(255, 255, 255, 0.1);
@@ -776,6 +792,19 @@
       </div>
     </div>
     <div id="userBadge" class="user-badge hidden">
+      <!-- BOTÓN CARPETA DRIVE (SOLO VISTA) -->
+      <a id="btnCarpetaDriveVista"
+         href="https://drive.google.com/drive/folders/1R4OrJ3nSTjeiHnt7yHwJrOnBhY8Ct2Vp"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="btn-drive-view"
+         title="Abrir repositorio en Google Drive en modo Solo Lectura">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+        Carpeta Drive (Solo Vista) ↗
+      </a>
+
       <div class="user-info">
         <strong id="lblNombreUsuario">Usuario</strong>
         <small id="lblSedeUsuario">Sede</small>
@@ -1200,8 +1229,9 @@
     }
 
     const CONFIG = {
-      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbzxEQ7dazxEytY0zldW8QcWzuN9ZeqsDSUZ-gdZR0oQFlnyGZKqJ-gNg9hiWN6YQ6ZX/exec",
-      MAX_SIZE_MB: 15
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwbfiOGgByLPLF6HEHavga-bYQFScKkEep620yp6YUbm7CLg9jiZRIUdkVX8D03tY0R/exec",
+      MAX_SIZE_MB: 15,
+      DEFAULT_DRIVE_VIEW_URL: "https://drive.google.com/drive/folders/1R4OrJ3nSTjeiHnt7yHwJrOnBhY8Ct2Vp"
     };
 
     const STORAGE_KEY = "sesion_capacitacion_pdf";
@@ -1258,6 +1288,7 @@
     const vistaLogin = document.getElementById("vistaLogin");
     const vistaApp = document.getElementById("vistaApp");
     const userBadge = document.getElementById("userBadge");
+    const btnCarpetaDriveVista = document.getElementById("btnCarpetaDriveVista");
     const loginForm = document.getElementById("loginForm");
     const loginMensaje = document.getElementById("loginMensaje");
     const btnLogin = document.getElementById("btnLogin");
@@ -1361,6 +1392,22 @@
       }
     }
 
+    async function sincronizarBotonDriveSoloVista(sedeFiltro = "", tipoFiltro = "") {
+      if (!sesionActual) return;
+      try {
+        const res = await llamarBackend({
+          accion: "obtener_url_carpeta_vista",
+          usuario: sesionActual.usuario,
+          clave: sesionActual.clave,
+          sede: sedeFiltro,
+          tipoDocumento: tipoFiltro
+        });
+        if (res.ok && res.urlCarpetaDrive) {
+          btnCarpetaDriveVista.href = res.urlCarpetaDrive;
+        }
+      } catch (e) {}
+    }
+
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const usuario = document.getElementById("loginUsuario").value.trim();
@@ -1383,7 +1430,8 @@
           nombre: data.nombre,
           sedeAsignada: String(data.sedeAsignada || "").trim().toUpperCase(),
           rol: data.rol || "COORDINADOR(A)",
-          permisos: data.permisos || {}
+          permisos: data.permisos || {},
+          urlCarpetaDrive: data.urlCarpetaDrive || CONFIG.DEFAULT_DRIVE_VIEW_URL
         };
         tiposDocumento = data.tiposDocumento || [];
         iniciarInterfazUsuario();
@@ -1400,6 +1448,8 @@
       vistaLogin.classList.add("hidden");
       vistaApp.classList.remove("hidden");
       userBadge.classList.remove("hidden");
+
+      btnCarpetaDriveVista.href = sesionActual.urlCarpetaDrive || CONFIG.DEFAULT_DRIVE_VIEW_URL;
 
       const p = sesionActual.permisos || {};
 
@@ -1510,7 +1560,6 @@
       if (!window.Chart) return;
       const stats = data.dashboardStats || { porTipo: {}, porNivel: {}, porUsuario: {} };
 
-      // 1. Gráfico Donut: Documentos por Tipo Documental
       const labelsTipo = Object.keys(stats.porTipo);
       const valsTipo = Object.values(stats.porTipo);
       if (chartTiposInstance) chartTiposInstance.destroy();
@@ -1534,7 +1583,6 @@
         }
       });
 
-      // 2. Gráfico Barras: Listas de Asistencia por Nivel
       const labelsNivel = Object.keys(stats.porNivel);
       const valsNivel = Object.values(stats.porNivel);
       if (chartNivelesInstance) chartNivelesInstance.destroy();
@@ -1559,7 +1607,6 @@
         }
       });
 
-      // 3. Gráfico Barras Horizontales: Ranking de Archivos Cargados por Usuario
       const entradasUsuarios = Object.entries(stats.porUsuario || {})
         .map(([usuario, total]) => ({ usuario, total }))
         .sort((a, b) => b.total - a.total)
@@ -1703,8 +1750,18 @@
       rutaPreview.textContent = ruta;
     }
 
-    selectSede.addEventListener("change", actualizarVistaRuta);
-    selectTipo.addEventListener("change", actualizarOpcionesSubnivel);
+    selectSede.addEventListener("change", () => {
+      actualizarVistaRuta();
+      if (selectSede.value && selectSede.value !== "SIN COINCIDENCIAS") {
+        sincronizarBotonDriveSoloVista(selectSede.value, selectTipo.value);
+      }
+    });
+    selectTipo.addEventListener("change", () => {
+      actualizarOpcionesSubnivel();
+      if (selectSede.value && selectSede.value !== "SIN COINCIDENCIAS") {
+        sincronizarBotonDriveSoloVista(selectSede.value, selectTipo.value);
+      }
+    });
     selectNivel.addEventListener("change", actualizarOpcionesSubnivel);
     selectSubnivel.addEventListener("change", actualizarVistaRuta);
     inputFechaAsistencia.addEventListener("change", actualizarVistaRuta);
@@ -1783,6 +1840,9 @@
 
           if (res.ok) {
             mostrarAlerta(mensaje, `[${res.accionRealizada}] Guardado como "${res.nombreGuardado}" en ${res.ruta}.`, "success");
+            if (res.urlCarpeta) {
+              btnCarpetaDriveVista.href = res.urlCarpeta;
+            }
             agregarAlHistorial(res);
             archivoSeleccionado = null;
             inputArchivo.value = "";
@@ -1853,8 +1913,14 @@
     }
 
     document.getElementById("btnRefrescarVisor").addEventListener("click", cargarDocumentosVisor);
-    filtroVisorSede.addEventListener("change", renderizarListaVisor);
-    filtroVisorTipo.addEventListener("change", renderizarListaVisor);
+    filtroVisorSede.addEventListener("change", () => {
+      renderizarListaVisor();
+      sincronizarBotonDriveSoloVista(filtroVisorSede.value, filtroVisorTipo.value);
+    });
+    filtroVisorTipo.addEventListener("change", () => {
+      renderizarListaVisor();
+      sincronizarBotonDriveSoloVista(filtroVisorSede.value, filtroVisorTipo.value);
+    });
     filtroVisorTexto.addEventListener("input", renderizarListaVisor);
 
     async function cargarDocumentosVisor() {
@@ -2765,6 +2831,10 @@
               tiposDocumento = data.tiposDocumento;
               sesionActual.rol = data.rol || sesionActual.rol;
               sesionActual.permisos = data.permisos || sesionActual.permisos;
+              if (data.urlCarpetaDrive) {
+                sesionActual.urlCarpetaDrive = data.urlCarpetaDrive;
+                btnCarpetaDriveVista.href = data.urlCarpetaDrive;
+              }
               renderizarTiposDocumento();
               inicializarFiltrosVisor();
             }
@@ -2779,3 +2849,4 @@
   </script>
 </body>
 </html>
+```[cite: 16, 17]
