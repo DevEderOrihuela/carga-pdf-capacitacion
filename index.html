@@ -416,7 +416,7 @@
 
     .visor-layout {
       display: grid;
-      grid-template-columns: 370px 1fr;
+      grid-template-columns: 390px 1fr;
       gap: 16px;
       align-items: stretch;
     }
@@ -427,24 +427,14 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       padding-right: 6px;
-    }
-
-    .doc-item {
-      padding: 12px 14px;
+      background: #f8fafc;
       border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      background: #fff;
-      cursor: pointer;
-      transition: all 0.15s;
+      border-radius: 10px;
+      padding: 10px;
     }
 
-    .doc-item:hover { border-color: var(--accent); background: #f8fafc; }
-    .doc-item.selected { border-color: var(--primary); background: #eff6ff; box-shadow: 0 0 0 2px rgba(15, 76, 129, 0.15); }
-
-    .doc-title { font-weight: 600; font-size: 0.85rem; color: var(--text); word-break: break-word; margin-bottom: 5px; }
-    .doc-meta { font-size: 0.76rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; }
     .badge {
       background: #e2e8f0;
       color: #334155;
@@ -456,6 +446,116 @@
     .badge.blue { background: #dbeafe; color: #1e40af; }
     .badge.green { background: #dcfce7; color: #166534; }
     .badge.red { background: #fee2e2; color: #991b1b; }
+
+    /* ÁRBOL JERÁRQUICO DEL VISOR */
+    .tree-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 10px;
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      font-size: 0.78rem;
+      color: #1e293b;
+      position: sticky;
+      top: 0;
+      z-index: 4;
+    }
+
+    .tree-toolbar-btns { display: flex; gap: 5px; }
+
+    .tree-mini-btn {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      padding: 3px 8px;
+      font-size: 0.73rem;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+    }
+    .tree-mini-btn:hover { background: #f1f5f9; }
+
+    .tree-node { user-select: none; }
+
+    .tree-folder-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.81rem;
+      font-weight: 600;
+      color: #1e293b;
+      transition: background 0.12s;
+    }
+    .tree-folder-row:hover { background: #e2e8f0; }
+
+    .tree-arrow {
+      display: inline-block;
+      width: 14px;
+      font-size: 0.68rem;
+      color: #64748b;
+      transition: transform 0.15s;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .tree-node.open > .tree-folder-row .tree-arrow { transform: rotate(90deg); }
+
+    .tree-folder-label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tree-count {
+      background: #1d4ed8;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 1px 8px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
+    .tree-children {
+      display: none;
+      padding-left: 14px;
+      margin-left: 7px;
+      border-left: 1px dashed #94a3b8;
+    }
+    .tree-node.open > .tree-children { display: block; }
+
+    .tree-file-item {
+      padding: 8px 10px;
+      margin: 4px 0;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tree-file-item:hover { border-color: var(--accent); background: #f8fafc; }
+    .tree-file-item.selected {
+      border-color: var(--primary);
+      background: #dbeafe;
+      box-shadow: 0 0 0 2px rgba(15, 76, 129, 0.18);
+    }
+    .tree-file-name {
+      font-weight: 600;
+      font-size: 0.79rem;
+      color: var(--text);
+      word-break: break-word;
+      margin-bottom: 3px;
+    }
+    .tree-file-sub {
+      font-size: 0.71rem;
+      color: #475569;
+    }
 
     .visor-preview-panel {
       border: 1px solid #cbd5e1;
@@ -1012,7 +1112,7 @@
         <div class="card-header-flex">
           <div>
             <h2>Visor de Documentos Almacenados</h2>
-            <p>Seleccione un archivo para visualizarlo, rotar páginas, imprimir o descargar.</p>
+            <p>Navegue por las carpetas jerárquicas o utilice los filtros para abrir, rotar, imprimir o descargar archivos.</p>
           </div>
           <button type="button" id="btnRefrescarVisor" class="btn-secondary">Actualizar Lista</button>
         </div>
@@ -1057,7 +1157,7 @@
             </div>
 
             <div id="visorPlaceholder" class="visor-empty">
-              <p>Selecciona un documento de la lista izquierda para cargarlo en el visor interactivo.</p>
+              <p>Despliega una carpeta y selecciona un documento PDF del árbol izquierdo para cargarlo en el visor interactivo.</p>
             </div>
 
             <div id="pdfCanvasContainer" class="pdf-canvas-container hidden"></div>
@@ -1874,7 +1974,7 @@
       listaHistorial.prepend(li);
     }
 
-    // --- MÓDULO VISOR ---
+    // --- MÓDULO VISOR CON NAVEGADOR DE ÁRBOL JERÁRQUICO ---
     const filtroVisorSede = document.getElementById("filtroVisorSede");
     const filtroVisorTipo = document.getElementById("filtroVisorTipo");
     const filtroVisorTexto = document.getElementById("filtroVisorTexto");
@@ -1954,7 +2054,7 @@
         if (fSede && d.sede !== fSede) return false;
         if (fTipo && d.tipoDocumento !== fTipo) return false;
         if (fTexto) {
-          const bloque = `${d.archivo} ${d.nivel} ${d.fechaAsistencia} ${d.nombreUsuario}`.toLowerCase();
+          const bloque = `${d.archivo} ${d.sede} ${d.tipoDocumento} ${d.nivel} ${d.fechaAsistencia} ${d.nombreUsuario}`.toLowerCase();
           if (!bloque.includes(fTexto)) return false;
         }
         return true;
@@ -1966,31 +2066,123 @@
         return;
       }
 
-      filtrados.forEach((doc) => {
-        const div = document.createElement("div");
-        div.className = "doc-item";
-        const badgeNivel = doc.nivel && doc.nivel !== "-" ? `<span class="badge blue">${doc.nivel}</span>` : "";
-        const badgeFecha = doc.fechaAsistencia && doc.fechaAsistencia !== "-" ? `<span class="badge">${doc.fechaAsistencia}</span>` : "";
+      // Barra superior del árbol con contador total y botones Expandir / Contraer
+      const toolbar = document.createElement("div");
+      toolbar.className = "tree-toolbar";
+      toolbar.innerHTML = `
+        <span><strong>${filtrados.length}</strong> archivo(s)</span>
+        <div class="tree-toolbar-btns">
+          <button type="button" class="tree-mini-btn" id="btnExpandirArbol">+ Expandir</button>
+          <button type="button" class="tree-mini-btn" id="btnContraerArbol">− Contraer</button>
+        </div>
+      `;
+      listaDocumentosVisor.appendChild(toolbar);
 
-        div.innerHTML = `
-          <div class="doc-title">${doc.archivo}</div>
-          <div class="doc-meta">
-            <span class="badge">${doc.sede}</span>
-            ${badgeNivel}
-            ${badgeFecha}
-          </div>
-          <div style="font-size:0.74rem;color:#64748b;margin-top:5px;">
-            Subido: ${doc.fechaHora} por ${doc.nombreUsuario}
-          </div>
-        `;
+      // Construir jerarquía: Tipo -> Sede -> [Nivel] -> [Perfil] -> [Fecha] -> Documentos
+      const raiz = { hijos: {}, docs: [], total: 0 };
 
-        div.addEventListener("click", () => {
-          document.querySelectorAll(".doc-item").forEach(el => el.classList.remove("selected"));
-          div.classList.add("selected");
-          cargarDocumentoEnVisorInteractivo(doc);
+      filtrados.forEach(doc => {
+        const rutaCarpetas = [doc.tipoDocumento || "SIN TIPO", doc.sede || "SIN SEDE"];
+
+        if (doc.nivel && doc.nivel !== "-") {
+          if (doc.nivel.includes(" - ")) {
+            const partes = doc.nivel.split(" - ");
+            rutaCarpetas.push(partes[0].trim());
+            rutaCarpetas.push(partes.slice(1).join(" - ").trim());
+          } else {
+            rutaCarpetas.push(doc.nivel.trim());
+          }
+        }
+
+        if (doc.fechaAsistencia && doc.fechaAsistencia !== "-") {
+          rutaCarpetas.push(doc.fechaAsistencia.trim());
+        }
+
+        let nodoActual = raiz;
+        nodoActual.total++;
+
+        rutaCarpetas.forEach(nombreCarpeta => {
+          if (!nodoActual.hijos[nombreCarpeta]) {
+            nodoActual.hijos[nombreCarpeta] = {
+              nombre: nombreCarpeta,
+              hijos: {},
+              docs: [],
+              total: 0
+            };
+          }
+          nodoActual = nodoActual.hijos[nombreCarpeta];
+          nodoActual.total++;
         });
 
-        listaDocumentosVisor.appendChild(div);
+        nodoActual.docs.push(doc);
+      });
+
+      const expandirPorDefecto = Boolean(fSede || fTexto || filtrados.length <= 15);
+
+      function crearElementoNodo(nodo, profundidad) {
+        const contenedor = document.createElement("div");
+        contenedor.className = "tree-node" + (expandirPorDefecto || profundidad === 0 ? " open" : "");
+
+        const filaCarpeta = document.createElement("div");
+        filaCarpeta.className = "tree-folder-row";
+        const icono = profundidad === 0 ? "📁" : (profundidad === 1 ? "📍" : "📂");
+
+        filaCarpeta.innerHTML = `
+          <span class="tree-arrow">▶</span>
+          <span>${icono}</span>
+          <span class="tree-folder-label" title="${nodo.nombre}">${nodo.nombre}</span>
+          <span class="tree-count">${nodo.total}</span>
+        `;
+
+        filaCarpeta.addEventListener("click", () => {
+          contenedor.classList.toggle("open");
+        });
+
+        const contenedorHijos = document.createElement("div");
+        contenedorHijos.className = "tree-children";
+
+        Object.keys(nodo.hijos).sort().forEach(clave => {
+          contenedorHijos.appendChild(crearElementoNodo(nodo.hijos[clave], profundidad + 1));
+        });
+
+        nodo.docs.forEach(doc => {
+          const itemDoc = document.createElement("div");
+          itemDoc.className = "tree-file-item";
+          if (docSeleccionadoActual && docSeleccionadoActual.fileId === doc.fileId) {
+            itemDoc.classList.add("selected");
+          }
+
+          itemDoc.innerHTML = `
+            <div class="tree-file-name">📄 ${doc.archivo}</div>
+            <div class="tree-file-sub">${doc.fechaHora} • ${doc.nombreUsuario}</div>
+          `;
+
+          itemDoc.addEventListener("click", (e) => {
+            e.stopPropagation();
+            document.querySelectorAll(".tree-file-item").forEach(el => el.classList.remove("selected"));
+            itemDoc.classList.add("selected");
+            cargarDocumentoEnVisorInteractivo(doc);
+          });
+
+          contenedorHijos.appendChild(itemDoc);
+        });
+
+        contenedor.appendChild(filaCarpeta);
+        contenedor.appendChild(contenedorHijos);
+        return contenedor;
+      }
+
+      const arbolContainer = document.createElement("div");
+      Object.keys(raiz.hijos).sort().forEach(claveTipo => {
+        arbolContainer.appendChild(crearElementoNodo(raiz.hijos[claveTipo], 0));
+      });
+      listaDocumentosVisor.appendChild(arbolContainer);
+
+      document.getElementById("btnExpandirArbol").addEventListener("click", () => {
+        arbolContainer.querySelectorAll(".tree-node").forEach(n => n.classList.add("open"));
+      });
+      document.getElementById("btnContraerArbol").addEventListener("click", () => {
+        arbolContainer.querySelectorAll(".tree-node").forEach(n => n.classList.remove("open"));
       });
     }
 
@@ -2849,4 +3041,3 @@
   </script>
 </body>
 </html>
-```[cite: 16, 17]
