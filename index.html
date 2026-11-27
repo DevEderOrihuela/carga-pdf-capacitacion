@@ -873,10 +873,10 @@
           </div>
 
           <div class="chart-card full">
-            <h3>Ranking de Carga por Sede Operativa (Top 20)</h3>
-            <p>Sedes con mayor volumen de documentos cargados al repositorio.</p>
+            <h3>Ranking de Archivos Cargados por Usuario</h3>
+            <p>Usuarios con mayor volumen de documentos PDF cargados al repositorio.</p>
             <div class="chart-box tall">
-              <canvas id="chartSedes"></canvas>
+              <canvas id="chartUsuarios"></canvas>
             </div>
           </div>
         </div>
@@ -1200,7 +1200,7 @@
     }
 
     const CONFIG = {
-      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyFmtigdda_42ClnfIm-EYbsnSTS-Gq92B4T0auf-iSkJYgUey3IjUGbVjY2j9bPgug/exec",
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyyeXDKb6cU9_afJICqHzq4uYhUkmIGLLyfObMH4DAnaP27aGqV4pDBKQKzBKxH9j0c/exec",
       MAX_SIZE_MB: 15
     };
 
@@ -1253,7 +1253,7 @@
 
     let chartTiposInstance = null;
     let chartNivelesInstance = null;
-    let chartSedesInstance = null;
+    let chartUsuariosInstance = null;
 
     const vistaLogin = document.getElementById("vistaLogin");
     const vistaApp = document.getElementById("vistaApp");
@@ -1407,20 +1407,17 @@
       document.getElementById("lblSedeUsuario").textContent =
         sesionActual.sedeAsignada === "TODAS" ? "Ámbito: Nacional (50 Sedes)" : `Sede: ${sesionActual.sedeAsignada}`;
 
-      // Mostrar/ocultar pestañas según permisos del Rol
       tabDashboard.classList.toggle("hidden", !p.dashboard);
       tabCarga.classList.toggle("hidden", !p.cargar);
       tabVisor.classList.toggle("hidden", !p.visor);
       tabReportes.classList.toggle("hidden", !p.reportes);
       tabUsuarios.classList.toggle("hidden", !p.usuarios);
 
-      // Controlar botón Eliminar en el Visor según permiso del rol
       const btnEliminar = document.getElementById("btnEliminarPdf");
       const sepEliminar = document.getElementById("sepEliminar");
       btnEliminar.classList.toggle("hidden", !p.eliminar);
       sepEliminar.classList.toggle("hidden", !p.eliminar);
 
-      // Botón + Nuevo Tipo Documental solo si tiene permiso de gestión/admin
       if (p.usuarios && sesionActual.sedeAsignada === "TODAS") {
         btnToggleNuevoTipo.classList.remove("hidden");
       } else {
@@ -1442,7 +1439,6 @@
       inicializarFiltrosVisor();
       poblarSelectSedesUsuario();
 
-      // Abrir primera pestaña permitida para el rol
       if (p.dashboard) cambiarPestana("dashboard");
       else if (p.cargar) cambiarPestana("carga");
       else if (p.visor) cambiarPestana("visor");
@@ -1512,7 +1508,7 @@
 
     function renderizarGraficosDashboard(data) {
       if (!window.Chart) return;
-      const stats = data.dashboardStats || { porTipo: {}, porNivel: {} };
+      const stats = data.dashboardStats || { porTipo: {}, porNivel: {}, porUsuario: {} };
 
       // 1. Gráfico Donut: Documentos por Tipo Documental
       const labelsTipo = Object.keys(stats.porTipo);
@@ -1563,19 +1559,20 @@
         }
       });
 
-      // 3. Gráfico Barras Horizontales: Top 20 Sedes con más carga
-      const topSedes = [...(data.filas || [])]
+      // 3. Gráfico Barras Horizontales: Ranking de Archivos Cargados por Usuario
+      const entradasUsuarios = Object.entries(stats.porUsuario || {})
+        .map(([usuario, total]) => ({ usuario, total }))
         .sort((a, b) => b.total - a.total)
         .slice(0, 20);
 
-      if (chartSedesInstance) chartSedesInstance.destroy();
-      chartSedesInstance = new Chart(document.getElementById("chartSedes"), {
+      if (chartUsuariosInstance) chartUsuariosInstance.destroy();
+      chartUsuariosInstance = new Chart(document.getElementById("chartUsuarios"), {
         type: "bar",
         data: {
-          labels: topSedes.map(s => s.sede),
+          labels: entradasUsuarios.map(u => u.usuario),
           datasets: [{
-            label: "Total Documentos",
-            data: topSedes.map(s => s.total),
+            label: "Archivos Cargados",
+            data: entradasUsuarios.map(u => u.total),
             backgroundColor: "#0f4c81",
             borderRadius: 4
           }]
