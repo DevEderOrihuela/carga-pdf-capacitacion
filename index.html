@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Gestión Documental PDF — Capacitación</title>
+  <!-- PDF.js para visor interactivo -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- SheetJS con soporte de estilos visuales (colores, bordes, fuentes) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <style>
     :root {
       --primary: #0f4c81;
@@ -1763,6 +1765,7 @@
       tfootReporte.innerHTML = footHtml;
     }
 
+    // EXPORTAR A EXCEL (.XLSX) CON DISEÑO EJECUTIVO, COLORES Y BORDES
     document.getElementById("btnExportarExcel").addEventListener("click", () => {
       if (!reporteDataCache) return;
       if (!window.XLSX) {
@@ -1778,19 +1781,92 @@
       const estadoTexto = document.getElementById("filtroReporteEstado").selectedOptions[0].text;
       const filtroSedeTexto = filtroReporteSede.value.trim().toUpperCase() || "NINGUNO";
 
+      // Definición de estilos reutilizables
+      const bordeFino = {
+        top: { style: "thin", color: { rgb: "CBD5E1" } },
+        bottom: { style: "thin", color: { rgb: "CBD5E1" } },
+        left: { style: "thin", color: { rgb: "CBD5E1" } },
+        right: { style: "thin", color: { rgb: "CBD5E1" } }
+      };
+
+      const bordeCabecera = {
+        top: { style: "thin", color: { rgb: "FFFFFF" } },
+        bottom: { style: "thin", color: { rgb: "FFFFFF" } },
+        left: { style: "thin", color: { rgb: "FFFFFF" } },
+        right: { style: "thin", color: { rgb: "FFFFFF" } }
+      };
+
+      const estiloBanner = {
+        font: { name: "Calibri", sz: 13, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "0A355C" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      const estiloMetaLabel = {
+        font: { name: "Calibri", sz: 9, bold: true, color: { rgb: "1E293B" } },
+        fill: { fgColor: { rgb: "E2E8F0" } },
+        border: bordeFino,
+        alignment: { horizontal: "left", vertical: "center" }
+      };
+
+      const estiloMetaVal = {
+        font: { name: "Calibri", sz: 9, color: { rgb: "0F172A" } },
+        fill: { fgColor: { rgb: "F8FAFC" } },
+        border: bordeFino,
+        alignment: { horizontal: "left", vertical: "center" }
+      };
+
+      const estiloThTipo = {
+        font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "0F4C81" } },
+        border: bordeCabecera,
+        alignment: { horizontal: "center", vertical: "center", wrapText: true }
+      };
+
+      const estiloThSede = {
+        font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "0A355C" } },
+        border: bordeCabecera,
+        alignment: { horizontal: "center", vertical: "center", wrapText: true }
+      };
+
+      const estiloThNivel = {
+        font: { name: "Calibri", sz: 9, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "1D4ED8" } },
+        border: bordeCabecera,
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      const estiloThFecha = {
+        font: { name: "Calibri", sz: 9, bold: true, color: { rgb: "1E3A8A" } },
+        fill: { fgColor: { rgb: "DBEAFE" } },
+        border: bordeFino,
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      // Calcular total de columnas para extender el banner
+      let totalColsTabla = 2; // SEDE + TOTAL SEDE
+      estructuraTipos.forEach(et => { totalColsTabla += et.colspan; });
+      const ultimaColIdx = Math.max(totalColsTabla - 1, 6);
+
+      // Bloque superior de identificadores (Filas 0 a 4)
+      const filaBanner = Array(ultimaColIdx + 1).fill("");
+      filaBanner[0] = "REPORTE DE AVANCE DE CARGA DOCUMENTAL — EVALUACIÓN DOCENTE 2026 (CAPACITACIÓN)";
+
       const aoa = [
-        ["REPORTE DE AVANCE DE CARGA DOCUMENTAL — CAPACITACIÓN (ED2026)"],
+        filaBanner,
         ["CÓDIGO DE REPORTE:", "RPT-AVANCE-CAP-ED2026", "", "FECHA Y HORA DE DESCARGA:", fechaHoraExport],
         ["ÁMBITO DE CONSULTA:", ambito, "", "DATOS CONSULTADOS AL:", generadoEn],
         ["GENERADO POR:", usuarioGenerador, "", "FILTRO APLICADO:", `${estadoTexto} (Sede: ${filtroSedeTexto})`],
         []
       ];
 
+      // Cabeceras multinivel (Filas 5, 6 y 7)
       const rowTipo = ["SEDE OPERATIVA"];
       const rowNivel = [""];
       const rowFecha = [""];
       const merges = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
+        { s: { r: 0, c: 0 }, e: { r: 0, c: ultimaColIdx } },
         { s: { r: 5, c: 0 }, e: { r: 7, c: 0 } }
       ];
 
@@ -1826,13 +1902,15 @@
         }
       });
 
+      const colTotalIdx = colIdx;
       rowTipo.push("TOTAL SEDE");
       rowNivel.push("");
       rowFecha.push("");
-      merges.push({ s: { r: 5, c: colIdx }, e: { r: 7, c: colIdx } });
+      merges.push({ s: { r: 5, c: colTotalIdx }, e: { r: 7, c: colTotalIdx } });
 
       aoa.push(rowTipo, rowNivel, rowFecha);
 
+      // Filas de datos por sede
       const totalesCol = {};
       columnasHoja.forEach(c => { totalesCol[c.key] = 0; });
       let granTotal = 0;
@@ -1849,6 +1927,7 @@
         aoa.push(filaExcel);
       });
 
+      // Fila final de totales
       const filaTotalesExcel = [`TOTAL GENERAL (${filasExportar.length} sedes)`];
       columnasHoja.forEach(c => filaTotalesExcel.push(totalesCol[c.key]));
       filaTotalesExcel.push(granTotal);
@@ -1858,12 +1937,127 @@
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       ws["!merges"] = merges;
 
+      // Aplicar estilos celda por celda
+      const filaInicioDatos = 8;
+      const filaTotalIdx = filaInicioDatos + filasExportar.length;
+
+      for (let r = 0; r <= filaTotalIdx; r++) {
+        for (let c = 0; c <= ultimaColIdx; c++) {
+          const ref = XLSX.utils.encode_cell({ r, c });
+          if (!ws[ref]) ws[ref] = { t: "s", v: "" };
+
+          // Fila 0: Banner título
+          if (r === 0) {
+            ws[ref].s = estiloBanner;
+            continue;
+          }
+
+          // Filas 1-3: Ficha identificadora
+          if (r >= 1 && r <= 3) {
+            if (c === 0 || c === 3) ws[ref].s = estiloMetaLabel;
+            else if (c === 1 || c === 4) ws[ref].s = estiloMetaVal;
+            continue;
+          }
+
+          // Fila 4: Separador
+          if (r === 4) continue;
+
+          // Filas 5-7: Cabecera jerárquica
+          if (r === 5) {
+            ws[ref].s = (c === 0 || c === colTotalIdx) ? estiloThSede : estiloThTipo;
+            continue;
+          }
+          if (r === 6) {
+            ws[ref].s = (c === 0 || c === colTotalIdx) ? estiloThSede : (rowNivel[c] !== "" || ws[ref].v !== "" ? estiloThNivel : estiloThTipo);
+            continue;
+          }
+          if (r === 7) {
+            ws[ref].s = (c === 0 || c === colTotalIdx) ? estiloThSede : (rowFecha[c] !== "" ? estiloThFecha : estiloThTipo);
+            continue;
+          }
+
+          // Fila Final: Totales Generales
+          if (r === filaTotalIdx && c <= colTotalIdx) {
+            ws[ref].s = {
+              font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "0A355C" } },
+              fill: { fgColor: { rgb: "CBD5E1" } },
+              border: {
+                top: { style: "medium", color: { rgb: "0F4C81" } },
+                bottom: { style: "double", color: { rgb: "0F4C81" } },
+                left: { style: "thin", color: { rgb: "94A3B8" } },
+                right: { style: "thin", color: { rgb: "94A3B8" } }
+              },
+              alignment: { horizontal: c === 0 ? "left" : "center", vertical: "center" }
+            };
+            continue;
+          }
+
+          // Filas de datos por sede (r >= 8 && r < filaTotalIdx)
+          if (r >= filaInicioDatos && r < filaTotalIdx && c <= colTotalIdx) {
+            const esFilaPar = (r % 2 === 0);
+            const valorNum = Number(ws[ref].v || 0);
+
+            if (c === 0) {
+              // Columna Sede Operativa
+              ws[ref].s = {
+                font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "1E293B" } },
+                fill: { fgColor: { rgb: esFilaPar ? "F8FAFC" : "FFFFFF" } },
+                border: bordeFino,
+                alignment: { horizontal: "left", vertical: "center" }
+              };
+            } else if (c === colTotalIdx) {
+              // Columna Total Sede
+              ws[ref].s = {
+                font: { name: "Calibri", sz: 10, bold: true, color: { rgb: valorNum > 0 ? "1E40AF" : "94A3B8" } },
+                fill: { fgColor: { rgb: valorNum > 0 ? "DBEAFE" : "F1F5F9" } },
+                border: bordeFino,
+                alignment: { horizontal: "center", vertical: "center" }
+              };
+            } else {
+              // Celdas de conteo (Semáforo: Verde si > 0, gris tenue si = 0)
+              ws[ref].s = {
+                font: {
+                  name: "Calibri",
+                  sz: 10,
+                  bold: valorNum > 0,
+                  color: { rgb: valorNum > 0 ? "166534" : "94A3B8" }
+                },
+                fill: {
+                  fgColor: { rgb: valorNum > 0 ? "DCFCE7" : (esFilaPar ? "F8FAFC" : "FFFFFF") }
+                },
+                border: bordeFino,
+                alignment: { horizontal: "center", vertical: "center" }
+              };
+            }
+          }
+        }
+      }
+
+      // Alturas de filas para respiración visual
+      const wsrows = [
+        { hpt: 28 }, // Banner
+        { hpt: 19 }, // Meta 1
+        { hpt: 19 }, // Meta 2
+        { hpt: 19 }, // Meta 3
+        { hpt: 10 }, // Separador
+        { hpt: 26 }, // Cabecera Tipo
+        { hpt: 22 }, // Cabecera Nivel
+        { hpt: 22 }  // Cabecera Fecha
+      ];
+      for (let i = 0; i < filasExportar.length; i++) wsrows.push({ hpt: 20 });
+      wsrows.push({ hpt: 24 }); // Fila Total
+      ws["!rows"] = wsrows;
+
+      // Anchos de columnas optimizados
       const wscols = [{ wch: 32 }];
-      columnasHoja.forEach(() => wscols.push({ wch: 16 }));
+      columnasHoja.forEach(() => wscols.push({ wch: 15 }));
       wscols.push({ wch: 14 });
       ws["!cols"] = wscols;
 
-      XLSX.utils.book_append_sheet(wb, ws, "Avance_Sedes");
+      // Inmovilizar panel izquierdo (Sede) y cabecera superior
+      ws["!freeze"] = { xSplit: 1, ySplit: 8 };
+
+      XLSX.utils.book_append_sheet(wb, ws, "Avance_ED2026");
 
       const tagDescarga = timestampArchivo || ahoraLocal.toISOString().replace(/[-:T]/g, "").slice(0, 15);
       const nombreArchivoExcel = `RPT_Avance_Documental_ED2026_${tagDescarga}.xlsx`;
