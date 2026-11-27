@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Gestión Documental PDF — Capacitación</title>
+  <!-- PDF.js para visor interactivo -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- SheetJS para exportación nativa a Excel (.xlsx) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --primary: #0f4c81;
@@ -164,17 +167,17 @@
     .btn-secondary:hover { background: #dbeafe; }
 
     .btn-excel {
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-      padding: 8px 14px;
+      background: #166534;
+      color: #fff;
+      border: 1px solid #14532d;
+      padding: 8px 15px;
       border-radius: 8px;
       font-size: 0.84rem;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
     }
-    .btn-excel:hover { background: #d1fae5; }
+    .btn-excel:hover { background: #14532d; }
 
     /* LAYOUT DIVIDIDO PARA CARGA */
     .carga-grid {
@@ -495,7 +498,7 @@
       font-size: 0.94rem;
     }
 
-    /* MÓDULO DE REPORTES DE AVANCE */
+    /* MÓDULO DE REPORTES JERÁRQUICOS */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -530,7 +533,7 @@
     .table-scroll-wrapper {
       width: 100%;
       max-height: calc(100vh - 340px);
-      min-height: 440px;
+      min-height: 460px;
       overflow: auto;
       border: 1px solid #cbd5e1;
       border-radius: 10px;
@@ -541,32 +544,54 @@
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
     }
 
     .report-table th, .report-table td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #e2e8f0;
-      border-right: 1px solid #e2e8f0;
+      padding: 8px 10px;
+      border-bottom: 1px solid #cbd5e1;
+      border-right: 1px solid #cbd5e1;
       text-align: center;
     }
 
-    .report-table thead th {
+    /* Cabeceras multinivel fijas */
+    .report-table thead tr:nth-child(1) th {
       position: sticky;
       top: 0;
       background: #0f4c81;
       color: #fff;
-      font-weight: 600;
-      z-index: 2;
-      white-space: normal;
-      min-width: 135px;
-      line-height: 1.25;
+      font-weight: 700;
+      z-index: 3;
+      height: 38px;
     }
 
-    .report-table thead th:first-child {
+    .report-table thead tr:nth-child(2) th {
+      position: sticky;
+      top: 38px;
+      background: #1d4ed8;
+      color: #fff;
+      font-weight: 600;
+      z-index: 3;
+      height: 32px;
+      font-size: 0.76rem;
+    }
+
+    .report-table thead tr:nth-child(3) th {
+      position: sticky;
+      top: 70px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-weight: 700;
+      z-index: 3;
+      height: 30px;
+      font-size: 0.74rem;
+      white-space: nowrap;
+    }
+
+    .report-table thead tr:nth-child(1) th:first-child {
       position: sticky;
       left: 0;
-      z-index: 4;
+      z-index: 5;
       background: #0a355c;
       text-align: left;
       min-width: 240px;
@@ -579,7 +604,7 @@
       font-weight: 600;
       color: #1e293b;
       text-align: left;
-      z-index: 1;
+      z-index: 2;
       white-space: nowrap;
     }
 
@@ -597,42 +622,30 @@
       background: #e2e8f0;
       font-weight: 800;
       color: #0f172a;
-      z-index: 2;
+      z-index: 3;
       border-top: 2px solid #94a3b8;
     }
 
     .report-table tfoot td:first-child {
       position: sticky;
       left: 0;
-      z-index: 4;
+      z-index: 5;
       background: #cbd5e1;
       text-align: left;
     }
 
     .count-pill {
       display: inline-block;
-      min-width: 28px;
-      padding: 3px 8px;
+      min-width: 26px;
+      padding: 2px 7px;
       border-radius: 999px;
       font-weight: 700;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
     }
 
-    .count-zero {
-      background: #f1f5f9;
-      color: #94a3b8;
-      font-weight: 500;
-    }
-
-    .count-positive {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .count-total {
-      background: #dbeafe;
-      color: #1e40af;
-    }
+    .count-zero { background: #f1f5f9; color: #94a3b8; font-weight: 500; }
+    .count-positive { background: #dcfce7; color: #166534; }
+    .count-total { background: #dbeafe; color: #1e40af; }
 
     .hidden { display: none !important; }
 
@@ -853,16 +866,16 @@
       </div>
     </section>
 
-    <!-- MÓDULO 3: REPORTES DE AVANCE (MATRIZ SEDES x TIPOS DOCUMENTALES) -->
+    <!-- MÓDULO 3: REPORTES DE AVANCE (JERÁRQUICO: TIPO -> NIVEL -> FECHA) -->
     <section id="moduloReportes" class="hidden">
       <div class="card">
         <div class="card-header-flex">
           <div>
             <h2>Reporte de Avance de Carga por Sede Operativa</h2>
-            <p id="subtituloReporte">Matriz consolidada de archivos cargados por sede y tipo documental.</p>
+            <p id="subtituloReporte">Matriz consolidada con desglose por Nivel y Fechas de Control.</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button type="button" id="btnExportarCsv" class="btn-excel">⬇ Exportar Reporte (.CSV)</button>
+            <button type="button" id="btnExportarExcel" class="btn-excel">📊 Exportar a Excel (.XLSX)</button>
             <button type="button" id="btnRefrescarReporte" class="btn-secondary">Actualizar Reporte</button>
           </div>
         </div>
@@ -917,7 +930,7 @@
     }
 
     const CONFIG = {
-      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwHi8-tVABKr8FWg3N6y3ZQ-KWsFi_HImEaTjXfY3mjln4VgXg4bOCIymw8IuB0KoRK/exec",
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycbztxXSaIB_5yVYAD6J9iKJuvMh6KpircUfaplzG5SQ4mXSzYKEZ6sK0aixEJwkzCVPS/exec",
       MAX_SIZE_MB: 15
     };
 
@@ -1628,7 +1641,7 @@
       }
     });
 
-    // --- MÓDULO 3: REPORTES DE AVANCE ---
+    // --- MÓDULO 3: REPORTES DE AVANCE JERÁRQUICOS + EXPORTACIÓN EXCEL (.XLSX) ---
     const reporteEstado = document.getElementById("reporteEstado");
     const filtroReporteSede = document.getElementById("filtroReporteSede");
     const filtroReporteEstado = document.getElementById("filtroReporteEstado");
@@ -1642,7 +1655,7 @@
     filtroReporteEstado.addEventListener("change", renderizarTablaReporte);
 
     async function cargarReporteAvance() {
-      mostrarAlerta(reporteEstado, "Calculando avance por sede y tipo documental...", "info");
+      mostrarAlerta(reporteEstado, "Calculando avance por sede, tipo documental, nivel y fechas...", "info");
       try {
         const res = await fetch(CONFIG.WEB_APP_URL, {
           method: "POST",
@@ -1660,58 +1673,81 @@
 
         reporteDataCache = data;
         reporteEstado.classList.add("hidden");
-        subtituloReporte.textContent = `Matriz consolidada de archivos cargados por sede y tipo documental • Actualizado: ${data.generadoEn}`;
+        subtituloReporte.textContent = `Matriz consolidada con desglose por Nivel y Fechas • Generado: ${data.generadoEn}`;
         renderizarTablaReporte();
       } catch (err) {
         mostrarAlerta(reporteEstado, "Error al generar el reporte de avance.", "error");
       }
     }
 
-    function renderizarTablaReporte() {
-      if (!reporteDataCache) return;
-
-      const { tipos, filas } = reporteDataCache;
+    function obtenerFilasReporteFiltradas() {
+      if (!reporteDataCache) return [];
       const textoSede = filtroReporteSede.value.trim().toUpperCase();
       const estadoFiltro = filtroReporteEstado.value;
 
-      // Actualizar KPIs globales (sobre el universo cargado)
-      const totalGeneralDocs = filas.reduce((acc, f) => acc + f.total, 0);
-      const sedesConCarga = filas.filter(f => f.total > 0).length;
-
-      document.getElementById("kpiTotalDocs").textContent = totalGeneralDocs;
-      document.getElementById("kpiSedesActivas").textContent = `${sedesConCarga} / ${filas.length}`;
-      document.getElementById("kpiTiposActivos").textContent = tipos.length;
-
-      // Filtrar filas visibles
-      const filasFiltradas = filas.filter(f => {
+      return reporteDataCache.filas.filter(f => {
         if (textoSede && !f.sede.includes(textoSede)) return false;
         if (estadoFiltro === "CON_CARGA" && f.total === 0) return false;
         if (estadoFiltro === "SIN_CARGA" && f.total > 0) return false;
         return true;
       });
+    }
 
-      // Cabecera: SEDE OPERATIVA | [Tipos Documentales...] | TOTAL SEDE
-      let headHtml = "<tr><th>SEDE OPERATIVA</th>";
-      tipos.forEach(t => {
-        headHtml += `<th>${t}</th>`;
+    function renderizarTablaReporte() {
+      if (!reporteDataCache) return;
+
+      const { estructuraTipos, filas } = reporteDataCache;
+      const filasFiltradas = obtenerFilasReporteFiltradas();
+
+      // KPIs globales
+      const totalGeneralDocs = filas.reduce((acc, f) => acc + f.total, 0);
+      const sedesConCarga = filas.filter(f => f.total > 0).length;
+      document.getElementById("kpiTotalDocs").textContent = totalGeneralDocs;
+      document.getElementById("kpiSedesActivas").textContent = `${sedesConCarga} / ${filas.length}`;
+      document.getElementById("kpiTiposActivos").textContent = estructuraTipos.length;
+
+      // Construir cabecera HTML multinivel (3 filas)
+      let tr1 = `<tr><th rowspan="3">SEDE OPERATIVA</th>`;
+      let tr2 = `<tr>`;
+      let tr3 = `<tr>`;
+
+      const columnasHojaOrdenadas = [];
+
+      estructuraTipos.forEach(et => {
+        if (!et.tieneNiveles) {
+          tr1 += `<th rowspan="3">${et.nombre}</th>`;
+          columnasHojaOrdenadas.push(et.columnas[0]);
+        } else {
+          tr1 += `<th colspan="${et.colspan}">${et.nombre}</th>`;
+          et.niveles.forEach(nd => {
+            tr2 += `<th colspan="${nd.colspan}">${nd.nivel}</th>`;
+            nd.fechas.forEach(f => {
+              tr3 += `<th>${f}</th>`;
+            });
+          });
+          et.columnas.forEach(col => columnasHojaOrdenadas.push(col));
+        }
       });
-      headHtml += "<th>TOTAL SEDE</th></tr>";
-      theadReporte.innerHTML = headHtml;
 
-      // Cuerpo y acumuladores de totales por columna
-      const totalesColumna = {};
-      tipos.forEach(t => { totalesColumna[t] = 0; });
+      tr1 += `<th rowspan="3">TOTAL SEDE</th></tr>`;
+      tr2 += `</tr>`;
+      tr3 += `</tr>`;
+      theadReporte.innerHTML = tr1 + tr2 + tr3;
+
+      // Acumuladores por columna hoja
+      const totalesCol = {};
+      columnasHojaOrdenadas.forEach(c => { totalesCol[c.key] = 0; });
       let granTotalFiltrado = 0;
 
       if (!filasFiltradas.length) {
-        tbodyReporte.innerHTML = `<tr><td colspan="${tipos.length + 2}" style="text-align:center;color:#64748b;padding:24px;">No hay sedes que coincidan con el filtro aplicado.</td></tr>`;
+        tbodyReporte.innerHTML = `<tr><td colspan="${columnasHojaOrdenadas.length + 2}" style="text-align:center;color:#64748b;padding:24px;">No hay sedes que coincidan con el filtro aplicado.</td></tr>`;
       } else {
         let bodyHtml = "";
         filasFiltradas.forEach(f => {
           bodyHtml += `<tr><td>${f.sede}</td>`;
-          tipos.forEach(t => {
-            const cant = f.conteos[t] || 0;
-            totalesColumna[t] += cant;
+          columnasHojaOrdenadas.forEach(c => {
+            const cant = f.conteos[c.key] || 0;
+            totalesCol[c.key] += cant;
             const clasePill = cant > 0 ? "count-pill count-positive" : "count-pill count-zero";
             bodyHtml += `<td><span class="${clasePill}">${cant}</span></td>`;
           });
@@ -1722,53 +1758,127 @@
         tbodyReporte.innerHTML = bodyHtml;
       }
 
-      // Fila pie de totales por tipo documental
       let footHtml = `<tr><td>TOTAL GENERAL (${filasFiltradas.length} sedes)</td>`;
-      tipos.forEach(t => {
-        footHtml += `<td>${totalesColumna[t]}</td>`;
+      columnasHojaOrdenadas.forEach(c => {
+        footHtml += `<td>${totalesCol[c.key]}</td>`;
       });
       footHtml += `<td>${granTotalFiltrado}</td></tr>`;
       tfootReporte.innerHTML = footHtml;
     }
 
-    // Exportar reporte matricial a CSV (compatible con Excel)
-    document.getElementById("btnExportarCsv").addEventListener("click", () => {
+    // EXPORTAR A EXCEL (.XLSX) CON IDENTIFICADORES DE REPORTE, FECHA Y HORA
+    document.getElementById("btnExportarExcel").addEventListener("click", () => {
       if (!reporteDataCache) return;
-      const { tipos, filas } = reporteDataCache;
+      if (!window.XLSX) {
+        alert("La librería de Excel aún está cargando. Intente nuevamente en unos segundos.");
+        return;
+      }
 
-      const encabezados = ["SEDE OPERATIVA", ...tipos, "TOTAL SEDE"];
-      const lineas = [encabezados.map(v => `"${v}"`).join(",")];
+      const { estructuraTipos, generadoEn, timestampArchivo, usuarioGenerador, ambito } = reporteDataCache;
+      const filasExportar = obtenerFilasReporteFiltradas();
 
-      const totalesCol = {};
-      tipos.forEach(t => { totalesCol[t] = 0; });
-      let granTotal = 0;
+      const ahoraLocal = new Date();
+      const fechaHoraExport = ahoraLocal.toLocaleString("es-PE", { hour12: false });
+      const estadoTexto = document.getElementById("filtroReporteEstado").selectedOptions[0].text;
+      const filtroSedeTexto = filtroReporteSede.value.trim().toUpperCase() || "NINGUNO";
 
-      filas.forEach(f => {
-        const vals = [`"${f.sede}"`];
-        tipos.forEach(t => {
-          const cant = f.conteos[t] || 0;
-          totalesCol[t] += cant;
-          vals.push(cant);
-        });
-        granTotal += f.total;
-        vals.push(f.total);
-        lineas.push(vals.join(","));
+      // Bloque de identificadores del reporte (Filas 1 a 6)
+      const aoa = [
+        ["REPORTE DE AVANCE DE CARGA DOCUMENTAL — CAPACITACIÓN (ED2026)"],
+        ["CÓDIGO DE REPORTE:", "RPT-AVANCE-CAP-ED2026", "", "FECHA Y HORA DE DESCARGA:", fechaHoraExport],
+        ["ÁMBITO DE CONSULTA:", ambito, "", "DATOS CONSULTADOS AL:", generadoEn],
+        ["GENERADO POR:", usuarioGenerador, "", "FILTRO APLICADO:", `${estadoTexto} (Sede: ${filtroSedeTexto})`],
+        [] // Fila 5 en blanco separadora
+      ];
+
+      // Construir filas de cabecera multinivel (Filas índice 5, 6 y 7 en Excel -> filas 6, 7 y 8 visuales)
+      const rowTipo = ["SEDE OPERATIVA"];
+      const rowNivel = [""];
+      const rowFecha = [""];
+      const merges = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }, // Título principal
+        { s: { r: 5, c: 0 }, e: { r: 7, c: 0 } }  // SEDE OPERATIVA (rowspan 3)
+      ];
+
+      const columnasHoja = [];
+      let colIdx = 1;
+
+      estructuraTipos.forEach(et => {
+        if (!et.tieneNiveles) {
+          rowTipo.push(et.nombre);
+          rowNivel.push("");
+          rowFecha.push("");
+          merges.push({ s: { r: 5, c: colIdx }, e: { r: 7, c: colIdx } });
+          columnasHoja.push(et.columnas[0]);
+          colIdx += 1;
+        } else {
+          const inicioTipo = colIdx;
+          et.niveles.forEach(nd => {
+            const inicioNivel = colIdx;
+            nd.fechas.forEach((f, idxF) => {
+              rowTipo.push(colIdx === inicioTipo ? et.nombre : "");
+              rowNivel.push(idxF === 0 ? nd.nivel : "");
+              rowFecha.push(f);
+              colIdx += 1;
+            });
+            if (nd.colspan > 1) {
+              merges.push({ s: { r: 6, c: inicioNivel }, e: { r: 6, c: colIdx - 1 } });
+            }
+          });
+          if (et.colspan > 1) {
+            merges.push({ s: { r: 5, c: inicioTipo }, e: { r: 5, c: colIdx - 1 } });
+          }
+          et.columnas.forEach(c => columnasHoja.push(c));
+        }
       });
 
-      const filaTotal = ['"TOTAL GENERAL"', ...tipos.map(t => totalesCol[t]), granTotal];
-      lineas.push(filaTotal.join(","));
+      // Columna TOTAL SEDE
+      rowTipo.push("TOTAL SEDE");
+      rowNivel.push("");
+      rowFecha.push("");
+      merges.push({ s: { r: 5, c: colIdx }, e: { r: 7, c: colIdx } });
 
-      const csvContent = "\uFEFF" + lineas.join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      const fechaArchivo = new Date().toISOString().slice(0, 10);
-      a.download = `Reporte_Avance_Sedes_${fechaArchivo}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      aoa.push(rowTipo, rowNivel, rowFecha);
+
+      // Filas de datos por sede
+      const totalesCol = {};
+      columnasHoja.forEach(c => { totalesCol[c.key] = 0; });
+      let granTotal = 0;
+
+      filasExportar.forEach(f => {
+        const filaExcel = [f.sede];
+        columnasHoja.forEach(c => {
+          const cant = f.conteos[c.key] || 0;
+          totalesCol[c.key] += cant;
+          filaExcel.push(cant);
+        });
+        granTotal += f.total;
+        filaExcel.push(f.total);
+        aoa.push(filaExcel);
+      });
+
+      // Fila final de totales
+      const filaTotalesExcel = [`TOTAL GENERAL (${filasExportar.length} sedes)`];
+      columnasHoja.forEach(c => filaTotalesExcel.push(totalesCol[c.key]));
+      filaTotalesExcel.push(granTotal);
+      aoa.push(filaTotalesExcel);
+
+      // Crear libro y hoja Excel
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws["!merges"] = merges;
+
+      // Ajustar anchos de columnas
+      const wscols = [{ wch: 32 }];
+      columnasHoja.forEach(() => wscols.push({ wch: 16 }));
+      wscols.push({ wch: 14 });
+      ws["!cols"] = wscols;
+
+      XLSX.utils.book_append_sheet(wb, ws, "Avance_Sedes");
+
+      const tagDescarga = timestampArchivo || ahoraLocal.toISOString().replace(/[-:T]/g, "").slice(0, 15);
+      const nombreArchivoExcel = `RPT_Avance_Documental_ED2026_${tagDescarga}.xlsx`;
+      XLSX.writeFile(wb, nombreArchivoExcel);
     });
 
     function mostrarAlerta(el, texto, tipo) {
